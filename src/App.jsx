@@ -1,6 +1,7 @@
 import "./App.css";
+import AppRoutes from "./routes/index";
 
 function App() {
-  return <h1>Calendario de Funcionarios</h1>;
+  return <AppRoutes />;
 }
 export default App;
