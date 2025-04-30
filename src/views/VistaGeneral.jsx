@@ -12,11 +12,13 @@ export default function VistaGeneral() {
           const formateados = res.data.data.map((ev) => ({
             event_id: ev.id,
             title: ev.titulo,
+            subtitle: ev.nombre,
             start: new Date(ev.fecha_inicio),
             end: new Date(ev.fecha_fin),
-            description: ev.descripcion,
             color: ev.color,
             nombre: ev.nombre,
+            categoria: ev.categoria,
+            id_ticket: ev.id_ticket,
           }));
           setEventos(formateados);
         }
@@ -28,10 +30,29 @@ export default function VistaGeneral() {
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Calendario General de Eventos</h1>
+      <h1 className="text-xl font-bold mb-4">Calendario</h1>
       <Scheduler
         view="week"
         events={eventos}
+        viewerExtraComponent={(fields, event) => (
+          <div>
+            <ul>
+              <li>
+                <strong>Categoría:</strong> {event?.categoria}
+              </li>
+              <li>
+                <strong>Ticket: </strong>
+                <a
+                  href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ver ticket
+                </a>
+              </li>
+            </ul>
+          </div>
+        )}
         editable={false}
         deletable={false}
         draggable={false}
