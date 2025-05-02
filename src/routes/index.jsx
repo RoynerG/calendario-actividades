@@ -13,6 +13,14 @@ export default function AppRoutes() {
           element={<VistaFuncionario />}
         />
         <Route path="/categoria/:id_categoria" element={<VistaCategoria />} />
+        <Route
+          path="/calendario-administrativo/:categorias"
+          element={<VistaAdministrativo />}
+        />
+        <Route
+          path="/calendario-comercial/:categorias"
+          element={<VistaComercial />}
+        />
       </Routes>
     </BrowserRouter>
   );
