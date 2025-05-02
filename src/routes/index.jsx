@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import VistaGeneral from "../views/VistaGeneral";
 import VistaFuncionario from "../views/VistaFuncionario";
 import VistaCategoria from "../views/VistaCategoria";
+import VistaAdministrativo from "../views/VistaAdministrativo";
+import VistaComercial from "../views/VistaComercial";
 
 export default function AppRoutes() {
   return (
