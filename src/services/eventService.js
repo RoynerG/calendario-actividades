@@ -23,3 +23,13 @@ export async function listarFuncionarios() {
   const res = await fetch(BASE_URL + "listar_funcionarios");
   return await res.json();
 }
+
+export async function obtenerFuncionario(id) {
+  const res = await axios.post(BASE_URL + "obtener_funcionario", { id });
+  return res.data;
+}
+
+export async function obtenerCategoria(id) {
+  const res = await axios.post(BASE_URL + "obtener_categoria", { id });
+  return res.data;
+}

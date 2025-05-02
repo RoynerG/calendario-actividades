@@ -8,8 +8,11 @@ export default function AppRoutes() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<VistaGeneral />} />
-        <Route path="/funcionario/:id" element={<VistaFuncionario />} />
-        <Route path="/categoria/:id" element={<VistaCategoria />} />
+        <Route
+          path="/funcionario/:id_funcionario"
+          element={<VistaFuncionario />}
+        />
+        <Route path="/categoria/:id_categoria" element={<VistaCategoria />} />
       </Routes>
     </BrowserRouter>
   );
