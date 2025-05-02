@@ -13,3 +13,13 @@ export const actualizarEvento = (evento) =>
   axios.post(BASE_URL + "actualizar_evento", evento);
 export const eliminarEvento = (id) =>
   axios.post(BASE_URL + "eliminar_evento", { id });
+
+export async function listarCategorias() {
+  const res = await fetch(BASE_URL + "listar_categorias");
+  return await res.json();
+}
+
+export async function listarFuncionarios() {
+  const res = await fetch(BASE_URL + "listar_funcionarios");
+  return await res.json();
+}

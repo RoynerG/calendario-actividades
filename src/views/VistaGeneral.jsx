@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react";
 import { Scheduler } from "@aldabil/react-scheduler";
-import { listarEventos } from "../services/eventService";
+import {
+  listarCategorias,
+  listarFuncionarios,
+  filtrarEventos,
+} from "../services/eventService";
 
 export default function VistaGeneral() {
   const [eventos, setEventos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [funcionarios, setFuncionarios] = useState([]);
+  const [filtros, setFiltros] = useState({ id_categoria: "", id_empleado: "" });
 
   useEffect(() => {
-    listarEventos()
+    listarCategorias().then((res) => {
+      if (res.success) setCategorias(res.data);
+    });
+    listarFuncionarios().then((res) => {
+      if (res.success) setFuncionarios(res.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    filtrarEventos(filtros)
       .then((res) => {
         if (res.data.success) {
           const formateados = res.data.data.map((ev) => ({
@@ -26,11 +42,40 @@ export default function VistaGeneral() {
       .catch((err) => {
         console.error("Error al cargar eventos:", err);
       });
-  }, []);
+  }, [filtros]);
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Calendario</h1>
+    <div className="p-4 space-y-4">
+      <h1 className="text-xl font-bold">Calendario</h1>
+      <div className="flex gap-4">
+        <select
+          onChange={(e) =>
+            setFiltros((f) => ({ ...f, id_categoria: e.target.value }))
+          }
+          className="border p-2 rounded"
+        >
+          <option value="">Todas las categorías</option>
+          {categorias.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.nombre}
+            </option>
+          ))}
+        </select>
+
+        <select
+          onChange={(e) =>
+            setFiltros((f) => ({ ...f, id_empleado: e.target.value }))
+          }
+          className="border p-2 rounded"
+        >
+          <option value="">Todos los funcionarios</option>
+          {funcionarios.map((f) => (
+            <option key={f.id_empleado} value={f.id_empleado}>
+              {f.nombre}
+            </option>
+          ))}
+        </select>
+      </div>
       <Scheduler
         view="week"
         events={eventos}
