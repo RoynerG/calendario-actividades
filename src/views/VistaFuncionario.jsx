@@ -63,7 +63,7 @@ export default function VistaFuncionario() {
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-xl font-bold">Calendario de {funcionario.nombre}</h1>
-      <div className="flex gap-4">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         <input
           type="date"
           value={filtros.fecha_inicio}
@@ -114,42 +114,44 @@ export default function VistaFuncionario() {
           Cargando calendario...
         </div>
       ) : (
-        <Scheduler
-          view="week"
-          events={eventos}
-          week={schedulerConfig.week}
-          day={schedulerConfig.day}
-          translations={{
-            navigation: schedulerConfig.navigation,
-            event: schedulerConfig.event,
-            moreEvents: schedulerConfig.moreEvents,
-            noDataToDisplay: schedulerConfig.noDataToDisplay,
-            loading: schedulerConfig.loading,
-          }}
-          locale={es}
-          viewerExtraComponent={(fields, event) => (
-            <div>
-              <ul>
-                <li>
-                  <strong>Categoría:</strong> {event?.categoria}
-                </li>
-                <li>
-                  <strong>Ticket: </strong>
-                  <a
-                    href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Ver ticket
-                  </a>
-                </li>
-              </ul>
-            </div>
-          )}
-          editable={false}
-          deletable={false}
-          draggable={false}
-        />
+        <div className="w-full overflow-auto">
+          <Scheduler
+            view="week"
+            events={eventos}
+            week={schedulerConfig.week}
+            day={schedulerConfig.day}
+            translations={{
+              navigation: schedulerConfig.navigation,
+              event: schedulerConfig.event,
+              moreEvents: schedulerConfig.moreEvents,
+              noDataToDisplay: schedulerConfig.noDataToDisplay,
+              loading: schedulerConfig.loading,
+            }}
+            locale={es}
+            viewerExtraComponent={(fields, event) => (
+              <div>
+                <ul>
+                  <li>
+                    <strong>Categoría:</strong> {event?.categoria}
+                  </li>
+                  <li>
+                    <strong>Ticket: </strong>
+                    <a
+                      href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Ver ticket
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            )}
+            editable={false}
+            deletable={false}
+            draggable={false}
+          />
+        </div>
       )}
     </div>
   );
