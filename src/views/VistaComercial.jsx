@@ -3,6 +3,7 @@ import { Scheduler } from "@aldabil/react-scheduler";
 import { filtrarEventos, listarFuncionarios } from "../services/eventService";
 import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
+import { es } from "date-fns/locale";
 export default function VistaComercial() {
   const { categorias } = useParams();
   const [eventos, setEventos] = useState([]);
@@ -112,6 +113,14 @@ export default function VistaComercial() {
           events={eventos}
           week={schedulerConfig.week}
           day={schedulerConfig.day}
+          translations={{
+            navigation: schedulerConfig.navigation,
+            event: schedulerConfig.event,
+            moreEvents: schedulerConfig.moreEvents,
+            noDataToDisplay: schedulerConfig.noDataToDisplay,
+            loading: schedulerConfig.loading,
+          }}
+          locale={es}
           viewerExtraComponent={(fields, event) => (
             <div>
               <ul>

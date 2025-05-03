@@ -6,6 +6,7 @@ import {
   filtrarEventos,
 } from "../services/eventService";
 import schedulerConfig from "../services/schedulerConfig";
+import { es } from "date-fns/locale";
 
 export default function VistaGeneral() {
   const [eventos, setEventos] = useState([]);
@@ -131,6 +132,14 @@ export default function VistaGeneral() {
           events={eventos}
           week={schedulerConfig.week}
           day={schedulerConfig.day}
+          translations={{
+            navigation: schedulerConfig.navigation,
+            event: schedulerConfig.event,
+            moreEvents: schedulerConfig.moreEvents,
+            noDataToDisplay: schedulerConfig.noDataToDisplay,
+            loading: schedulerConfig.loading,
+          }}
+          locale={es}
           viewerExtraComponent={(fields, event) => (
             <div>
               <ul>

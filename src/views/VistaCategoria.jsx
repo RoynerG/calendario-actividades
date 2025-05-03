@@ -7,6 +7,7 @@ import {
 } from "../services/eventService";
 import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
+import { es } from "date-fns/locale";
 export default function VistaCategoria() {
   const { id_categoria } = useParams();
   const [eventos, setEventos] = useState([]);
@@ -119,6 +120,14 @@ export default function VistaCategoria() {
           events={eventos}
           week={schedulerConfig.week}
           day={schedulerConfig.day}
+          translations={{
+            navigation: schedulerConfig.navigation,
+            event: schedulerConfig.event,
+            moreEvents: schedulerConfig.moreEvents,
+            noDataToDisplay: schedulerConfig.noDataToDisplay,
+            loading: schedulerConfig.loading,
+          }}
+          locale={es}
           viewerExtraComponent={(fields, event) => (
             <div>
               <ul>
