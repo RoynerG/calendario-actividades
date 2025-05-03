@@ -3,8 +3,7 @@ import { Scheduler } from "@aldabil/react-scheduler";
 import { filtrarEventos, listarFuncionarios } from "../services/eventService";
 import { useParams } from "react-router-dom";
 export default function VistaAdministrativo() {
-  const { categoria } = useParams();
-  const { categorias } = categoria.split(",").map(Number);
+  const { categorias } = useParams();
   const [eventos, setEventos] = useState([]);
   const [funcionarios, setFuncionarios] = useState([]);
   const [filtros, setFiltros] = useState({
@@ -18,7 +17,9 @@ export default function VistaAdministrativo() {
     listarFuncionarios().then((res) => {
       if (res.success) setFuncionarios(res.data);
     });
-  });
+  }, []);
+
+  console.log(categorias);
 
   useEffect(() => {
     if (!categorias) return;
@@ -26,7 +27,9 @@ export default function VistaAdministrativo() {
     async function fetchEventos() {
       setLoading(true);
       try {
-        const filtrosCompletos = { ...filtros, categorias: categorias };
+        const categoriasArray = categorias.split(",").map(Number);
+        const filtrosCompletos = { ...filtros, categorias: categoriasArray };
+        console.log("Enviando filtros:", filtrosCompletos);
         const res = await filtrarEventos(filtrosCompletos);
         if (res.data.success) {
           const formateados = res.data.data.map((ev) => ({
