@@ -5,6 +5,7 @@ import {
   listarFuncionarios,
   filtrarEventos,
 } from "../services/eventService";
+import schedulerConfig from "../services/schedulerConfig";
 
 export default function VistaGeneral() {
   const [eventos, setEventos] = useState([]);
@@ -128,6 +129,8 @@ export default function VistaGeneral() {
         <Scheduler
           view="week"
           events={eventos}
+          week={schedulerConfig.week}
+          day={schedulerConfig.day}
           viewerExtraComponent={(fields, event) => (
             <div>
               <ul>

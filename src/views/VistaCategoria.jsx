@@ -6,6 +6,7 @@ import {
   listarFuncionarios,
 } from "../services/eventService";
 import { useParams } from "react-router-dom";
+import schedulerConfig from "../services/schedulerConfig";
 export default function VistaCategoria() {
   const { id_categoria } = useParams();
   const [eventos, setEventos] = useState([]);
@@ -27,7 +28,6 @@ export default function VistaCategoria() {
     });
   }, [id_categoria]);
 
-  console.log(JSON.stringify(categoria));
   useEffect(() => {
     if (!id_categoria) return;
 
@@ -117,6 +117,8 @@ export default function VistaCategoria() {
         <Scheduler
           view="week"
           events={eventos}
+          week={schedulerConfig.week}
+          day={schedulerConfig.day}
           viewerExtraComponent={(fields, event) => (
             <div>
               <ul>

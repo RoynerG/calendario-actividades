@@ -6,6 +6,7 @@ import {
   filtrarEventos,
 } from "../services/eventService";
 import { useParams } from "react-router-dom";
+import schedulerConfig from "../services/schedulerConfig";
 export default function VistaFuncionario() {
   const { id_funcionario } = useParams();
   const [eventos, setEventos] = useState([]);
@@ -115,6 +116,8 @@ export default function VistaFuncionario() {
         <Scheduler
           view="week"
           events={eventos}
+          week={schedulerConfig.week}
+          day={schedulerConfig.day}
           viewerExtraComponent={(fields, event) => (
             <div>
               <ul>
