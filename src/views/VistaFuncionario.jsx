@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Scheduler } from "@aldabil/react-scheduler";
+import Swal from "sweetalert2";
 import {
   listarCategorias,
   obtenerFuncionario,
@@ -26,8 +27,10 @@ export default function VistaFuncionario() {
     });
     obtenerFuncionario(id_funcionario).then((res) => {
       if (res.success) setFuncionario(res.data);
+      sessionStorage.setItem("id_funcionario", id_funcionario);
     });
   }, [id_funcionario]);
+
   useEffect(() => {
     if (!id_funcionario) return;
 
