@@ -6,15 +6,18 @@ import {
   obtenerFuncionario,
   filtrarEventos,
   crearEvento,
+  obtenerTicketsFuncionario,
 } from "../services/eventService";
 import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
+import Select from "react-select";
 
 export default function VistaFuncionario() {
   const { id_funcionario } = useParams();
   const [eventos, setEventos] = useState([]);
   const [categorias, setCategorias] = useState([]);
+  const [tickets, setTickets] = useState([]);
   const [funcionario, setFuncionario] = useState({});
   const [filtros, setFiltros] = useState({
     id_categoria: "",
@@ -40,6 +43,9 @@ export default function VistaFuncionario() {
     obtenerFuncionario(id_funcionario).then((res) => {
       if (res.success) setFuncionario(res.data);
       sessionStorage.setItem("id_funcionario", id_funcionario);
+    });
+    obtenerTicketsFuncionario(id_funcionario).then((res) => {
+      if (res.success) setTickets(res.data);
     });
   }, [id_funcionario]);
 
@@ -80,7 +86,6 @@ export default function VistaFuncionario() {
     document.activeElement?.blur();
 
     try {
-      // Ocultamos el formulario temporalmente para mostrar SweetAlert
       setShowForm(false);
 
       Swal.fire({
@@ -90,7 +95,7 @@ export default function VistaFuncionario() {
           Swal.showLoading();
         },
         customClass: {
-          container: "z-[100000]", // Aseguramos que esté por encima de todo
+          container: "z-[100000]",
         },
       });
 
@@ -123,7 +128,7 @@ export default function VistaFuncionario() {
             container: "z-[100000]",
           },
         });
-        setShowForm(true); // Volvemos a mostrar el formulario si hay error
+        setShowForm(true);
       }
     } catch (error) {
       console.error(error);
@@ -293,31 +298,61 @@ export default function VistaFuncionario() {
                 className="border p-2 rounded w-full"
                 required
               />
-              <input
-                type="text"
-                placeholder="ID Ticket"
-                value={formData.id_ticket}
-                onChange={(e) =>
-                  setFormData({ ...formData, id_ticket: e.target.value })
+              <Select
+                options={tickets.map((tic) => ({
+                  value: tic._ID,
+                  label: tic._ID,
+                }))}
+                value={
+                  formData.id_ticket
+                    ? tickets
+                        .map((tic) => ({
+                          value: tic._ID,
+                          label: tic._ID,
+                        }))
+                        .find((option) => option.value === formData.id_ticket)
+                    : null
                 }
-                className="border p-2 rounded w-full"
-                required
+                onChange={(selectedOption) =>
+                  setFormData({
+                    ...formData,
+                    id_ticket: selectedOption.value,
+                  })
+                }
+                className="w-full"
+                classNamePrefix="react-select"
+                placeholder="Selecciona un ticket"
+                isClearable
               />
-              <select
-                value={formData.id_categoria}
-                onChange={(e) =>
-                  setFormData({ ...formData, id_categoria: e.target.value })
+              <Select
+                options={categorias.map((cat) => ({
+                  value: cat.id,
+                  label: cat.nombre,
+                }))}
+                value={
+                  formData.id_categoria
+                    ? categorias
+                        .map((cat) => ({
+                          value: cat.id,
+                          label: cat.nombre,
+                        }))
+                        .find(
+                          (option) => option.value === formData.id_categoria
+                        )
+                    : null
                 }
-                className="border p-2 rounded w-full"
-                required
-              >
-                <option value="">Selecciona una categoría</option>
-                {categorias.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.nombre}
-                  </option>
-                ))}
-              </select>
+                onChange={(selectedOption) =>
+                  setFormData({
+                    ...formData,
+                    id_categoria: selectedOption.value,
+                  })
+                }
+                className="w-full"
+                classNamePrefix="react-select"
+                placeholder="Selecciona una categoría"
+                isClearable
+              />
+
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"

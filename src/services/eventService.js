@@ -24,6 +24,11 @@ export async function listarFuncionarios() {
   return await res.json();
 }
 
+export async function listarTickets() {
+  const res = await fetch(BASE_URL + "listar_tickets");
+  return await res.json();
+}
+
 export async function obtenerFuncionario(id) {
   const res = await axios.post(BASE_URL + "obtener_funcionario", { id });
   return res.data;
@@ -31,5 +36,12 @@ export async function obtenerFuncionario(id) {
 
 export async function obtenerCategoria(id) {
   const res = await axios.post(BASE_URL + "obtener_categoria", { id });
+  return res.data;
+}
+
+export async function obtenerTicketsFuncionario(id_empleado) {
+  const res = await axios.post(BASE_URL + "obtener_tickets_funcionario", {
+    id_empleado,
+  });
   return res.data;
 }
