@@ -81,6 +81,47 @@ export default function VistaFuncionario() {
     fetchEventos();
   }, [filtros, id_funcionario]);
 
+  useEffect(() => {
+    const categoriaSeleccionada = categorias.find(
+      (cat) => cat.id === formData.id_categoria
+    );
+
+    if (categoriaSeleccionada && formData.fecha_inicio && formData.fecha_fin) {
+      const fechaInicio = new Date(formData.fecha_inicio);
+      const fechaFin = new Date(formData.fecha_fin);
+
+      const opcionesFecha = {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      };
+
+      const opcionesHora = {
+        hour: "2-digit",
+        minute: "2-digit",
+      };
+
+      const fechaStr = fechaInicio.toLocaleDateString("es-CO", opcionesFecha);
+      const horaInicioStr = fechaInicio.toLocaleTimeString(
+        "es-CO",
+        opcionesHora
+      );
+      const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
+
+      const descripcionGenerada = `Por medio de la presente, le confirmo que he dispuesto de un espacio con el propósito de reunirnos, ya sea de forma presencial o por medios virtuales, a fin de atender cualquier inquietud o asunto pendiente.</br></br> En cumplimiento del requerimiento, se ha programado una visita y/o reunión, la cual ha quedado agendada para el día <b>${fechaStr}</b>, de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b>. En caso de no ser posible contar con su atención en la fecha indicada, le agradecemos nos lo comunique por este mismo medio con al menos 3 horas de antelación.`;
+
+      setFormData((prev) => ({
+        ...prev,
+        descripcion: descripcionGenerada,
+      }));
+    }
+  }, [
+    formData.id_categoria,
+    formData.fecha_inicio,
+    formData.fecha_fin,
+    categorias,
+  ]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     document.activeElement?.blur();
@@ -271,15 +312,13 @@ export default function VistaFuncionario() {
                 className="border p-2 rounded w-full"
                 required
               />
-              <textarea
-                placeholder="Descripcion"
+              <input
+                type="hidden"
                 value={formData.descripcion}
                 onChange={(e) =>
                   setFormData({ ...formData, descripcion: e.target.value })
                 }
-                className="border p-2 rounded w-full"
-                required
-              ></textarea>
+              />
               <input
                 type="datetime-local"
                 value={formData.fecha_inicio}
