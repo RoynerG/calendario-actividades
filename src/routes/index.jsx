@@ -4,6 +4,7 @@ import VistaFuncionario from "../views/VistaFuncionario";
 import VistaCategoria from "../views/VistaCategoria";
 import VistaAdministrativo from "../views/VistaAdministrativo";
 import VistaComercial from "../views/VistaComercial";
+import CrearEventoTicket from "../components/CrearEventoTicket";
 
 export default function AppRoutes() {
   return (
@@ -22,6 +23,10 @@ export default function AppRoutes() {
         <Route
           path="/calendario-comercial/:categorias"
           element={<VistaComercial />}
+        />
+        <Route
+          path="/crear-evento-ticket/:id_ticket"
+          element={<CrearEventoTicket />}
         />
       </Routes>
     </BrowserRouter>

@@ -45,3 +45,10 @@ export async function obtenerTicketsFuncionario(id_empleado) {
   });
   return res.data;
 }
+
+export async function obtenerTicket(id_ticket) {
+  const res = await axios.post(BASE_URL + "obtener_ticket", {
+    id_ticket,
+  });
+  return res.data;
+}

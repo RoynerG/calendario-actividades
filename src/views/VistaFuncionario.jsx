@@ -33,6 +33,7 @@ export default function VistaFuncionario() {
     id_empleado: id_funcionario,
     id_ticket: "",
   });
+  const [relacionadoConTicket, setRelacionadoConTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
@@ -86,7 +87,12 @@ export default function VistaFuncionario() {
       (cat) => cat.id === formData.id_categoria
     );
 
-    if (categoriaSeleccionada && formData.fecha_inicio && formData.fecha_fin) {
+    if (
+      categoriaSeleccionada &&
+      formData.fecha_inicio &&
+      formData.fecha_fin &&
+      formData.id_ticket
+    ) {
       const fechaInicio = new Date(formData.fecha_inicio);
       const fechaFin = new Date(formData.fecha_fin);
 
@@ -95,11 +101,7 @@ export default function VistaFuncionario() {
         month: "2-digit",
         year: "numeric",
       };
-
-      const opcionesHora = {
-        hour: "2-digit",
-        minute: "2-digit",
-      };
+      const opcionesHora = { hour: "2-digit", minute: "2-digit" };
 
       const fechaStr = fechaInicio.toLocaleDateString("es-CO", opcionesFecha);
       const horaInicioStr = fechaInicio.toLocaleTimeString(
@@ -108,7 +110,7 @@ export default function VistaFuncionario() {
       );
       const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
 
-      const descripcionGenerada = `Por medio de la presente, le confirmo que he dispuesto de un espacio con el propósito de reunirnos, ya sea de forma presencial o por medios virtuales, a fin de atender cualquier inquietud o asunto pendiente.</br></br> En cumplimiento del requerimiento, se ha programado una visita y/o reunión, la cual ha quedado agendada para el día <b>${fechaStr}</b>, de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b> En caso de no ser posible contar con su atención en la fecha indicada, le agradecemos nos lo comunique por este mismo medio con al menos 3 horas de antelación.`;
+      const descripcionGenerada = `Por medio de la presente, le confirmo que he dispuesto de un espacio con el propósito de reunirnos, ya sea de forma presencial o por medios virtuales, a fin de atender cualquier inquietud o asunto pendiente.</br></br> En cumplimiento de <b>${categoriaSeleccionada.nombre}</b>, se ha programado una visita y/o reunión, la cual ha quedado agendada para el día <b>${fechaStr}</b>, de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b> En caso de no ser posible contar con su atención en la fecha indicada, le agradecemos nos lo comunique por este mismo medio con al menos 3 horas de antelación.`;
 
       setFormData((prev) => ({
         ...prev,
@@ -119,6 +121,7 @@ export default function VistaFuncionario() {
     formData.id_categoria,
     formData.fecha_inicio,
     formData.fecha_fin,
+    formData.id_ticket,
     categorias,
   ]);
 
@@ -159,6 +162,7 @@ export default function VistaFuncionario() {
           id_empleado: id_funcionario,
           id_ticket: "",
         });
+        setRelacionadoConTicket(null);
         setFiltros({ ...filtros });
       } else {
         await Swal.fire({
@@ -198,6 +202,7 @@ export default function VistaFuncionario() {
         {showForm ? "Cerrar formulario" : "+ Crear Evento"}
       </button>
 
+      {/* FILTROS */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         <input
           type="date"
@@ -207,7 +212,6 @@ export default function VistaFuncionario() {
           }
           className="border p-2 rounded"
         />
-
         <input
           type="date"
           value={filtros.fecha_fin}
@@ -232,12 +236,11 @@ export default function VistaFuncionario() {
         </select>
         <button
           onClick={() =>
-            setFiltros((f) => ({
-              ...f,
+            setFiltros({
               id_categoria: "",
               fecha_inicio: "",
               fecha_fin: "",
-            }))
+            })
           }
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
         >
@@ -245,6 +248,7 @@ export default function VistaFuncionario() {
         </button>
       </div>
 
+      {/* CALENDARIO */}
       {loading ? (
         <div className="text-center text-xl py-10 text-gray-500">
           Cargando calendario...
@@ -270,16 +274,18 @@ export default function VistaFuncionario() {
                   <li>
                     <strong>Categoría:</strong> {event?.categoria}
                   </li>
-                  <li>
-                    <strong>Ticket: </strong>
-                    <a
-                      href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Ver ticket
-                    </a>
-                  </li>
+                  {event?.id_ticket > 0 ? (
+                    <li>
+                      <strong>Ticket: </strong>
+                      <a
+                        href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Ver ticket
+                      </a>
+                    </li>
+                  ) : null}
                 </ul>
               </div>
             )}
@@ -290,6 +296,7 @@ export default function VistaFuncionario() {
         </div>
       )}
 
+      {/* FORMULARIO */}
       {showForm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div
@@ -302,6 +309,7 @@ export default function VistaFuncionario() {
               <h2 className="text-lg font-semibold text-gray-700">
                 Crear nuevo evento
               </h2>
+
               <input
                 type="text"
                 placeholder="Título"
@@ -311,13 +319,6 @@ export default function VistaFuncionario() {
                 }
                 className="border p-2 rounded w-full"
                 required
-              />
-              <input
-                type="hidden"
-                value={formData.descripcion}
-                onChange={(e) =>
-                  setFormData({ ...formData, descripcion: e.target.value })
-                }
               />
               <input
                 type="datetime-local"
@@ -337,32 +338,7 @@ export default function VistaFuncionario() {
                 className="border p-2 rounded w-full"
                 required
               />
-              <Select
-                options={tickets.map((tic) => ({
-                  value: tic._ID,
-                  label: tic._ID,
-                }))}
-                value={
-                  formData.id_ticket
-                    ? tickets
-                        .map((tic) => ({
-                          value: tic._ID,
-                          label: tic._ID,
-                        }))
-                        .find((option) => option.value === formData.id_ticket)
-                    : null
-                }
-                onChange={(selectedOption) =>
-                  setFormData({
-                    ...formData,
-                    id_ticket: selectedOption.value,
-                  })
-                }
-                className="w-full"
-                classNamePrefix="react-select"
-                placeholder="Selecciona un ticket"
-                isClearable
-              />
+
               <Select
                 options={categorias.map((cat) => ({
                   value: cat.id,
@@ -370,20 +346,18 @@ export default function VistaFuncionario() {
                 }))}
                 value={
                   formData.id_categoria
-                    ? categorias
-                        .map((cat) => ({
-                          value: cat.id,
-                          label: cat.nombre,
-                        }))
-                        .find(
-                          (option) => option.value === formData.id_categoria
-                        )
+                    ? {
+                        value: formData.id_categoria,
+                        label: categorias.find(
+                          (cat) => cat.id === formData.id_categoria
+                        )?.nombre,
+                      }
                     : null
                 }
                 onChange={(selectedOption) =>
                   setFormData({
                     ...formData,
-                    id_categoria: selectedOption.value,
+                    id_categoria: selectedOption ? selectedOption.value : "",
                   })
                 }
                 className="w-full"
@@ -391,6 +365,78 @@ export default function VistaFuncionario() {
                 placeholder="Selecciona una categoría"
                 isClearable
               />
+
+              {/* NUEVA PREGUNTA SOBRE RELACIÓN CON TICKET */}
+              {tickets.length > 0 && (
+                <Select
+                  options={[
+                    {
+                      value: "si",
+                      label: "Sí, está relacionado con un ticket",
+                    },
+                    {
+                      value: "no",
+                      label: "No, no está relacionado con un ticket",
+                    },
+                  ]}
+                  value={
+                    relacionadoConTicket === null
+                      ? null
+                      : relacionadoConTicket
+                      ? {
+                          value: "si",
+                          label: "Sí, está relacionado con un ticket",
+                        }
+                      : {
+                          value: "no",
+                          label: "No, no está relacionado con un ticket",
+                        }
+                  }
+                  onChange={(selectedOption) =>
+                    setRelacionadoConTicket(selectedOption?.value === "si")
+                  }
+                  className="w-full"
+                  classNamePrefix="react-select"
+                  placeholder="¿El evento está relacionado con un ticket?"
+                  isClearable
+                />
+              )}
+
+              {relacionadoConTicket && (
+                <Select
+                  options={tickets.map((tic) => ({
+                    value: tic._ID,
+                    label: tic._ID,
+                  }))}
+                  value={
+                    formData.id_ticket
+                      ? { value: formData.id_ticket, label: formData.id_ticket }
+                      : null
+                  }
+                  onChange={(selectedOption) =>
+                    setFormData({
+                      ...formData,
+                      id_ticket: selectedOption ? selectedOption.value : "",
+                    })
+                  }
+                  className="w-full"
+                  classNamePrefix="react-select"
+                  placeholder="Selecciona un ticket"
+                  isClearable
+                />
+              )}
+
+              {(!relacionadoConTicket || tickets.length === 0) && (
+                <textarea
+                  placeholder="Descripción"
+                  value={formData.descripcion}
+                  onChange={(e) =>
+                    setFormData({ ...formData, descripcion: e.target.value })
+                  }
+                  className="border p-2 rounded w-full"
+                  required
+                />
+              )}
 
               <div className="flex justify-end space-x-2">
                 <button
