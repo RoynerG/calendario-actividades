@@ -7,8 +7,10 @@ export const filtrarEventos = (filtros) =>
   axios.post(BASE_URL + "filtrar_eventos", filtros);
 export const crearEvento = (evento) =>
   axios.post(BASE_URL + "crear_evento", evento);
-export const obtenerEvento = (id) =>
-  axios.post(BASE_URL + "obtener_evento", { id });
+export async function obtenerEvento(id) {
+  const res = await axios.post(BASE_URL + "obtener_evento", { id });
+  return res.data;
+}
 export const actualizarEvento = (evento) =>
   axios.post(BASE_URL + "actualizar_evento", evento);
 export const eliminarEvento = (id) =>

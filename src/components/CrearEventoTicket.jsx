@@ -107,7 +107,6 @@ export default function CrearEventoTicket() {
           fecha_fin: "",
           id_categoria: "",
         }));
-        window.parent.location.reload();
       } else {
         await Swal.fire({
           title: "Error",
