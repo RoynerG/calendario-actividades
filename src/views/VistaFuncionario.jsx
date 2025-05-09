@@ -286,6 +286,15 @@ export default function VistaFuncionario() {
                       </a>
                     </li>
                   ) : null}
+                  <li>
+                    <a
+                      href={`/evento/${event?.event_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Ver evento
+                    </a>
+                  </li>
                 </ul>
               </div>
             )}
