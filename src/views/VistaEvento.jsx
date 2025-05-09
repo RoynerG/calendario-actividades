@@ -149,23 +149,25 @@ export default function VistaEvento() {
 
         {/* Botón Ver Ticket */}
         <div className="flex justify-end">
-          <a
-            href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${evento.id_ticket}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              backgroundColor: "black",
-              color: "white",
-              paddingLeft: "1rem",
-              paddingRight: "1rem",
-              paddingTop: "0.5rem",
-              paddingBottom: "0.5rem",
-              borderRadius: "0.25rem",
-              width: "100%",
-            }}
-          >
-            Ver ticket
-          </a>
+          {evento.id_ticket > 0 ? (
+            <a
+              href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${evento.id_ticket}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                backgroundColor: "black",
+                color: "white",
+                paddingLeft: "1rem",
+                paddingRight: "1rem",
+                paddingTop: "0.5rem",
+                paddingBottom: "0.5rem",
+                borderRadius: "0.25rem",
+                width: "100%",
+              }}
+            >
+              Ver ticket
+            </a>
+          ) : null}
         </div>
       </div>
     </div>

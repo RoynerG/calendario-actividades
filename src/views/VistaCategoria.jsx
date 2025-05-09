@@ -135,16 +135,18 @@ export default function VistaCategoria() {
                   <li>
                     <strong>Categoría:</strong> {event?.categoria}
                   </li>
-                  <li>
-                    <strong>Ticket: </strong>
-                    <a
-                      href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Ver ticket
-                    </a>
-                  </li>
+                  {event?.id_ticket > 0 ? (
+                    <li>
+                      <strong>Ticket: </strong>
+                      <a
+                        href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Ver ticket
+                      </a>
+                    </li>
+                  ) : null}
                 </ul>
               </div>
             )}
