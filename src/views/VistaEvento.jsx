@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { obtenerEvento } from "../services/eventService";
 import Swal from "sweetalert2";
-import { FaCalendarAlt, FaClock, FaTag } from "react-icons/fa";
+import { FaCalendarAlt, FaClock, FaTag, FaPowerOff } from "react-icons/fa";
 
 export default function VistaEvento() {
   const { id_evento } = useParams();
@@ -130,11 +130,12 @@ export default function VistaEvento() {
           </span>
         </div>
 
-        {/* Categoría */}
-        <div className="mb-4 flex items-center">
-          <FaTag className="mr-2 text-yellow-500" />
-          <span
-            className={`inline-block text-xs font-semibold px-3 py-1 rounded-full 
+        {/* Categoría y Estado*/}
+        <div className="mb-4 flex flex-col">
+          <div className="mb-4 flex items-center">
+            <FaTag className="mr-2 text-yellow-500" />
+            <span
+              className={`inline-block text-xs font-semibold px-3 py-1 rounded-full 
               ${
                 evento.categoria === "Reunión"
                   ? "bg-green-100 text-green-700"
@@ -142,9 +143,27 @@ export default function VistaEvento() {
                   ? "bg-purple-100 text-purple-700"
                   : "bg-blue-100 text-blue-700"
               }`}
-          >
-            {evento.categoria}
-          </span>
+            >
+              {evento.categoria}
+            </span>
+          </div>
+          <div className="mb-4 flex items-center">
+            {evento.estado === "Si" ? (
+              <FaPowerOff className="mr-2 text-green-500 transform rotate-180" />
+            ) : (
+              <FaPowerOff className="mr-2 text-red-500" />
+            )}
+
+            <span
+              className={`block text-xs font-semibold px-3 py-1 rounded-full ${
+                evento.estado === "Si"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {evento.estado === "Si" ? "Realizado" : "Sin realizar"}
+            </span>
+          </div>
         </div>
 
         {/* Botón Ver Ticket */}

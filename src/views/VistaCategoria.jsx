@@ -8,6 +8,7 @@ import {
 import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
+import { FaPowerOff } from "react-icons/fa";
 export default function VistaCategoria() {
   const { id_categoria } = useParams();
   const [eventos, setEventos] = useState([]);
@@ -48,6 +49,7 @@ export default function VistaCategoria() {
             nombre: ev.nombre,
             categoria: ev.categoria,
             id_ticket: ev.id_ticket,
+            estado: ev.estado,
           }));
           setEventos(formateados);
         }
@@ -132,6 +134,23 @@ export default function VistaCategoria() {
             viewerExtraComponent={(fields, event) => (
               <div>
                 <ul>
+                  <li className="flex items-center">
+                    {event?.estado === "Si" ? (
+                      <FaPowerOff className="mr-2 text-green-500 transform rotate-180" />
+                    ) : (
+                      <FaPowerOff className="mr-2 text-red-500" />
+                    )}
+
+                    <span
+                      className={`block text-xs font-semibold px-3 py-1 rounded-full ${
+                        event?.estado === "Si"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {event?.estado === "Si" ? "Realizado" : "Sin realizar"}
+                    </span>
+                  </li>
                   <li>
                     <strong>Categoría:</strong> {event?.categoria}
                   </li>
