@@ -7,6 +7,8 @@ export const filtrarEventos = (filtros) =>
   axios.post(BASE_URL + "filtrar_eventos", filtros);
 export const crearEvento = (evento) =>
   axios.post(BASE_URL + "crear_evento", evento);
+export const crearEventos = (payload) =>
+  axios.post(BASE_URL + "crear_eventos", payload).then((res) => res.data);
 export async function obtenerEvento(id) {
   const res = await axios.post(BASE_URL + "obtener_evento", { id });
   return res.data;

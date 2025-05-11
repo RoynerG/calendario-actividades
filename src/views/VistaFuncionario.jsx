@@ -88,7 +88,6 @@ export default function VistaFuncionario() {
     const categoriaSeleccionada = categorias.find(
       (cat) => cat.id === formData.id_categoria
     );
-
     if (
       categoriaSeleccionada &&
       formData.fecha_inicio &&
@@ -97,27 +96,20 @@ export default function VistaFuncionario() {
     ) {
       const fechaInicio = new Date(formData.fecha_inicio);
       const fechaFin = new Date(formData.fecha_fin);
-
       const opcionesFecha = {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
       };
       const opcionesHora = { hour: "2-digit", minute: "2-digit" };
-
       const fechaStr = fechaInicio.toLocaleDateString("es-CO", opcionesFecha);
       const horaInicioStr = fechaInicio.toLocaleTimeString(
         "es-CO",
         opcionesHora
       );
       const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
-
-      const descripcionGenerada = `Por medio de la presente, le confirmo que he dispuesto de un espacio con el propósito de reunirnos, ya sea de forma presencial o por medios virtuales, a fin de atender cualquier inquietud o asunto pendiente.</br></br> En cumplimiento de <b>${categoriaSeleccionada.nombre}</b>, se ha programado una visita y/o reunión, la cual ha quedado agendada para el día <b>${fechaStr}</b>, de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b> En caso de no ser posible contar con su atención en la fecha indicada, le agradecemos nos lo comunique por este mismo medio con al menos 3 horas de antelación.`;
-
-      setFormData((prev) => ({
-        ...prev,
-        descripcion: descripcionGenerada,
-      }));
+      const descripcionGenerada = `Por medio de la presente, le confirmo que he dispuesto de un espacio con el propósito de reunirnos, ya sea de forma presencial o por medios virtuales, a fin de atender cualquier inquietud o asunto pendiente.<br/><br/>En cumplimiento de <b>${categoriaSeleccionada.nombre}</b>, se ha programado una visita y/o reunión, la cual ha quedado agendada para el día <b>${fechaStr}</b>, de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b>. En caso de no ser posible contar con su atención en la fecha indicada, le agradecemos nos lo comunique por este mismo medio con al menos 3 horas de antelación.`;
+      setFormData((prev) => ({ ...prev, descripcion: descripcionGenerada }));
     }
   }, [
     formData.id_categoria,
@@ -130,30 +122,21 @@ export default function VistaFuncionario() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     document.activeElement?.blur();
-
     try {
       setShowForm(false);
-
       Swal.fire({
         title: "Guardando...",
         allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-        customClass: {
-          container: "z-[100000]",
-        },
+        didOpen: () => Swal.showLoading(),
+        customClass: { container: "z-[100000]" },
       });
-
       const res = await crearEvento(formData);
       if (res.data.success) {
         await Swal.fire({
           title: "¡Éxito!",
           text: "El evento fue agregado correctamente",
           icon: "success",
-          customClass: {
-            container: "z-[100000]",
-          },
+          customClass: { container: "z-[100000]" },
         });
         setFormData({
           titulo: "",
@@ -171,9 +154,7 @@ export default function VistaFuncionario() {
           title: "Error",
           text: "No se pudo agregar el evento",
           icon: "error",
-          customClass: {
-            container: "z-[100000]",
-          },
+          customClass: { container: "z-[100000]" },
         });
         setShowForm(true);
       }
@@ -183,9 +164,7 @@ export default function VistaFuncionario() {
         title: "Error",
         text: "Ocurrió un error al agregar el evento",
         icon: "error",
-        customClass: {
-          container: "z-[100000]",
-        },
+        customClass: { container: "z-[100000]" },
       });
       setShowForm(true);
     }
@@ -196,14 +175,12 @@ export default function VistaFuncionario() {
       <h1 className="text-xl font-bold">
         Calendario de {funcionario.nombre || "Funcionario"}
       </h1>
-
       <button
         onClick={() => setShowForm(!showForm)}
-        className="bg-blue-500 hover:bg-blue-600 text-gray p-2 rounded shadow"
+        className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded shadow"
       >
         {showForm ? "Cerrar formulario" : "+ Crear Evento"}
       </button>
-
       {/* FILTROS */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         <input
@@ -238,18 +215,13 @@ export default function VistaFuncionario() {
         </select>
         <button
           onClick={() =>
-            setFiltros({
-              id_categoria: "",
-              fecha_inicio: "",
-              fecha_fin: "",
-            })
+            setFiltros({ id_categoria: "", fecha_inicio: "", fecha_fin: "" })
           }
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
         >
           Eliminar filtros
         </button>
       </div>
-
       {/* CALENDARIO */}
       {loading ? (
         <div className="text-center text-xl py-10 text-gray-500">
@@ -279,7 +251,6 @@ export default function VistaFuncionario() {
                     ) : (
                       <FaPowerOff className="mr-2 text-red-500" />
                     )}
-
                     <span
                       className={`block text-xs font-semibold px-3 py-1 rounded-full ${
                         event?.estado === "Si"
@@ -293,7 +264,7 @@ export default function VistaFuncionario() {
                   <li>
                     <strong>Categoría:</strong> {event?.categoria}
                   </li>
-                  {event?.id_ticket > 0 ? (
+                  {event?.id_ticket > 0 && (
                     <li>
                       <strong>Ticket: </strong>
                       <a
@@ -304,7 +275,7 @@ export default function VistaFuncionario() {
                         Ver ticket
                       </a>
                     </li>
-                  ) : null}
+                  )}
                   <li>
                     <a
                       href={`/evento/${event?.event_id}`}
@@ -323,7 +294,6 @@ export default function VistaFuncionario() {
           />
         </div>
       )}
-
       {/* FORMULARIO */}
       {showForm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
@@ -331,13 +301,11 @@ export default function VistaFuncionario() {
             className="fixed inset-0 bg-black bg-opacity-50 z-[9999]"
             onClick={() => setShowForm(false)}
           />
-
           <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-md z-[10000]">
             <form onSubmit={handleSubmit} className="space-y-4">
               <h2 className="text-lg font-semibold text-gray-700">
                 Crear nuevo evento
               </h2>
-
               <input
                 type="text"
                 placeholder="Título"
@@ -366,7 +334,6 @@ export default function VistaFuncionario() {
                 className="border p-2 rounded w-full"
                 required
               />
-
               <Select
                 options={categorias.map((cat) => ({
                   value: cat.id,
@@ -382,10 +349,10 @@ export default function VistaFuncionario() {
                       }
                     : null
                 }
-                onChange={(selectedOption) =>
+                onChange={(opt) =>
                   setFormData({
                     ...formData,
-                    id_categoria: selectedOption ? selectedOption.value : "",
+                    id_categoria: opt ? opt.value : "",
                   })
                 }
                 className="w-full"
@@ -393,8 +360,6 @@ export default function VistaFuncionario() {
                 placeholder="Selecciona una categoría"
                 isClearable
               />
-
-              {/* NUEVA PREGUNTA SOBRE RELACIÓN CON TICKET */}
               {tickets.length > 0 && (
                 <Select
                   options={[
@@ -420,31 +385,27 @@ export default function VistaFuncionario() {
                           label: "No, no está relacionado con un ticket",
                         }
                   }
-                  onChange={(selectedOption) =>
-                    setRelacionadoConTicket(selectedOption?.value === "si")
+                  onChange={(opt) =>
+                    setRelacionadoConTicket(opt?.value === "si")
                   }
                   className="w-full"
                   classNamePrefix="react-select"
-                  placeholder="¿El evento está relacionado con un ticket?"
+                  placeholder="¿Relacionado con ticket?"
                   isClearable
                 />
               )}
-
               {relacionadoConTicket && (
                 <Select
-                  options={tickets.map((tic) => ({
-                    value: tic._ID,
-                    label: tic._ID,
-                  }))}
+                  options={tickets.map((t) => ({ value: t._ID, label: t._ID }))}
                   value={
                     formData.id_ticket
                       ? { value: formData.id_ticket, label: formData.id_ticket }
                       : null
                   }
-                  onChange={(selectedOption) =>
+                  onChange={(opt) =>
                     setFormData({
                       ...formData,
-                      id_ticket: selectedOption ? selectedOption.value : "",
+                      id_ticket: opt ? opt.value : "",
                     })
                   }
                   className="w-full"
@@ -453,7 +414,6 @@ export default function VistaFuncionario() {
                   isClearable
                 />
               )}
-
               {(!relacionadoConTicket || tickets.length === 0) && (
                 <textarea
                   placeholder="Descripción"
@@ -465,7 +425,6 @@ export default function VistaFuncionario() {
                   required
                 />
               )}
-
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"
@@ -476,7 +435,7 @@ export default function VistaFuncionario() {
                 </button>
                 <button
                   type="submit"
-                  className="bg-green-500 hover:bg-green-600 text-gray px-4 py-2 rounded"
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
                 >
                   Crear
                 </button>

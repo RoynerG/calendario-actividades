@@ -6,6 +6,7 @@ import VistaAdministrativo from "../views/VistaAdministrativo";
 import VistaComercial from "../views/VistaComercial";
 import CrearEventoTicket from "../components/CrearEventoTicket";
 import VistaEvento from "../views/VistaEvento";
+import CrearEventoMultiple from "../components/CrearEventoMultiple";
 
 export default function AppRoutes() {
   return (
@@ -28,6 +29,10 @@ export default function AppRoutes() {
         <Route
           path="/crear-evento-ticket/:id_ticket"
           element={<CrearEventoTicket />}
+        />
+        <Route
+          path="/crear-evento-multiple"
+          element={<CrearEventoMultiple />}
         />
         <Route path="/evento/:id_evento" element={<VistaEvento />} />
       </Routes>
