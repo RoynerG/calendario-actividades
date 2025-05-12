@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Scheduler } from "@aldabil/react-scheduler";
 import Swal from "sweetalert2";
 import {
@@ -7,6 +7,8 @@ import {
   filtrarEventos,
   crearEvento,
   obtenerTicketsFuncionario,
+  cambiarEstadoEvento,
+  trasladarEvento,
 } from "../services/eventService";
 import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
@@ -37,6 +39,7 @@ export default function VistaFuncionario() {
   const [relacionadoConTicket, setRelacionadoConTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const schedulerRef = useRef(null);
 
   useEffect(() => {
     listarCategorias().then((res) => {
@@ -230,6 +233,7 @@ export default function VistaFuncionario() {
       ) : (
         <div className="w-full overflow-auto">
           <Scheduler
+            ref={schedulerRef}
             view="week"
             events={eventos}
             week={schedulerConfig.week}
@@ -286,6 +290,123 @@ export default function VistaFuncionario() {
                     </a>
                   </li>
                 </ul>
+                {event?.estado === "No" ? (
+                  <div className="flex flex-col gap-2 mt-4">
+                    <button
+                      className="px-2 py-1 bg-green-600 text-white rounded"
+                      onClick={async () => {
+                        close();
+                        const { value: obs } = await Swal.fire({
+                          customClass: { container: "z-[2000]" },
+                          title: `Resultado del evento #${event?.event_id}:`,
+                          html: `<p>${event?.title}</p>`,
+                          input: "textarea",
+                          inputPlaceholder: "Escribe tu observación…",
+                          showCancelButton: true,
+                        });
+                        if (!obs) return;
+                        Swal.fire({
+                          title: "Actualizando estado...",
+                          allowOutsideClick: false,
+                          didOpen: () => {
+                            Swal.showLoading();
+                          },
+                          customClass: { container: "z-[2000]" },
+                        });
+                        const resp = await cambiarEstadoEvento(
+                          event?.event_id,
+                          obs
+                        );
+                        Swal.close();
+                        if (resp.success) {
+                          await Swal.fire("¡Hecho!", resp.message, "success");
+                          setFiltros((prev) => ({ ...prev }));
+                        } else {
+                          Swal.fire("Error", resp.message, "error");
+                        }
+                      }}
+                    >
+                      Marcar como realizado
+                    </button>
+                    <button
+                      className="px-2 py-1 bg-blue-600 text-white rounded"
+                      onClick={async () => {
+                        const { value: form } = await Swal.fire({
+                          title: `Trasladar fecha del evento #${event?.event_id}:`,
+                          html: `
+        <p>${event?.title}</p>
+        <input id="f1" type="datetime-local" class="swal2-input" placeholder="Nueva fecha inicio">
+        <input id="f2" type="datetime-local" class="swal2-input" placeholder="Nueva fecha fin">
+        <textarea id="obs" class="swal2-textarea" placeholder="Motivo"></textarea>
+      `,
+                          focusConfirm: false,
+                          preConfirm: () => ({
+                            fecha_inicio: document.getElementById("f1").value,
+                            fecha_fin: document.getElementById("f2").value,
+                            observacion: document.getElementById("obs").value,
+                          }),
+                          showCancelButton: true,
+                          customClass: { container: "z-[2000]" },
+                        });
+                        if (!form?.observacion) return;
+                        const fechaInicio = new Date(form.fecha_inicio);
+                        const fechaFin = new Date(form.fecha_fin);
+                        const opcionesFecha = {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        };
+                        const opcionesHora = {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        };
+                        const fechaStr = fechaInicio.toLocaleDateString(
+                          "es-CO",
+                          opcionesFecha
+                        );
+                        const horaInicioStr = fechaInicio.toLocaleTimeString(
+                          "es-CO",
+                          opcionesHora
+                        );
+                        const horaFinStr = fechaFin.toLocaleTimeString(
+                          "es-CO",
+                          opcionesHora
+                        );
+                        const nombreCategoria = event.categoria;
+
+                        const descripcionGenerada = `
+      Por medio de la presente, le confirmo que se ha <b>reprogramado</b>
+      el evento correspondiente a <b>${event.title}</b> en cumplimiento de
+      <b>${nombreCategoria}</b>, para el día <b>${fechaStr}</b>,
+      de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b>.<br/><br/>
+      <b>Motivo:</b> ${form.observacion}
+    `;
+                        Swal.fire({
+                          title: "Trasladando evento...",
+                          allowOutsideClick: false,
+                          didOpen: () => Swal.showLoading(),
+                          customClass: { container: "z-[2000]" },
+                        });
+                        const resp = await trasladarEvento(
+                          event.event_id,
+                          form.fecha_inicio,
+                          form.fecha_fin,
+                          form.observacion,
+                          descripcionGenerada
+                        );
+                        Swal.close();
+                        if (resp.success) {
+                          await Swal.fire("¡Hecho!", resp.message, "success");
+                          setFiltros((prev) => ({ ...prev }));
+                        } else {
+                          Swal.fire("Error", resp.message, "error");
+                        }
+                      }}
+                    >
+                      Trasladar fecha
+                    </button>
+                  </div>
+                ) : null}
               </div>
             )}
             editable={false}

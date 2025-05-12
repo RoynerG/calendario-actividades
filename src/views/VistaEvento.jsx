@@ -10,26 +10,17 @@ export default function VistaEvento() {
   const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchEvento() {
-      try {
-        const res = await obtenerEvento(id_evento);
-        if (res.success) {
-          setEvento(res.data);
-        } else {
-          Swal.fire("Error", "No se pudo cargar el evento", "error");
-          navigate(-1);
-        }
-      } catch (error) {
-        console.error(error);
-        Swal.fire("Error", "Hubo un problema al cargar el evento", "error");
-        navigate(-1);
-      } finally {
-        setLoading(false);
-      }
-    }
+  console.log(id_evento);
 
-    fetchEvento();
+  useEffect(() => {
+    obtenerEvento(id_evento)
+      .then((evt) => setEvento(evt))
+      .catch((err) => {
+        console.error(err);
+        Swal.fire("Error", err.message, "error");
+        navigate(-1);
+      })
+      .finally(() => setLoading(false));
   }, [id_evento, navigate]);
 
   if (loading) {

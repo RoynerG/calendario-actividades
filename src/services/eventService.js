@@ -11,7 +11,7 @@ export const crearEventos = (payload) =>
   axios.post(BASE_URL + "crear_eventos", payload).then((res) => res.data);
 export async function obtenerEvento(id) {
   const res = await axios.post(BASE_URL + "obtener_evento", { id });
-  return res.data;
+  return res.data.data;
 }
 export const actualizarEvento = (evento) =>
   axios.post(BASE_URL + "actualizar_evento", evento);
@@ -55,4 +55,29 @@ export async function obtenerTicket(id_ticket) {
     id_ticket,
   });
   return res.data;
+}
+
+export async function cambiarEstadoEvento(id_evento, observacion) {
+  const { data } = await axios.post(BASE_URL + "cambiar_estado", {
+    id_evento,
+    observacion,
+  });
+  return data;
+}
+
+export async function trasladarEvento(
+  id_evento,
+  fecha_inicio,
+  fecha_fin,
+  observacion,
+  descripcion
+) {
+  const { data } = await axios.post(BASE_URL + "trasladar_evento", {
+    id_evento,
+    fecha_inicio,
+    fecha_fin,
+    observacion,
+    descripcion,
+  });
+  return data;
 }
