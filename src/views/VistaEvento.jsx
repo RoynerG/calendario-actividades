@@ -67,38 +67,18 @@ export default function VistaEvento() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6">
-      {/* Contenedor de botones superiores - ahora responsivo */}
       <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
         <a
-          href={`https://mango-mushroom-0f4d0671e.6.azurestaticapps.net`}
+          href={`https://sucasainmobiliaria.com.co/mi-cuenta`}
           target="_blank"
           rel="noopener noreferrer"
           style={buttonStyle}
           className="flex-1 sm:flex-none text-center"
         >
-          Ver calendario
-        </a>
-        <a
-          href="https://mango-mushroom-0f4d0671e.6.azurestaticapps.net/categoria/1,6,7,8,9,10,11"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={buttonStyle}
-          className="flex-1 sm:flex-none text-center"
-        >
-          Calendario administrativo
-        </a>
-        <a
-          href="https://mango-mushroom-0f4d0671e.6.azurestaticapps.net/categoria/2,3,4,5,11"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={buttonStyle}
-          className="flex-1 sm:flex-none text-center"
-        >
-          Calendario comercial
+          Regresar a mi cuenta
         </a>
       </div>
 
-      {/* Tarjeta del evento */}
       <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 max-w-md mx-auto border border-gray-200">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">
           {evento.titulo}
@@ -109,7 +89,6 @@ export default function VistaEvento() {
           dangerouslySetInnerHTML={{ __html: evento.descripcion }}
         />
 
-        {/* Información de fecha y hora - ajustado para móviles */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <span className="flex items-center text-sm text-gray-600">
             <FaCalendarAlt className="mr-1 text-blue-500" />
@@ -121,7 +100,6 @@ export default function VistaEvento() {
           </span>
         </div>
 
-        {/* Categoría y Estado*/}
         <div className="mb-4 flex flex-col">
           <div className="mb-4 flex items-center">
             <FaTag className="mr-2 text-yellow-500" />
@@ -157,7 +135,6 @@ export default function VistaEvento() {
           </div>
         </div>
 
-        {/* Botón Ver Ticket */}
         <div className="flex justify-end">
           {evento.id_ticket > 0 ? (
             <a

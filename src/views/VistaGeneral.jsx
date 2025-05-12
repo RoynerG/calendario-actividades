@@ -20,6 +20,17 @@ export default function VistaGeneral() {
     fecha_fin: "",
   });
   const [loading, setLoading] = useState(true);
+  const buttonStyle = {
+    backgroundColor: "black",
+    color: "white",
+    paddingLeft: "1rem",
+    paddingRight: "1rem",
+    paddingTop: "0.5rem",
+    paddingBottom: "0.5rem",
+    borderRadius: "0.25rem",
+    width: "auto",
+    whiteSpace: "nowrap",
+  };
 
   useEffect(() => {
     listarCategorias().then((res) => {
@@ -61,6 +72,15 @@ export default function VistaGeneral() {
 
   return (
     <div className="p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
+        <a
+          href={`https://sucasainmobiliaria.com.co/mi-cuenta`}
+          style={buttonStyle}
+          className="flex-1 sm:flex-none text-center"
+        >
+          Regresar a mi cuenta
+        </a>
+      </div>
       <h1 className="text-xl font-bold">Calendario</h1>
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         <input
