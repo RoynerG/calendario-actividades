@@ -78,7 +78,7 @@ export default function VistaCategoria() {
     <div className="p-4 space-y-4">
       <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
         <a
-          href={`https://sucasainmobiliaria.com.co/mi-cuenta`}
+          href={`httphttps://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario/`}
           style={buttonStyle}
           className="flex-1 sm:flex-none text-center"
         >
