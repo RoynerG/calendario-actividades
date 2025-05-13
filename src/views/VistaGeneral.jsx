@@ -18,6 +18,7 @@ export default function VistaGeneral() {
     id_empleado: "",
     fecha_inicio: "",
     fecha_fin: "",
+    estado: "",
   });
   const [loading, setLoading] = useState(true);
   const buttonStyle = {
@@ -129,6 +130,17 @@ export default function VistaGeneral() {
             </option>
           ))}
         </select>
+        <select
+          value={filtros.estado}
+          onChange={(e) =>
+            setFiltros((f) => ({ ...f, estado: e.target.value }))
+          }
+          className="border p-2 rounded"
+        >
+          <option value="">¿Fue realizado?</option>
+          <option value="Si">Si</option>
+          <option value="No">No</option>
+        </select>
         <button
           onClick={() =>
             setFiltros((f) => ({
@@ -137,6 +149,7 @@ export default function VistaGeneral() {
               id_categoria: "",
               fecha_inicio: "",
               fecha_fin: "",
+              estado: "",
             }))
           }
           className="border p-2 rounded"

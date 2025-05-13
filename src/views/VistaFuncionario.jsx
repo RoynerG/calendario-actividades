@@ -26,6 +26,7 @@ export default function VistaFuncionario() {
     id_categoria: "",
     fecha_inicio: "",
     fecha_fin: "",
+    estado: "",
   });
   const [formData, setFormData] = useState({
     titulo: "",
@@ -236,9 +237,25 @@ export default function VistaFuncionario() {
             </option>
           ))}
         </select>
+        <select
+          value={filtros.estado}
+          onChange={(e) =>
+            setFiltros((f) => ({ ...f, estado: e.target.value }))
+          }
+          className="border p-2 rounded"
+        >
+          <option value="">¿Fue realizado?</option>
+          <option value="Si">Si</option>
+          <option value="No">No</option>
+        </select>
         <button
           onClick={() =>
-            setFiltros({ id_categoria: "", fecha_inicio: "", fecha_fin: "" })
+            setFiltros({
+              id_categoria: "",
+              fecha_inicio: "",
+              fecha_fin: "",
+              estado: "",
+            })
           }
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
         >
