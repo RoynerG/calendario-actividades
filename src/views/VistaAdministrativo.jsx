@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
 import { FaPowerOff } from "react-icons/fa";
+import GuiaCategorias from "../components/GuiaCategorias";
 export default function VistaAdministrativo() {
   const { categorias } = useParams();
   const [eventos, setEventos] = useState([]);
@@ -78,6 +79,7 @@ export default function VistaAdministrativo() {
         >
           Regresar a mi cuenta
         </a>
+        <GuiaCategorias buttonStyle={buttonStyle} />
       </div>
       <h1 className="text-xl font-bold ">Calendario Administrativo</h1>
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">

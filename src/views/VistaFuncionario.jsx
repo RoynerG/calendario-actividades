@@ -15,6 +15,7 @@ import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
 import Select from "react-select";
 import { FaPowerOff } from "react-icons/fa";
+import GuiaCategorias from "../components/GuiaCategorias";
 
 export default function VistaFuncionario() {
   const { id_funcionario } = useParams();
@@ -189,12 +190,13 @@ export default function VistaFuncionario() {
     <div className="p-4 space-y-4">
       <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
         <a
-          href={`https://sucasainmobiliaria.com.co/mi-cuenta/`}
+          href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario`}
           style={buttonStyle}
           className="flex-1 sm:flex-none text-center"
         >
           Regresar a mi cuenta
         </a>
+        <GuiaCategorias buttonStyle={buttonStyle} />
       </div>
       <h1 className="text-xl font-bold">
         Calendario de {funcionario.nombre || "Funcionario"}

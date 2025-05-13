@@ -8,6 +8,7 @@ import {
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
 import { FaPowerOff } from "react-icons/fa";
+import GuiaCategorias from "../components/GuiaCategorias";
 
 export default function VistaGeneral() {
   const [eventos, setEventos] = useState([]);
@@ -81,6 +82,7 @@ export default function VistaGeneral() {
         >
           Regresar a mi cuenta
         </a>
+        <GuiaCategorias buttonStyle={buttonStyle} />
       </div>
       <h1 className="text-xl font-bold">Calendario</h1>
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
