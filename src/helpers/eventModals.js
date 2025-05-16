@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
 import {
+  listarCategorias,
   cambiarEstadoEvento,
   actualizarEvento,
   trasladarEvento,
@@ -47,58 +48,85 @@ export async function showRealizadoModal(event, setFiltros) {
   }
 }
 
-export async function showEditarModal(event, categorias, setFiltros) {
+export async function showEditarModal(
+  event,
+  passedCategorias = [],
+  setFiltros
+) {
+  let cats = passedCategorias;
+  if (!cats || cats.length === 0) {
+    const resCat = await listarCategorias();
+    cats = resCat.success ? resCat.data : [];
+  }
+
+  const selectedId =
+    event.id_categoria ||
+    cats.find((c) => c.nombre === event.categoria)?.id ||
+    "";
+
   const { value: form } = await Swal.fire({
     title: `Editar evento #${event.event_id}`,
     html: `
-      <label for="titulo" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Título</label>
-      <input id="titulo" class="${styleInput}" value="${
-      event.title || ""
-    }" placeholder="Escribe en 3 palabras la actividad a realizar">
-          <label for="ubicacion" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Ubicacion</label>
-      <input id="ubicacion" class="${styleInput}" value="${
-      event.ubicacion || ""
-    }" placeholder="Escribe donde será realizado el evento">
-      <label for="descripcion" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Descripción</label>
-      <textarea id="descripcion" class="${styleInput}" placeholder="Describe detalladamente que se va a realizar en esta actividad">${
-      event.descripcion || ""
-    }</textarea>
-      <label for="categoria" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Categoría</label>
+      <label for="titulo" class="block mb-1 font-medium">Título</label>
+      <input
+        id="titulo"
+        class="${styleInput}"
+        value="${event.title || ""}"
+        placeholder="Escribe en 3 palabras la actividad"
+      />
+
+      <label for="ubicacion" class="block mt-3 mb-1 font-medium">Ubicación</label>
+      <input
+        id="ubicacion"
+        class="${styleInput}"
+        value="${event.ubicacion || ""}"
+        placeholder="Dirección del evento"
+      />
+
+      <label for="descripcion" class="block mt-3 mb-1 font-medium">Descripción</label>
+      <textarea
+        id="descripcion"
+        class="${styleInput}"
+        placeholder="Describe la actividad"
+      >${event.descripcion || ""}</textarea>
+
+      <label for="categoria" class="block mt-3 mb-1 font-medium">Categoría</label>
       <select id="categoria" class="${styleInput}">
-        ${categorias
+        ${cats
           .map(
-            (cat) =>
-              `<option value="${cat.id}" ${
-                event.id_categoria === cat.id || event.categoria === cat.nombre
-                  ? "selected"
-                  : ""
-              }>${cat.nombre}</option>`
+            (cat) => `
+            <option value="${cat.id}" ${
+              String(cat.id) === String(selectedId) ? "selected" : ""
+            }>${cat.nombre}</option>`
           )
           .join("")}
       </select>
     `,
     focusConfirm: false,
     preConfirm: () => {
-      const titulo = document.getElementById("titulo").value;
-      const descripcion = document.getElementById("descripcion").value;
-      const ubicacion = document.getElementById("ubicacion").value;
+      const titulo = document.getElementById("titulo").value.trim();
+      const ubicacion = document.getElementById("ubicacion").value.trim();
+      const descripcion = document.getElementById("descripcion").value.trim();
       const id_categoria = document.getElementById("categoria").value;
       if (!titulo || !descripcion || !id_categoria) {
         Swal.showValidationMessage("Todos los campos son obligatorios");
         return false;
       }
-      return { titulo, descripcion, ubicacion, id_categoria };
+      return { titulo, ubicacion, descripcion, id_categoria };
     },
     showCancelButton: true,
     customClass: { container: "z-[2000]" },
   });
+
   if (!form) return;
+
   Swal.fire({
     title: "Guardando cambios...",
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading(),
     customClass: { container: "z-[2000]" },
   });
+
   const resp = await actualizarEvento(
     event.event_id,
     form.titulo,
@@ -107,6 +135,7 @@ export async function showEditarModal(event, categorias, setFiltros) {
     form.id_categoria
   );
   Swal.close();
+
   if (resp.success) {
     await Swal.fire(
       "¡Editado!",
