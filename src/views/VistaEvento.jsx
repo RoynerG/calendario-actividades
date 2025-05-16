@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { obtenerEvento } from "../services/eventService";
 import Swal from "sweetalert2";
-import { FaCalendarAlt, FaClock, FaTag, FaPowerOff } from "react-icons/fa";
+import { FaClock, FaTag, FaPowerOff, FaMapLocationDot } from "react-icons/fa6";
+import { FaCalendarAlt } from "react-icons/fa";
 
 export default function VistaEvento() {
   const { id_evento } = useParams();
@@ -69,9 +70,7 @@ export default function VistaEvento() {
     <div className="px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
         <a
-          href={`https://sucasainmobiliaria.com.co/mi-cuenta`}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario`}
           style={buttonStyle}
           className="flex-1 sm:flex-none text-center"
         >
@@ -83,11 +82,25 @@ export default function VistaEvento() {
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">
           {evento.titulo}
         </h2>
-
+        {evento.ubicacion && (
+          <div className="mb-4 flex items-center">
+            <FaMapLocationDot className="mr-2 text-green-900" />
+            <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full">
+              {evento.ubicacion}
+            </span>
+          </div>
+        )}
         <div
           className="text-sm sm:text-md text-gray-600 mb-4 text-left"
           dangerouslySetInnerHTML={{ __html: evento.descripcion }}
         />
+
+        {evento.observacion && (
+          <p className="text-sm sm:text-md text-gray-600 mb-4 text-left">
+            <span className="font-bold">Observacion/Motivo: </span>{" "}
+            {evento.observacion}
+          </p>
+        )}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
           <span className="flex items-center text-sm text-gray-600">
@@ -103,16 +116,7 @@ export default function VistaEvento() {
         <div className="mb-4 flex flex-col">
           <div className="mb-4 flex items-center">
             <FaTag className="mr-2 text-yellow-500" />
-            <span
-              className={`inline-block text-xs font-semibold px-3 py-1 rounded-full 
-              ${
-                evento.categoria === "Reunión"
-                  ? "bg-green-100 text-green-700"
-                  : evento.categoria === "Visita"
-                  ? "bg-purple-100 text-purple-700"
-                  : "bg-blue-100 text-blue-700"
-              }`}
-            >
+            <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-700">
               {evento.categoria}
             </span>
           </div>
