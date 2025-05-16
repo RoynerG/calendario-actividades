@@ -7,8 +7,6 @@ import {
   filtrarEventos,
   crearEvento,
   obtenerTicketsFuncionario,
-  cambiarEstadoEvento,
-  trasladarEvento,
 } from "../services/eventService";
 import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
@@ -16,6 +14,7 @@ import { es } from "date-fns/locale";
 import Select from "react-select";
 import { FaPowerOff } from "react-icons/fa";
 import GuiaCategorias from "../components/GuiaCategorias";
+import EventoViewer from "../components/EventoViewer";
 
 export default function VistaFuncionario() {
   const { id_funcionario } = useParams();
@@ -87,6 +86,7 @@ export default function VistaFuncionario() {
             categoria: ev.categoria,
             id_ticket: ev.id_ticket,
             estado: ev.estado,
+            descripcion: ev.descripcion,
           }));
           setEventos(formateados);
         }
@@ -207,7 +207,6 @@ export default function VistaFuncionario() {
       >
         {showForm ? "Cerrar formulario" : "+ Crear Evento"}
       </button>
-      {/* FILTROS */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         <input
           type="date"
@@ -264,7 +263,6 @@ export default function VistaFuncionario() {
           Eliminar filtros
         </button>
       </div>
-      {/* CALENDARIO */}
       {loading ? (
         <div className="text-center text-xl py-10 text-gray-500">
           Cargando calendario...
@@ -286,166 +284,11 @@ export default function VistaFuncionario() {
             }}
             locale={es}
             viewerExtraComponent={(fields, event) => (
-              <div>
-                <ul>
-                  <li className="flex items-center">
-                    {event?.estado === "Si" ? (
-                      <FaPowerOff className="mr-2 text-green-500 transform rotate-180" />
-                    ) : (
-                      <FaPowerOff className="mr-2 text-red-500" />
-                    )}
-                    <span
-                      className={`block text-xs font-semibold px-3 py-1 rounded-full ${
-                        event?.estado === "Si"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {event?.estado === "Si" ? "Realizado" : "Sin realizar"}
-                    </span>
-                  </li>
-                  <li>
-                    <strong>Categoría:</strong> {event?.categoria}
-                  </li>
-                  {event?.id_ticket > 0 && (
-                    <li>
-                      <strong>Ticket: </strong>
-                      <a
-                        href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Ver ticket
-                      </a>
-                    </li>
-                  )}
-                  <li>
-                    <a
-                      href={`/evento/${event?.event_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Ver evento
-                    </a>
-                  </li>
-                </ul>
-                {event?.estado === "No" ? (
-                  <div className="flex flex-col gap-2 mt-4">
-                    <button
-                      className="px-2 py-1 bg-green-600 text-white rounded"
-                      onClick={async () => {
-                        close();
-                        const { value: obs } = await Swal.fire({
-                          customClass: { container: "z-[2000]" },
-                          title: `Resultado del evento #${event?.event_id}:`,
-                          html: `<p>${event?.title}</p>`,
-                          input: "textarea",
-                          inputPlaceholder: "Escribe tu observación…",
-                          showCancelButton: true,
-                        });
-                        if (!obs) return;
-                        Swal.fire({
-                          title: "Actualizando estado...",
-                          allowOutsideClick: false,
-                          didOpen: () => {
-                            Swal.showLoading();
-                          },
-                          customClass: { container: "z-[2000]" },
-                        });
-                        const resp = await cambiarEstadoEvento(
-                          event?.event_id,
-                          obs
-                        );
-                        Swal.close();
-                        if (resp.success) {
-                          await Swal.fire("¡Hecho!", resp.message, "success");
-                          setFiltros((prev) => ({ ...prev }));
-                        } else {
-                          Swal.fire("Error", resp.message, "error");
-                        }
-                      }}
-                    >
-                      Marcar como realizado
-                    </button>
-                    <button
-                      className="px-2 py-1 bg-blue-600 text-white rounded"
-                      onClick={async () => {
-                        const { value: form } = await Swal.fire({
-                          title: `Trasladar fecha del evento #${event?.event_id}:`,
-                          html: `
-                          <p>${event?.title}</p>
-                          <input id="f1" type="datetime-local" class="swal2-input" placeholder="Nueva fecha inicio">
-                          <input id="f2" type="datetime-local" class="swal2-input" placeholder="Nueva fecha fin">
-                          <textarea id="obs" class="swal2-textarea" placeholder="Motivo"></textarea>`,
-                          focusConfirm: false,
-                          preConfirm: () => ({
-                            fecha_inicio: document.getElementById("f1").value,
-                            fecha_fin: document.getElementById("f2").value,
-                            observacion: document.getElementById("obs").value,
-                          }),
-                          showCancelButton: true,
-                          customClass: { container: "z-[2000]" },
-                        });
-                        if (!form?.observacion) return;
-                        const fechaInicio = new Date(form.fecha_inicio);
-                        const fechaFin = new Date(form.fecha_fin);
-                        const opcionesFecha = {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        };
-                        const opcionesHora = {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        };
-                        const fechaStr = fechaInicio.toLocaleDateString(
-                          "es-CO",
-                          opcionesFecha
-                        );
-                        const horaInicioStr = fechaInicio.toLocaleTimeString(
-                          "es-CO",
-                          opcionesHora
-                        );
-                        const horaFinStr = fechaFin.toLocaleTimeString(
-                          "es-CO",
-                          opcionesHora
-                        );
-                        const nombreCategoria = event.categoria;
-
-                        const descripcionGenerada = `
-      Por medio de la presente, le confirmo que se ha <b>reprogramado</b>
-      el evento correspondiente a <b>${event.title}</b> en cumplimiento de
-      <b>${nombreCategoria}</b>, para el día <b>${fechaStr}</b>,
-      de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b>.<br/><br/>
-      <b>Motivo:</b> ${form.observacion}
-    `;
-                        Swal.fire({
-                          title: "Trasladando evento...",
-                          allowOutsideClick: false,
-                          didOpen: () => Swal.showLoading(),
-                          customClass: { container: "z-[2000]" },
-                        });
-                        const resp = await trasladarEvento(
-                          event.event_id,
-                          form.fecha_inicio,
-                          form.fecha_fin,
-                          form.observacion,
-                          descripcionGenerada
-                        );
-                        Swal.close();
-                        if (resp.success) {
-                          await Swal.fire("¡Hecho!", resp.message, "success");
-                          setFiltros((prev) => ({ ...prev }));
-                        } else {
-                          Swal.fire("Error", resp.message, "error");
-                        }
-                      }}
-                    >
-                      Trasladar fecha
-                    </button>
-                  </div>
-                ) : null}
-              </div>
+              <EventoViewer
+                event={event}
+                categorias={categorias}
+                setFiltros={setFiltros}
+              />
             )}
             editable={false}
             deletable={false}
@@ -453,7 +296,7 @@ export default function VistaFuncionario() {
           />
         </div>
       )}
-      {/* FORMULARIO */}
+      {/* Crear evento */}
       {showForm && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div

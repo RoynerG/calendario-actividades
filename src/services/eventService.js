@@ -13,8 +13,6 @@ export async function obtenerEvento(id) {
   const res = await axios.post(BASE_URL + "obtener_evento", { id });
   return res.data.data;
 }
-export const actualizarEvento = (evento) =>
-  axios.post(BASE_URL + "actualizar_evento", evento);
 export const eliminarEvento = (id) =>
   axios.post(BASE_URL + "eliminar_evento", { id });
 
@@ -78,6 +76,16 @@ export async function trasladarEvento(
     fecha_fin,
     observacion,
     descripcion,
+  });
+  return data;
+}
+
+export async function actualizarEvento(id, titulo, descripcion, id_categoria) {
+  const { data } = await axios.post(BASE_URL + "actualizar_evento", {
+    id,
+    titulo,
+    descripcion,
+    id_categoria,
   });
   return data;
 }
