@@ -31,6 +31,7 @@ export default function VistaFuncionario() {
   const [formData, setFormData] = useState({
     titulo: "",
     descripcion: "",
+    ubicacion: "",
     fecha_inicio: "",
     fecha_fin: "",
     id_categoria: "",
@@ -52,6 +53,8 @@ export default function VistaFuncionario() {
     width: "auto",
     whiteSpace: "nowrap",
   };
+  const inputStyle =
+    "border p-2 rounded w-bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
   useEffect(() => {
     listarCategorias().then((res) => {
@@ -87,6 +90,7 @@ export default function VistaFuncionario() {
             id_ticket: ev.id_ticket,
             estado: ev.estado,
             descripcion: ev.descripcion,
+            ubicacion: ev.ubicacion,
           }));
           setEventos(formateados);
         }
@@ -157,6 +161,7 @@ export default function VistaFuncionario() {
         setFormData({
           titulo: "",
           descripcion: "",
+          ubicacion: "",
           fecha_inicio: "",
           fecha_fin: "",
           id_categoria: "",
@@ -305,35 +310,69 @@ export default function VistaFuncionario() {
           />
           <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-md z-[10000]">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <h2 className="text-lg font-semibold text-gray-700">
-                Crear nuevo evento
-              </h2>
+              <label
+                for="titulo"
+                class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Título
+              </label>
               <input
+                id="titulo"
                 type="text"
-                placeholder="Título"
+                placeholder="Escribe en 3 palabras la actividad a realizar"
                 value={formData.titulo}
                 onChange={(e) =>
                   setFormData({ ...formData, titulo: e.target.value })
                 }
-                className="border p-2 rounded w-full"
+                className={inputStyle}
                 required
               />
+              <label
+                for="ubicacion"
+                class="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Ubicacion/direccion del evento
+              </label>
               <input
+                id="ubicacion"
+                type="text"
+                placeholder="Escribe donde será realizado el evento"
+                value={formData.ubicacion}
+                onChange={(e) =>
+                  setFormData({ ...formData, ubicacion: e.target.value })
+                }
+                className={inputStyle}
+              />
+              <label
+                for="f1"
+                class="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Fecha de inicio
+              </label>
+              <input
+                id="f1"
                 type="datetime-local"
                 value={formData.fecha_inicio}
                 onChange={(e) =>
                   setFormData({ ...formData, fecha_inicio: e.target.value })
                 }
-                className="border p-2 rounded w-full"
+                className={inputStyle}
                 required
               />
+              <label
+                for="f2"
+                class="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Fecha de finalizacion
+              </label>
               <input
+                id="f2"
                 type="datetime-local"
                 value={formData.fecha_fin}
                 onChange={(e) =>
                   setFormData({ ...formData, fecha_fin: e.target.value })
                 }
-                className="border p-2 rounded w-full"
+                className={inputStyle}
                 required
               />
               <Select
@@ -417,15 +456,23 @@ export default function VistaFuncionario() {
                 />
               )}
               {(!relacionadoConTicket || tickets.length === 0) && (
-                <textarea
-                  placeholder="Descripción"
-                  value={formData.descripcion}
-                  onChange={(e) =>
-                    setFormData({ ...formData, descripcion: e.target.value })
-                  }
-                  className="border p-2 rounded w-full"
-                  required
-                />
+                <>
+                  <label
+                    for="f2"
+                    class="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                  >
+                    Descripcion
+                  </label>
+                  <textarea
+                    placeholder="Describe detalladamente que se va a realizar en esta actividad"
+                    value={formData.descripcion}
+                    onChange={(e) =>
+                      setFormData({ ...formData, descripcion: e.target.value })
+                    }
+                    className={inputStyle}
+                    required
+                  />
+                </>
               )}
               <div className="flex justify-end space-x-2">
                 <button

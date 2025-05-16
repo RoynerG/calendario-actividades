@@ -80,11 +80,18 @@ export async function trasladarEvento(
   return data;
 }
 
-export async function actualizarEvento(id, titulo, descripcion, id_categoria) {
+export async function actualizarEvento(
+  id,
+  titulo,
+  descripcion,
+  ubicacion,
+  id_categoria
+) {
   const { data } = await axios.post(BASE_URL + "actualizar_evento", {
     id,
     titulo,
     descripcion,
+    ubicacion,
     id_categoria,
   });
   return data;

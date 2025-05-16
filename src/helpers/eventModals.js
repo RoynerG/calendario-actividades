@@ -4,6 +4,8 @@ import {
   actualizarEvento,
   trasladarEvento,
 } from "../services/eventService";
+const styleInput =
+  "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
 export async function showRealizadoModal(event, setFiltros) {
   const { value: obs } = await Swal.fire({
@@ -14,7 +16,7 @@ export async function showRealizadoModal(event, setFiltros) {
         Escribe en este campo el resultado de la actividad
       </label>
       <textarea id="obs" 
-        class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        class="${styleInput}"
       ></textarea>
     `,
     focusConfirm: false,
@@ -50,15 +52,19 @@ export async function showEditarModal(event, categorias, setFiltros) {
     title: `Editar evento #${event.event_id}`,
     html: `
       <label for="titulo" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Título</label>
-      <input id="titulo" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" value="${
-        event.title || ""
-      }" placeholder="Título">
+      <input id="titulo" class="${styleInput}" value="${
+      event.title || ""
+    }" placeholder="Escribe en 3 palabras la actividad a realizar">
+          <label for="ubicacion" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Ubicacion</label>
+      <input id="ubicacion" class="${styleInput}" value="${
+      event.ubicacion || ""
+    }" placeholder="Escribe donde será realizado el evento">
       <label for="descripcion" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Descripción</label>
-      <textarea id="descripcion" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Descripción">${
-        event.descripcion || ""
-      }</textarea>
+      <textarea id="descripcion" class="${styleInput}" placeholder="Describe detalladamente que se va a realizar en esta actividad">${
+      event.descripcion || ""
+    }</textarea>
       <label for="categoria" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Categoría</label>
-      <select id="categoria" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      <select id="categoria" class="${styleInput}">
         ${categorias
           .map(
             (cat) =>
@@ -75,12 +81,13 @@ export async function showEditarModal(event, categorias, setFiltros) {
     preConfirm: () => {
       const titulo = document.getElementById("titulo").value;
       const descripcion = document.getElementById("descripcion").value;
+      const ubicacion = document.getElementById("ubicacion").value;
       const id_categoria = document.getElementById("categoria").value;
       if (!titulo || !descripcion || !id_categoria) {
         Swal.showValidationMessage("Todos los campos son obligatorios");
         return false;
       }
-      return { titulo, descripcion, id_categoria };
+      return { titulo, descripcion, ubicacion, id_categoria };
     },
     showCancelButton: true,
     customClass: { container: "z-[2000]" },
@@ -96,6 +103,7 @@ export async function showEditarModal(event, categorias, setFiltros) {
     event.event_id,
     form.titulo,
     form.descripcion,
+    form.ubicacion,
     form.id_categoria
   );
   Swal.close();
@@ -116,11 +124,11 @@ export async function showTrasladarModal(event, setFiltros) {
     title: `Trasladar fecha del evento #${event.event_id}`,
     html: `
       <label for="f1" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Nueva fecha inicio</label>
-      <input id="f1" type="datetime-local" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      <input id="f1" type="datetime-local" class="${styleInput}">
       <label for="f2" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Nueva fecha fin</label>
-      <input id="f2" type="datetime-local" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+      <input id="f2" type="datetime-local" class="${styleInput}">
       <label for="obs" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Ingresa el motivo por el cual trasladas el evento</label>
-      <textarea id="obs" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"></textarea>
+      <textarea id="obs" class="${styleInput}"></textarea>
     `,
     focusConfirm: false,
     preConfirm: () => {
