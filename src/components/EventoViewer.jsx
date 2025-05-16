@@ -1,4 +1,4 @@
-import { FaPowerOff } from "react-icons/fa";
+import { FaPowerOff, FaMapLocationDot } from "react-icons/fa6";
 import {
   showRealizadoModal,
   showEditarModal,
@@ -25,26 +25,58 @@ export default function EventoViewer({ event, categorias, setFiltros }) {
             {event?.estado === "Si" ? "Realizado" : "Sin realizar"}
           </span>
         </li>
+        {event?.ubicacion && (
+          <li>
+            <FaMapLocationDot className="inline" /> {event?.ubicacion}
+          </li>
+        )}
         <li>
           <strong>Categoría:</strong> {event?.categoria}
         </li>
         {event?.id_ticket > 0 && (
-          <li>
+          <li
+            style={{
+              marginTop: "0.25rem",
+              marginBottom: "1rem",
+            }}
+          >
             <strong>Ticket: </strong>
             <a
               href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
               target="_blank"
               rel="noopener noreferrer"
+              style={{
+                paddingLeft: "0.5rem",
+                paddingRight: "0.5rem",
+                paddingTop: "0.25rem",
+                paddingBottom: "0.25rem",
+                backgroundColor: "#000000",
+                color: "#ffffff",
+                borderRadius: "0.25rem",
+              }}
             >
               Ver ticket
             </a>
           </li>
         )}
-        <li>
+        <li
+          style={{
+            marginTop: "0.25rem",
+          }}
+        >
           <a
             href={`/evento/${event?.event_id}`}
             target="_blank"
             rel="noopener noreferrer"
+            style={{
+              paddingLeft: "0.5rem",
+              paddingRight: "0.5rem",
+              paddingTop: "0.25rem",
+              paddingBottom: "0.25rem",
+              backgroundColor: "#000000",
+              color: "#ffffff",
+              borderRadius: "0.25rem",
+            }}
           >
             Ver evento
           </a>

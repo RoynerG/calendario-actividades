@@ -12,7 +12,6 @@ import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
 import Select from "react-select";
-import { FaPowerOff } from "react-icons/fa";
 import GuiaCategorias from "../components/GuiaCategorias";
 import EventoViewer from "../components/EventoViewer";
 
