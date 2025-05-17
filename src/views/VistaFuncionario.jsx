@@ -202,7 +202,7 @@ export default function VistaFuncionario() {
         </a>
         <GuiaCategorias buttonStyle={buttonStyle} />
       </div>
-      <h1 className="text-xl font-bold">
+      <h1 className="text-sm md:text-5xl font-bold">
         Calendario de {funcionario.nombre || "Funcionario"}
       </h1>
       <button

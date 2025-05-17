@@ -86,7 +86,9 @@ export default function VistaCategoria() {
           Regresar a mi cuenta
         </a>
       </div>
-      <h1 className="text-xl font-bold">Calendario de {categoria.nombre}</h1>
+      <h1 className="text-sm md:text-5xl font-bold">
+        Calendario de {categoria.nombre}
+      </h1>
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         <input
           type="date"

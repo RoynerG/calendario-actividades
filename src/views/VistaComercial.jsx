@@ -81,7 +81,7 @@ export default function VistaComercial() {
         </a>
         <GuiaCategorias buttonStyle={buttonStyle} />
       </div>
-      <h1 className="text-xl font-bold">Calendario Comercial</h1>
+      <h1 className="text-sm md:text-5xl font-bold">Calendario Comercial</h1>
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         <input
           type="date"
