@@ -10,6 +10,10 @@ export default function CrearEventoMultiple() {
     loading,
     handleSubmit,
   } = useEventoForm("multiple");
+  const styleLabel =
+    "block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white";
+  const styleInput =
+    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
   if (loading) {
     return (
@@ -21,15 +25,31 @@ export default function CrearEventoMultiple() {
 
   return (
     <div className="p-4 space-y-4 mx-auto max-w-lg">
-      <h1 className="text-sm font-bold text-center">Crear evento múltiple</h1>
-
       <form onSubmit={handleSubmit} className="space-y-4">
+        <label htmlFor="titulo" className={styleLabel}>
+          Titulo
+        </label>
         <input
+          id="titulo"
           type="text"
           placeholder="Título"
           value={formData.titulo}
           onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
-          className="border p-2 rounded w-full"
+          className={styleInput}
+          required
+        />
+        <label htmlFor="ubicacion" className={styleLabel}>
+          Ubicacion/direccion del evento
+        </label>
+        <input
+          id="ubicacion"
+          type="text"
+          placeholder="Escribe donde será realizado el evento"
+          value={formData.ubicacion}
+          onChange={(e) =>
+            setFormData({ ...formData, ubicacion: e.target.value })
+          }
+          className={styleInput}
           required
         />
 
@@ -40,7 +60,7 @@ export default function CrearEventoMultiple() {
             onChange={(e) =>
               setFormData({ ...formData, fecha_inicio: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className={styleInput}
             required
           />
           <input
@@ -49,7 +69,7 @@ export default function CrearEventoMultiple() {
             onChange={(e) =>
               setFormData({ ...formData, fecha_fin: e.target.value })
             }
-            className="border p-2 rounded w-full"
+            className={styleInput}
             required
           />
         </div>
@@ -85,7 +105,7 @@ export default function CrearEventoMultiple() {
           onChange={(e) =>
             setFormData({ ...formData, descripcion: e.target.value })
           }
-          className="border p-2 rounded w-full h-24"
+          className={styleInput}
           required
         />
         <Select
@@ -114,7 +134,7 @@ export default function CrearEventoMultiple() {
           type="submit"
           className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
         >
-          Crear
+          Crear evento
         </button>
       </form>
     </div>

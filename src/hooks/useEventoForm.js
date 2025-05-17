@@ -16,6 +16,7 @@ export function useEventoForm(mode = "simple", id) {
   const initialData = {
     titulo: "",
     descripcion: "",
+    ubicacion: "",
     fecha_inicio: "",
     fecha_fin: "",
     id_categoria: "",
@@ -85,6 +86,7 @@ export function useEventoForm(mode = "simple", id) {
     const {
       titulo,
       descripcion,
+      ubicacion,
       fecha_inicio,
       fecha_fin,
       id_categoria,
@@ -122,6 +124,7 @@ export function useEventoForm(mode = "simple", id) {
             {
               titulo,
               descripcion,
+              ubicacion,
               fecha_inicio,
               fecha_fin,
               id_categoria,
