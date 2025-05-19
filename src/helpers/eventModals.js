@@ -149,6 +149,7 @@ export async function showEditarModal(
 }
 
 export async function showTrasladarModal(event, setFiltros) {
+  const mostrarCita = event.id_ticket > 0;
   const { value: form } = await Swal.fire({
     title: `Trasladar fecha del evento #${event.event_id}`,
     html: `
@@ -156,7 +157,17 @@ export async function showTrasladarModal(event, setFiltros) {
       <input id="f1" type="datetime-local" class="${styleInput}">
       <label for="f2" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Nueva fecha fin</label>
       <input id="f2" type="datetime-local" class="${styleInput}">
-      <label for="obs" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Ingresa el motivo por el cual trasladas el evento</label>
+      ${
+        mostrarCita
+          ? `<label for="es_cita" class="block mt-3 mb-1 font-medium">¿Es cita?</label>
+             <select id="es_cita" class="${styleInput}">
+               <option value="">Responde si el traslado corresponde a una cita</option>
+               <option value="si">Si</option>
+               <option value="no">No</option>
+             </select>`
+          : ``
+      }
+      <label for="obs" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Ingresa el motivo por el cual trasladas el evento. Ten en cuenta que si marcas si en ¿Es cita? saldra en el ticket.</label>
       <textarea id="obs" class="${styleInput}"></textarea>
     `,
     focusConfirm: false,
@@ -164,11 +175,14 @@ export async function showTrasladarModal(event, setFiltros) {
       const fecha_inicio = document.getElementById("f1").value;
       const fecha_fin = document.getElementById("f2").value;
       const observacion = document.getElementById("obs").value;
+      const selectEl = document.getElementById("es_cita");
+      const es_cita =
+        selectEl?.value && selectEl.value !== "" ? selectEl.value : "no";
       if (!fecha_inicio || !fecha_fin || !observacion) {
         Swal.showValidationMessage("Todos los campos son obligatorios");
         return false;
       }
-      return { fecha_inicio, fecha_fin, observacion };
+      return { fecha_inicio, fecha_fin, es_cita, observacion };
     },
     showCancelButton: true,
     customClass: { container: "z-[2000]" },
@@ -181,7 +195,7 @@ export async function showTrasladarModal(event, setFiltros) {
   const fechaStr = fechaInicio.toLocaleDateString("es-CO", opcionesFecha);
   const horaInicioStr = fechaInicio.toLocaleTimeString("es-CO", opcionesHora);
   const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
-  const descripcionGenerada = `Por medio de la presente, se ha reprogramado el evento <b>${event.title}</b> para el día <b>${fechaStr}</b> de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b>.<br/><br/><b>Motivo:</b> ${form.observacion}`;
+  const descripcionGenerada = `Por medio de la presente, se ha reprogramado el evento <b>${event.title}</b> para el día <b>${fechaStr}</b> de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b><br/><br/><br/><b>Motivo:</b> ${form.observacion}`;
   Swal.fire({
     title: "Trasladando evento...",
     allowOutsideClick: false,
@@ -193,6 +207,7 @@ export async function showTrasladarModal(event, setFiltros) {
     form.fecha_inicio,
     form.fecha_fin,
     form.observacion,
+    form.es_cita,
     descripcionGenerada
   );
   Swal.close();

@@ -36,10 +36,17 @@ export default function VistaFuncionario() {
     id_categoria: "",
     id_empleado: id_funcionario,
     id_ticket: "",
+    estado_administrativo: "",
+    estado_comercial: "",
+    contrato: "",
+    inmueble: "",
+    es_cita: "",
   });
   const [relacionadoConTicket, setRelacionadoConTicket] = useState(null);
+  const [ticketSelecionado, setTicketSelecionado] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [esCita, setEsCita] = useState(null);
   const schedulerRef = useRef(null);
   const buttonStyle = {
     backgroundColor: "black",
@@ -104,37 +111,41 @@ export default function VistaFuncionario() {
   }, [filtros, id_funcionario]);
 
   useEffect(() => {
-    const categoriaSeleccionada = categorias.find(
-      (cat) => cat.id === formData.id_categoria
-    );
     if (
-      categoriaSeleccionada &&
+      esCita &&
+      formData.id_categoria &&
       formData.fecha_inicio &&
-      formData.fecha_fin &&
-      formData.id_ticket
+      formData.fecha_fin
     ) {
-      const fechaInicio = new Date(formData.fecha_inicio);
-      const fechaFin = new Date(formData.fecha_fin);
-      const opcionesFecha = {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      };
-      const opcionesHora = { hour: "2-digit", minute: "2-digit" };
-      const fechaStr = fechaInicio.toLocaleDateString("es-CO", opcionesFecha);
-      const horaInicioStr = fechaInicio.toLocaleTimeString(
-        "es-CO",
-        opcionesHora
+      const categoriaSeleccionada = categorias.find(
+        (cat) => cat.id === formData.id_categoria
       );
-      const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
-      const descripcionGenerada = `Por medio de la presente, le confirmo que he dispuesto de un espacio con el propósito de reunirnos, ya sea de forma presencial o por medios virtuales, a fin de atender cualquier inquietud o asunto pendiente.<br/><br/>En cumplimiento de <b>${categoriaSeleccionada.nombre}</b>, se ha programado una visita y/o reunión, la cual ha quedado agendada para el día <b>${fechaStr}</b>, de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b>. En caso de no ser posible contar con su atención en la fecha indicada, le agradecemos nos lo comunique por este mismo medio con al menos 3 horas de antelación.`;
-      setFormData((prev) => ({ ...prev, descripcion: descripcionGenerada }));
+      if (categoriaSeleccionada) {
+        const fechaInicio = new Date(formData.fecha_inicio);
+        const fechaFin = new Date(formData.fecha_fin);
+        const opcionesFecha = {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        };
+        const opcionesHora = { hour: "2-digit", minute: "2-digit" };
+        const fechaStr = fechaInicio.toLocaleDateString("es-CO", opcionesFecha);
+        const horaInicioStr = fechaInicio.toLocaleTimeString(
+          "es-CO",
+          opcionesHora
+        );
+        const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
+
+        const descripcionGenerada = `Por medio de la presente, le confirmo que he dispuesto de un espacio con el propósito de reunirnos, ya sea de forma presencial o por medios virtuales, a fin de atender cualquier inquietud o asunto pendiente.<br/><br/>En cumplimiento de <b>${categoriaSeleccionada.nombre}</b>, se ha programado una visita y/o reunión, la cual ha quedado agendada para el día <b>${fechaStr}</b>, de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b>. En caso de no ser posible contar con su atención en la fecha indicada, le agradecemos nos lo comunique por este mismo medio con al menos 3 horas de antelación.`;
+
+        setFormData((prev) => ({ ...prev, descripcion: descripcionGenerada }));
+      }
     }
   }, [
+    esCita,
     formData.id_categoria,
     formData.fecha_inicio,
     formData.fecha_fin,
-    formData.id_ticket,
     categorias,
   ]);
 
@@ -166,8 +177,15 @@ export default function VistaFuncionario() {
           id_categoria: "",
           id_empleado: id_funcionario,
           id_ticket: "",
+          estado_administrativo: "",
+          estado_comercial: "",
+          contrato: "",
+          inmueble: "",
+          es_cita: "",
         });
         setRelacionadoConTicket(null);
+        setEsCita(null);
+        setTicketSelecionado(null);
         setFiltros({ ...filtros });
       } else {
         await Swal.fire({
@@ -307,11 +325,12 @@ export default function VistaFuncionario() {
             className="fixed inset-0 bg-black bg-opacity-50 z-[9999]"
             onClick={() => setShowForm(false)}
           />
-          <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-md z-[10000]">
+          <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto z-[10000]">
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Título */}
               <label
-                for="titulo"
-                class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white"
+                htmlFor="titulo"
+                className="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white"
               >
                 Título
               </label>
@@ -326,25 +345,27 @@ export default function VistaFuncionario() {
                 className={inputStyle}
                 required
               />
+              {/* Ubicación */}
               <label
-                for="ubicacion"
-                class="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                htmlFor="ubicacion"
+                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Ubicacion/direccion del evento
+                Ubicación / dirección del evento
               </label>
               <input
                 id="ubicacion"
                 type="text"
-                placeholder="Escribe donde será realizado el evento"
+                placeholder="Escribe dónde será realizado el evento"
                 value={formData.ubicacion}
                 onChange={(e) =>
                   setFormData({ ...formData, ubicacion: e.target.value })
                 }
                 className={inputStyle}
               />
+              {/* Fecha de inicio */}
               <label
-                for="f1"
-                class="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                htmlFor="f1"
+                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
               >
                 Fecha de inicio
               </label>
@@ -358,11 +379,12 @@ export default function VistaFuncionario() {
                 className={inputStyle}
                 required
               />
+              {/* Fecha de fin */}
               <label
-                for="f2"
-                class="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                htmlFor="f2"
+                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Fecha de finalizacion
+                Fecha de finalización
               </label>
               <input
                 id="f2"
@@ -374,6 +396,7 @@ export default function VistaFuncionario() {
                 className={inputStyle}
                 required
               />
+              {/* Categoría */}
               <Select
                 options={categorias.map((cat) => ({
                   value: cat.id,
@@ -400,6 +423,7 @@ export default function VistaFuncionario() {
                 placeholder="Selecciona una categoría"
                 isClearable
               />
+              {/* ¿Relacionado con ticket? */}
               {tickets.length > 0 && (
                 <Select
                   options={[
@@ -434,6 +458,7 @@ export default function VistaFuncionario() {
                   isClearable
                 />
               )}
+              {/* Selección del ticket si aplica */}
               {relacionadoConTicket && (
                 <Select
                   options={tickets.map((t) => ({ value: t._ID, label: t._ID }))}
@@ -442,37 +467,145 @@ export default function VistaFuncionario() {
                       ? { value: formData.id_ticket, label: formData.id_ticket }
                       : null
                   }
-                  onChange={(opt) =>
-                    setFormData({
-                      ...formData,
-                      id_ticket: opt ? opt.value : "",
-                    })
-                  }
+                  onChange={(opt) => {
+                    const id = opt?.value || "";
+                    setFormData((prev) => ({ ...prev, id_ticket: id }));
+
+                    // Buscar el objeto completo y guardarlo
+                    const ticketObj = tickets.find((t) => t._ID === id);
+                    setTicketSelecionado(ticketObj || null);
+                  }}
                   className="w-full"
                   classNamePrefix="react-select"
                   placeholder="Selecciona un ticket"
                   isClearable
                 />
               )}
-              {(!relacionadoConTicket || tickets.length === 0) && (
-                <>
-                  <label
-                    for="f2"
-                    class="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
-                  >
-                    Descripcion
-                  </label>
-                  <textarea
-                    placeholder="Describe detalladamente que se va a realizar en esta actividad"
-                    value={formData.descripcion}
-                    onChange={(e) =>
-                      setFormData({ ...formData, descripcion: e.target.value })
-                    }
-                    className={inputStyle}
-                    required
-                  />
-                </>
+              {/* ¿Es una cita? */}
+              {relacionadoConTicket && (
+                <Select
+                  options={[
+                    { value: "si", label: "Sí, es una cita" },
+                    { value: "no", label: "No, no es una cita" },
+                  ]}
+                  value={
+                    esCita === null
+                      ? null
+                      : esCita
+                      ? { value: "si", label: "Sí, es una cita" }
+                      : { value: "no", label: "No, no es una cita" }
+                  }
+                  onChange={(opt) => {
+                    const valor = opt?.value ?? "";
+                    const es = valor === "si";
+                    setEsCita(es);
+                    setFormData((prev) => ({
+                      ...prev,
+                      es_cita: valor,
+                      descripcion: es ? prev.descripcion : "",
+                    }));
+                  }}
+                  className="w-full"
+                  classNamePrefix="react-select"
+                  placeholder="¿Es una cita?"
+                  isClearable
+                />
               )}
+              {/* Estado comercial si el departamento es servicio al cliente */}
+              {relacionadoConTicket &&
+                ticketSelecionado &&
+                ticketSelecionado.departamento === "Servicio al cliente" && (
+                  <Select
+                    options={[
+                      {
+                        value: "Contactado",
+                        label: "Contactado",
+                      },
+                      { value: "En busqueda", label: "En busqueda" },
+                      { value: "En cierre", label: "En cierre" },
+                      { value: "En estudio", label: "En estudio" },
+                      { value: "Prospectado", label: "Prospectado" },
+                      { value: "Mostrando", label: "Mostrando" },
+                      { value: "En ruta", label: "En ruta" },
+                      { value: "Retocando", label: "Retocando" },
+                      {
+                        value: "En actividad comercial",
+                        label: "En actividad comercial",
+                      },
+                    ]}
+                    onChange={(opt) => {
+                      const estadoComercial = opt?.value ?? "";
+                      setFormData((prev) => ({
+                        ...prev,
+                        estado_comercial: estadoComercial,
+                      }));
+                    }}
+                    className="w-full"
+                    classNamePrefix="react-select"
+                    placeholder="Selecciona el estado comercial"
+                    isClearable
+                  />
+                )}
+              {/* Estado administrativo si el departamento es servicio al propietario y propietario */}
+              {relacionadoConTicket &&
+                ticketSelecionado &&
+                ticketSelecionado.departamento !== "Servicio al cliente" && (
+                  <Select
+                    options={[
+                      {
+                        value: "Por inspecccionar",
+                        label: "Por inspecccionar",
+                      },
+                      { value: "Inspeccionado", label: "Inspeccionado" },
+                      { value: "Cotizado", label: "Cotizado" },
+                      { value: "En ejecucion", label: "En ejecucion" },
+                    ]}
+                    onChange={(opt) => {
+                      const estadoAdministrativo = opt?.value ?? "";
+                      const { contrato, inmueble, direccion } =
+                        ticketSelecionado;
+                      const prefix = `Contrato #${contrato} - `;
+                      setFormData((prev) => {
+                        const prevTitle = prev.titulo;
+                        const suffix = prevTitle.startsWith(prefix)
+                          ? prevTitle.slice(prefix.length)
+                          : prevTitle;
+                        return {
+                          ...prev,
+                          estado_administrativo: estadoAdministrativo,
+                          contrato,
+                          inmueble,
+                          ubicacion: direccion,
+                          titulo: `${prefix}${suffix}`.trim(),
+                        };
+                      });
+                    }}
+                    className="w-full"
+                    classNamePrefix="react-select"
+                    placeholder="Selecciona el administrativo"
+                    isClearable
+                  />
+                )}
+              {/* Descripción */}
+              {console.log(formData)}
+              <label
+                htmlFor="descripcion"
+                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Descripción
+              </label>
+              <textarea
+                rows={6}
+                id="descripcion"
+                placeholder="Describe detalladamente qué se va a realizar en esta actividad"
+                value={formData.descripcion}
+                onChange={(e) =>
+                  setFormData({ ...formData, descripcion: e.target.value })
+                }
+                className={inputStyle}
+                required
+              />
+              {/* Botones */}
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"

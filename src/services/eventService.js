@@ -68,6 +68,7 @@ export async function trasladarEvento(
   fecha_inicio,
   fecha_fin,
   observacion,
+  es_cita,
   descripcion
 ) {
   const { data } = await axios.post(BASE_URL + "trasladar_evento", {
@@ -75,6 +76,7 @@ export async function trasladarEvento(
     fecha_inicio,
     fecha_fin,
     observacion,
+    es_cita,
     descripcion,
   });
   return data;
