@@ -21,6 +21,7 @@ export default function VistaCategoria() {
     fecha_inicio: "",
     fecha_fin: "",
     estado: "",
+    fue_trasladado: "",
   });
   const [loading, setLoading] = useState(true);
   const buttonStyle = {
@@ -136,17 +137,28 @@ export default function VistaCategoria() {
           <option value="Si">Si</option>
           <option value="No">No</option>
         </select>
+        <select
+          value={filtros.fue_trasladado}
+          onChange={(e) =>
+            setFiltros((f) => ({ ...f, fue_trasladado: e.target.value }))
+          }
+          className="border p-2 rounded"
+        >
+          <option value="">¿Fue trasladado?</option>
+          <option value="Si">Si</option>
+          <option value="No">No</option>
+        </select>
         <button
           onClick={() =>
-            setFiltros((f) => ({
-              ...f,
-              id_empleado: "",
+            setFiltros({
+              id_categoria: "",
               fecha_inicio: "",
               fecha_fin: "",
               estado: "",
-            }))
+              fue_trasladado: "",
+            })
           }
-          className="border p-2 rounded"
+          className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
         >
           Eliminar filtros
         </button>

@@ -26,6 +26,7 @@ export default function VistaFuncionario() {
     fecha_inicio: "",
     fecha_fin: "",
     estado: "",
+    fue_trasladado: "",
   });
   const [formData, setFormData] = useState({
     titulo: "",
@@ -272,6 +273,17 @@ export default function VistaFuncionario() {
           <option value="Si">Si</option>
           <option value="No">No</option>
         </select>
+        <select
+          value={filtros.fue_trasladado}
+          onChange={(e) =>
+            setFiltros((f) => ({ ...f, fue_trasladado: e.target.value }))
+          }
+          className="border p-2 rounded"
+        >
+          <option value="">¿Fue trasladado?</option>
+          <option value="Si">Si</option>
+          <option value="No">No</option>
+        </select>
         <button
           onClick={() =>
             setFiltros({
@@ -279,6 +291,7 @@ export default function VistaFuncionario() {
               fecha_inicio: "",
               fecha_fin: "",
               estado: "",
+              fue_trasladado: "",
             })
           }
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
