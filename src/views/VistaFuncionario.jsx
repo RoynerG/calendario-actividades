@@ -361,6 +361,7 @@ export default function VistaFuncionario() {
                   setFormData({ ...formData, ubicacion: e.target.value })
                 }
                 className={inputStyle}
+                required
               />
               {/* Fecha de inicio */}
               <label
@@ -535,10 +536,16 @@ export default function VistaFuncionario() {
                     ]}
                     onChange={(opt) => {
                       const estadoComercial = opt?.value ?? "";
-                      setFormData((prev) => ({
-                        ...prev,
-                        estado_comercial: estadoComercial,
-                      }));
+                      setFormData((prev) => {
+                        const solicitante = ticketSelecionado.solicitante;
+                        const baseTitle = prev.titulo.split(" - ")[0];
+
+                        return {
+                          ...prev,
+                          estado_comercial: estadoComercial,
+                          titulo: `${baseTitle} - ${solicitante}`,
+                        };
+                      });
                     }}
                     className="w-full"
                     classNamePrefix="react-select"
@@ -587,7 +594,6 @@ export default function VistaFuncionario() {
                   />
                 )}
               {/* Descripción */}
-              {console.log(formData)}
               <label
                 htmlFor="descripcion"
                 className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"

@@ -178,10 +178,17 @@ export default function CrearEventoTicket() {
               ].find((o) => o.value === formData.estado_comercial) || null
             }
             onChange={(opt) => {
-              setFormData((prev) => ({
-                ...prev,
-                estado_comercial: opt?.value || "",
-              }));
+              const estadoComercial = opt?.value ?? "";
+              setFormData((prev) => {
+                const solicitante = ticketData.solicitante;
+                const baseTitle = prev.titulo.split(" - ")[0];
+
+                return {
+                  ...prev,
+                  estado_comercial: estadoComercial,
+                  titulo: `${baseTitle} - ${solicitante}`,
+                };
+              });
             }}
             placeholder="Selecciona estado comercial"
             isClearable
