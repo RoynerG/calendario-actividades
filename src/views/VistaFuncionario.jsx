@@ -97,6 +97,7 @@ export default function VistaFuncionario() {
             estado: ev.estado,
             descripcion: ev.descripcion,
             ubicacion: ev.ubicacion,
+            fue_trasladado: ev.fue_trasladado,
           }));
           setEventos(formateados);
         }

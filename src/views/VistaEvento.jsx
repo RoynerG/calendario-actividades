@@ -11,8 +11,6 @@ export default function VistaEvento() {
   const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  console.log(id_evento);
-
   useEffect(() => {
     obtenerEvento(id_evento)
       .then((evt) => setEvento(evt))

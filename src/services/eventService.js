@@ -98,3 +98,10 @@ export async function actualizarEvento(
   });
   return data;
 }
+
+export async function obtenerHistorialEvento(id_evento) {
+  const { data } = await axios.post(BASE_URL + "obtener_historial", {
+    id_evento,
+  });
+  return data;
+}

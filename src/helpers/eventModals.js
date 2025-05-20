@@ -4,6 +4,7 @@ import {
   cambiarEstadoEvento,
   actualizarEvento,
   trasladarEvento,
+  obtenerHistorialEvento,
 } from "../services/eventService";
 const styleInput =
   "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
@@ -216,5 +217,77 @@ export async function showTrasladarModal(event, setFiltros) {
     setFiltros((prev) => ({ ...prev }));
   } else {
     Swal.fire("Error", resp.message, "error");
+  }
+}
+
+export async function showHistorialModal(event_id, page = 1) {
+  const pageSize = 5;
+  const {
+    success,
+    data: historial,
+    message,
+  } = await obtenerHistorialEvento(event_id);
+  if (!success) {
+    return Swal.fire("Error", message, "error");
+  }
+
+  if (!historial.length) {
+    return Swal.fire({
+      title: `Historial del evento #${event_id}`,
+      html: `<p>Aún no se han registrado cambios para este evento.</p>`,
+      icon: "info",
+      customClass: { container: "z-[2000]" },
+    });
+  }
+  const totalPages = Math.ceil(historial.length / pageSize);
+  const start = (page - 1) * pageSize;
+  const slice = historial.slice(start, start + pageSize);
+  const rows = slice
+    .map((h) => {
+      const fecha = new Date(h.fecha).toLocaleString("es-CO", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return `
+      <tr>
+        <td style="padding:.5rem;border:1px solid #ddd;">${fecha}</td>
+        <td style="padding:.5rem;border:1px solid #ddd;">${h.descripcion}</td>
+      </tr>
+    `;
+    })
+    .join("");
+  const result = await Swal.fire({
+    title: `Historial del evento #${event_id}`,
+    html: `
+      <table style="width:100%;border-collapse:collapse;margin-top:.5rem;">
+        <thead>
+          <tr>
+            <th style="padding:.5rem;border:1px solid #ddd;background:#f5f5f5;">Fecha</th>
+            <th style="padding:.5rem;border:1px solid #ddd;background:#f5f5f5;">Información</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    `,
+    width: 600,
+    showCancelButton: true,
+    cancelButtonText: "Cerrar",
+    showDenyButton: page > 1,
+    denyButtonText: "Anterior",
+    showConfirmButton: page < totalPages,
+    confirmButtonText: "Siguiente",
+    customClass: { container: "z-[2000]" },
+  });
+
+  if (result.isDenied) {
+    return showHistorialModal(event_id, page - 1);
+  }
+  if (result.isConfirmed) {
+    return showHistorialModal(event_id, page + 1);
   }
 }

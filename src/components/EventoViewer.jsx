@@ -1,8 +1,10 @@
 import { FaPowerOff, FaMapLocationDot } from "react-icons/fa6";
+import { IoTimeSharp } from "react-icons/io5";
 import {
   showRealizadoModal,
   showEditarModal,
   showTrasladarModal,
+  showHistorialModal,
 } from "../helpers/eventModals";
 
 export default function EventoViewer({ event, categorias, setFiltros }) {
@@ -25,6 +27,16 @@ export default function EventoViewer({ event, categorias, setFiltros }) {
             {event?.estado === "Si" ? "Realizado" : "Sin realizar"}
           </span>
         </li>
+        {event?.fue_trasladado === "Si" ? (
+          <li className="flex items-center mt-2">
+            <IoTimeSharp className="mr-2 text-red-500 transform rotate-180" />
+            <span
+              className={`block text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-red-700`}
+            >
+              Fue trasladado
+            </span>
+          </li>
+        ) : null}
         {event?.ubicacion && (
           <li>
             <FaMapLocationDot className="inline" /> {event?.ubicacion}
@@ -82,28 +94,36 @@ export default function EventoViewer({ event, categorias, setFiltros }) {
           </a>
         </li>
       </ul>
-      {event?.estado === "No" && (
-        <div className="flex flex-col gap-2 mt-4">
-          <button
-            className="px-2 py-1 bg-green-600 text-white rounded"
-            onClick={() => showRealizadoModal(event, setFiltros)}
-          >
-            Marcar como realizado
-          </button>
-          <button
-            className="px-2 py-1 bg-yellow-600 text-white rounded"
-            onClick={() => showEditarModal(event, categorias, setFiltros)}
-          >
-            Editar evento
-          </button>
-          <button
-            className="px-2 py-1 bg-blue-600 text-white rounded"
-            onClick={() => showTrasladarModal(event, setFiltros)}
-          >
-            Trasladar fecha
-          </button>
-        </div>
-      )}
+      <div className="flex flex-col gap-2 mt-4">
+        <button
+          className="px-2 py-1 bg-gray-500 text-white rounded"
+          onClick={() => showHistorialModal(event.event_id)}
+        >
+          Ver cambios
+        </button>
+        {event?.estado === "No" && (
+          <>
+            <button
+              className="px-2 py-1 bg-green-600 text-white rounded"
+              onClick={() => showRealizadoModal(event, setFiltros)}
+            >
+              Marcar como realizado
+            </button>
+            <button
+              className="px-2 py-1 bg-yellow-600 text-white rounded"
+              onClick={() => showEditarModal(event, categorias, setFiltros)}
+            >
+              Editar evento
+            </button>
+            <button
+              className="px-2 py-1 bg-blue-600 text-white rounded"
+              onClick={() => showTrasladarModal(event, setFiltros)}
+            >
+              Trasladar fecha
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
