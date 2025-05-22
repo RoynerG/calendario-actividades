@@ -126,6 +126,12 @@ export default function GuiaCategorias({ buttonStyle }) {
       descripcion:
         "Todas las actividades relacionadas salud en el trabajo, cursos, talleres, charlas etc.",
     },
+    {
+      color: "#FFB22C",
+      categoria: "Incapacidad",
+      descripcion:
+        "Todas las actividades relacionadas de incapacidad laboral y enfermad.",
+    },
   ];
 
   const pageCount = Math.ceil(rows.length / rowsPerPage);
