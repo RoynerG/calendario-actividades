@@ -190,10 +190,13 @@ export default function VistaFuncionario() {
         setTicketSelecionado(null);
         setFiltros({ ...filtros });
       } else {
+        const mensaje = res.data.message || "No se pudo agregar el evento";
+
+        // Mostrar si fue por bloqueo de eventos antiguos
         await Swal.fire({
-          title: "Error",
-          text: "No se pudo agregar el evento",
-          icon: "error",
+          title: "No se puede crear el evento",
+          html: mensaje,
+          icon: "warning",
           customClass: { container: "z-[100000]" },
         });
         setShowForm(true);
