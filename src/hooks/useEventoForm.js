@@ -113,17 +113,22 @@ export function useEventoForm(mode = "simple", id) {
       Swal.close();
       if (resp.success) {
         Swal.fire("¡Éxito!", resp.message || "Evento creado.", "success");
-        // Reset all fields but keep id_ticket and id_empleado
         setFormData({
           ...initialData,
           id_ticket: mode === "ticket" ? id : "",
           id_empleado: ticketData?.id_empleado || "",
         });
       } else {
-        Swal.fire("Error", resp.message || "Falló creación.", "error");
+        const mensaje = resp.message || "No se pudo crear el evento.";
+        await Swal.fire({
+          title: "No se puede crear el evento",
+          html: mensaje,
+          icon: "warning",
+          customClass: { container: "z-[100000]" },
+        });
       }
     } catch (err) {
-      Swal.fire("Error", "Hubo un error.", "error");
+      Swal.fire(err, "Hubo un error.", "error");
     }
   };
 

@@ -28,6 +28,10 @@ export default function CrearEventoTicket() {
 
   return (
     <div className="p-4 space-y-4 mx-auto max-w-lg">
+      <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded px-4 py-2 mb-4">
+        Recuerda marcar como realizados tus eventos anteriores. Los eventos sin
+        realizar con más de 2 días te bloquearán para crear nuevos.
+      </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Título */}
         <label htmlFor="titulo" className={styleLabel}>
