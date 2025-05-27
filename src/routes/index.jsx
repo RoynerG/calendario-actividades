@@ -7,6 +7,7 @@ import VistaComercial from "../views/VistaComercial";
 import CrearEventoTicket from "../components/CrearEventoTicket";
 import VistaEvento from "../views/VistaEvento";
 import CrearEventoMultiple from "../components/CrearEventoMultiple";
+import TablaBloqueos from "../views/TablaBloqueos";
 
 export default function AppRoutes() {
   return (
@@ -35,6 +36,7 @@ export default function AppRoutes() {
           element={<CrearEventoMultiple />}
         />
         <Route path="/evento/:id_evento" element={<VistaEvento />} />
+        <Route path="/tabla-bloqueos" element={<TablaBloqueos />} />
       </Routes>
     </BrowserRouter>
   );

@@ -111,3 +111,10 @@ export async function verificarBloqueo(id_empleado) {
   });
   return res.data;
 }
+
+export async function listarBloqueos(offset = 0, limit = 10) {
+  const res = await axios.get(
+    `${BASE_URL}listar_bloqueos&offset=${offset}&limit=${limit}`
+  );
+  return res.data;
+}
