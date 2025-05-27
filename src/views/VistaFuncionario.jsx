@@ -7,6 +7,7 @@ import {
   filtrarEventos,
   crearEvento,
   obtenerTicketsFuncionario,
+  verificarBloqueo,
 } from "../services/eventService";
 import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
@@ -111,6 +112,29 @@ export default function VistaFuncionario() {
 
     fetchEventos();
   }, [filtros, id_funcionario]);
+
+  useEffect(() => {
+    if (!id_funcionario) return;
+
+    async function revisarBloqueo() {
+      try {
+        const res = await verificarBloqueo(id_funcionario);
+        console.log(res);
+        if (res.success && res.data.bloqueado) {
+          Swal.fire({
+            title: "¡Atención!",
+            html: `Tienes <b>${res.data.cantidad}</b> evento(s) sin realizar con más de 2 días de antigüedad. No puedes agendar nuevos eventos hasta resolverlos.`,
+            icon: "warning",
+            customClass: { container: "z-[100000]" },
+          });
+        }
+      } catch (err) {
+        console.error("Error verificando bloqueo:", err);
+      }
+    }
+
+    revisarBloqueo();
+  }, [id_funcionario]);
 
   useEffect(() => {
     if (
@@ -308,6 +332,13 @@ export default function VistaFuncionario() {
         </div>
       ) : (
         <div className="w-full overflow-auto">
+          {loading === false && (
+            <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded px-4 py-2 mb-4">
+              Recuerda marcar como realizados tus eventos anteriores. Los
+              eventos sin realizar con más de 2 días te bloquearán para crear
+              nuevos.
+            </div>
+          )}
           <Scheduler
             ref={schedulerRef}
             view="week"

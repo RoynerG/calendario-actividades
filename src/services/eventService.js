@@ -105,3 +105,9 @@ export async function obtenerHistorialEvento(id_evento) {
   });
   return data;
 }
+export async function verificarBloqueo(id_empleado) {
+  const res = await axios.post(BASE_URL + "verificar_bloqueo", {
+    id_empleado,
+  });
+  return res.data;
+}
