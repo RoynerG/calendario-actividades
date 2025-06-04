@@ -44,6 +44,36 @@ export default function GuiaCategorias({ buttonStyle }) {
         "Cuando se realiza un recorrido buscando nuevas oportunidades inmobiliarias.",
     },
     {
+      color: "#00FFFF",
+      categoria: "Contactando precaptaciones",
+      descripcion:
+        "Es cuando el funcionario dedica tiempo para contactar a los propietarios de cada una de las oportunidades encontradas.",
+    },
+    {
+      color: "#7FFF00",
+      categoria: "Vinculacion club PPH",
+      descripcion:
+        "Corresponde a las llamadas que realizan con el fin de robusteser al club PPH, asi como Tambien para solicitar información de requerimiento inmobiliarios a los miembros del club. ",
+    },
+    {
+      color: "#E6E6FA",
+      categoria: "Avisos",
+      descripcion:
+        "Corresponde al tiempo que se emplea para pegar los avisos de fachada de los inmuebles captados.",
+    },
+    {
+      color: "#FF6EC7",
+      categoria: "Contrato",
+      descripcion:
+        "Corresponde al tiempo que se emplea para realizar contrato de mandato, hojas de cierres y todas aquellas actividades en torno al cierre del negocio.",
+    },
+    {
+      color: "#B0C4DE",
+      categoria: "Otros",
+      descripcion:
+        "Aquellas actividades no especificadas en las categorias de opciones",
+    },
+    {
       color: "#fa8d3b",
       categoria: "Revisión correctiva",
       descripcion:
