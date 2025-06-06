@@ -63,31 +63,44 @@ export default function CrearEventoTicket() {
           required
         />
 
-        {/* Fecha inicio */}
-        <label htmlFor="f1" className={styleLabel}>
-          Fecha de inicio
+        {/* Fecha única */}
+        <label htmlFor="fecha" className={styleLabel}>
+          Fecha
         </label>
         <input
-          id="f1"
-          type="datetime-local"
-          value={formData.fecha_inicio}
+          id="fecha"
+          type="date"
+          value={formData.fecha}
+          onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+          className={styleInput}
+          required
+        />
+
+        {/* Hora de inicio */}
+        <label htmlFor="hora_inicio" className={styleLabel}>
+          Hora de inicio
+        </label>
+        <input
+          id="hora_inicio"
+          type="time"
+          value={formData.hora_inicio}
           onChange={(e) =>
-            setFormData({ ...formData, fecha_inicio: e.target.value })
+            setFormData({ ...formData, hora_inicio: e.target.value })
           }
           className={styleInput}
           required
         />
 
-        {/* Fecha fin */}
-        <label htmlFor="f2" className={styleLabel}>
-          Fecha de finalización
+        {/* Hora de fin */}
+        <label htmlFor="hora_fin" className={styleLabel}>
+          Hora de finalización
         </label>
         <input
-          id="f2"
-          type="datetime-local"
-          value={formData.fecha_fin}
+          id="hora_fin"
+          type="time"
+          value={formData.hora_fin}
           onChange={(e) =>
-            setFormData({ ...formData, fecha_fin: e.target.value })
+            setFormData({ ...formData, hora_fin: e.target.value })
           }
           className={styleInput}
           required
@@ -200,8 +213,6 @@ export default function CrearEventoTicket() {
             classNamePrefix="react-select"
           />
         )}
-
-        {/* Estado administrativo */}
         {/* Estado administrativo */}
         {ticketData?.departamento &&
           ticketData.departamento !== "Servicio al cliente" && (

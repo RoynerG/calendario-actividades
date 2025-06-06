@@ -9,15 +9,14 @@ import {
 } from "../services/eventService";
 
 export function useEventoForm(mode = "simple", id) {
-  const [categorias, setCategorias] = useState([]);
-  const [funcionarios, setFuncionarios] = useState([]);
-  const [ticketData, setTicketData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+  // Campos de formulario, ahora con fecha y horas separadas
   const initialData = {
     titulo: "",
     descripcion: "",
     ubicacion: "",
+    fecha: "",
+    hora_inicio: "",
+    hora_fin: "",
     fecha_inicio: "",
     fecha_fin: "",
     id_categoria: "",
@@ -31,8 +30,13 @@ export function useEventoForm(mode = "simple", id) {
     empleados: [],
   };
 
+  const [categorias, setCategorias] = useState([]);
+  const [funcionarios, setFuncionarios] = useState([]);
+  const [ticketData, setTicketData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState(initialData);
 
+  // Cargar categorías y, si aplica, datos del ticket o funcionarios
   useEffect(() => {
     setLoading(true);
     const tasks = [
@@ -55,15 +59,17 @@ export function useEventoForm(mode = "simple", id) {
       );
     }
     Promise.all(tasks).finally(() => setLoading(false));
+    // eslint-disable-next-line
   }, [mode, id]);
 
+  // Generar automáticamente la descripción para citas
   useEffect(() => {
     if (mode !== "ticket") return;
-    const { id_categoria, fecha_inicio, fecha_fin, es_cita } = formData;
+    const { id_categoria, fecha, hora_inicio, hora_fin, es_cita } = formData;
     const cat = categorias.find((c) => c.id === id_categoria);
-    if (es_cita === "si" && cat && fecha_inicio && fecha_fin) {
-      const f1 = new Date(fecha_inicio);
-      const f2 = new Date(fecha_fin);
+    if (es_cita === "si" && cat && fecha && hora_inicio && hora_fin) {
+      const f1 = new Date(`${fecha}T${hora_inicio}`);
+      const f2 = new Date(`${fecha}T${hora_fin}`);
       const optsDate = { day: "2-digit", month: "2-digit", year: "numeric" };
       const optsTime = { hour: "2-digit", minute: "2-digit" };
       const fechaStr = f1.toLocaleDateString("es-CO", optsDate);
@@ -76,40 +82,145 @@ export function useEventoForm(mode = "simple", id) {
     } else if (mode === "ticket" && formData.es_cita === "no") {
       setFormData((f) => ({ ...f, descripcion: "" }));
     }
+    // eslint-disable-next-line
   }, [
     formData.id_categoria,
-    formData.fecha_inicio,
-    formData.fecha_fin,
+    formData.fecha,
+    formData.hora_inicio,
+    formData.hora_fin,
     formData.es_cita,
     categorias,
     mode,
   ]);
 
+  // Submit con validación y armado de payload para API
   const handleSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault();
-    const dataPayload = { ...formData };
+
+    // Unir fecha y horas para enviar a la API
+    const { fecha, hora_inicio, hora_fin } = formData;
+    const fecha_inicio = fecha && hora_inicio ? `${fecha}T${hora_inicio}` : "";
+    const fecha_fin = fecha && hora_fin ? `${fecha}T${hora_fin}` : "";
+
+    // Validaciones robustas
     if (
-      !dataPayload.titulo ||
-      !dataPayload.descripcion ||
-      !dataPayload.fecha_inicio ||
-      !dataPayload.fecha_fin ||
-      !dataPayload.id_categoria
+      !formData.titulo ||
+      !formData.ubicacion ||
+      !fecha_inicio ||
+      !fecha_fin ||
+      !formData.id_categoria
     ) {
       return Swal.fire("Error", "Todos los campos obligatorios.", "warning");
     }
+
+    const fInicio = new Date(fecha_inicio);
+    const fFin = new Date(fecha_fin);
+    const ahora = new Date();
+
+    if (isNaN(fInicio.getTime()) || isNaN(fFin.getTime())) {
+      return Swal.fire(
+        "Error",
+        "Debes ingresar fechas y horas válidas.",
+        "warning"
+      );
+    }
+
+    if (
+      fInicio.getFullYear() !== fFin.getFullYear() ||
+      fInicio.getMonth() !== fFin.getMonth() ||
+      fInicio.getDate() !== fFin.getDate()
+    ) {
+      return Swal.fire(
+        "Error",
+        "La fecha de inicio y la de finalización deben ser el mismo día.",
+        "warning"
+      );
+    }
+
+    if (fFin < fInicio) {
+      return Swal.fire(
+        "Error",
+        "La hora de finalización no puede ser menor que la de inicio.",
+        "warning"
+      );
+    }
+
+    // No permite fechas pasadas
+    const inicioSinHoras = new Date(
+      fInicio.getFullYear(),
+      fInicio.getMonth(),
+      fInicio.getDate()
+    );
+    const hoySinHoras = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      ahora.getDate()
+    );
+    if (inicioSinHoras < hoySinHoras) {
+      return Swal.fire(
+        "Error",
+        "No puedes seleccionar una fecha pasada.",
+        "warning"
+      );
+    }
+    if (fFin < ahora) {
+      return Swal.fire(
+        "Error",
+        "No puedes seleccionar una hora de finalización pasada.",
+        "warning"
+      );
+    }
+
+    // Horas entre 8:00 y 21:00
+    const hInicio = fInicio.getHours() + fInicio.getMinutes() / 60;
+    const hFin = fFin.getHours() + fFin.getMinutes() / 60;
+    if (hInicio < 8 || hInicio > 21) {
+      return Swal.fire(
+        "Error",
+        "La hora de inicio debe estar entre las 8:00 am y las 9:00 pm.",
+        "warning"
+      );
+    }
+    if (hFin < 8 || hFin > 21) {
+      return Swal.fire(
+        "Error",
+        "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm.",
+        "warning"
+      );
+    }
+
+    // Si no es cita, descripción obligatoria
+    if (formData.es_cita === "no" && !formData.descripcion) {
+      return Swal.fire(
+        "Error",
+        "La descripción es obligatoria si el evento no es una cita.",
+        "warning"
+      );
+    }
+
     Swal.fire({
       title: "Guardando…",
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading(),
     });
     try {
+      // Solo envía los campos requeridos por la API
+      const payload = {
+        ...formData,
+        fecha_inicio,
+        fecha_fin,
+      };
+      delete payload.fecha;
+      delete payload.hora_inicio;
+      delete payload.hora_fin;
+
       let resp;
       if (mode === "multiple")
         resp = await crearEventos({
-          eventos: [dataPayload],
+          eventos: [payload],
           empleados: formData.empleados,
         });
-      else resp = (await crearEvento(dataPayload)).data;
+      else resp = (await crearEvento(payload)).data;
       Swal.close();
       if (resp.success) {
         Swal.fire("¡Éxito!", resp.message || "Evento creado.", "success");
@@ -128,7 +239,7 @@ export function useEventoForm(mode = "simple", id) {
         });
       }
     } catch (err) {
-      Swal.fire(err, "Hubo un error.", "error");
+      Swal.fire("Error", "Hubo un error.", "error");
     }
   };
 

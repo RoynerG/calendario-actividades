@@ -10,6 +10,7 @@ export default function CrearEventoMultiple() {
     loading,
     handleSubmit,
   } = useEventoForm("multiple");
+
   const styleLabel =
     "block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white";
   const styleInput =
@@ -27,7 +28,7 @@ export default function CrearEventoMultiple() {
     <div className="p-4 space-y-4 mx-auto max-w-lg">
       <form onSubmit={handleSubmit} className="space-y-4">
         <label htmlFor="titulo" className={styleLabel}>
-          Titulo
+          Título
         </label>
         <input
           id="titulo"
@@ -39,12 +40,12 @@ export default function CrearEventoMultiple() {
           required
         />
         <label htmlFor="ubicacion" className={styleLabel}>
-          Ubicacion/direccion del evento
+          Ubicación/dirección del evento
         </label>
         <input
           id="ubicacion"
           type="text"
-          placeholder="Escribe donde será realizado el evento"
+          placeholder="Escribe dónde será realizado el evento"
           value={formData.ubicacion}
           onChange={(e) =>
             setFormData({ ...formData, ubicacion: e.target.value })
@@ -53,25 +54,40 @@ export default function CrearEventoMultiple() {
           required
         />
 
+        {/* FECHA Y HORAS SEPARADOS */}
+        <label className={styleLabel}>Fecha</label>
+        <input
+          type="date"
+          value={formData.fecha || ""}
+          onChange={(e) => setFormData({ ...formData, fecha: e.target.value })}
+          className={styleInput}
+          required
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <input
-            type="datetime-local"
-            value={formData.fecha_inicio}
-            onChange={(e) =>
-              setFormData({ ...formData, fecha_inicio: e.target.value })
-            }
-            className={styleInput}
-            required
-          />
-          <input
-            type="datetime-local"
-            value={formData.fecha_fin}
-            onChange={(e) =>
-              setFormData({ ...formData, fecha_fin: e.target.value })
-            }
-            className={styleInput}
-            required
-          />
+          <div>
+            <label className={styleLabel}>Hora inicio</label>
+            <input
+              type="time"
+              value={formData.hora_inicio || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, hora_inicio: e.target.value })
+              }
+              className={styleInput}
+              required
+            />
+          </div>
+          <div>
+            <label className={styleLabel}>Hora fin</label>
+            <input
+              type="time"
+              value={formData.hora_fin || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, hora_fin: e.target.value })
+              }
+              className={styleInput}
+              required
+            />
+          </div>
         </div>
 
         <Select
