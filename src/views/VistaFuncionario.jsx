@@ -15,6 +15,7 @@ import { es } from "date-fns/locale";
 import Select from "react-select";
 import GuiaCategorias from "../components/GuiaCategorias";
 import EventoViewer from "../components/EventoViewer";
+import { showSwal } from "../helpers/swalUtils";
 
 export default function VistaFuncionario() {
   const { id_funcionario } = useParams();
@@ -33,6 +34,9 @@ export default function VistaFuncionario() {
     titulo: "",
     descripcion: "",
     ubicacion: "",
+    fecha: "",
+    hora_inicio: "",
+    hora_fin: "",
     fecha_inicio: "",
     fecha_fin: "",
     id_categoria: "",
@@ -140,15 +144,18 @@ export default function VistaFuncionario() {
     if (
       esCita &&
       formData.id_categoria &&
-      formData.fecha_inicio &&
-      formData.fecha_fin
+      formData.fecha &&
+      formData.hora_inicio &&
+      formData.hora_fin
     ) {
       const categoriaSeleccionada = categorias.find(
         (cat) => cat.id === formData.id_categoria
       );
       if (categoriaSeleccionada) {
-        const fechaInicio = new Date(formData.fecha_inicio);
-        const fechaFin = new Date(formData.fecha_fin);
+        const fechaInicio = new Date(
+          `${formData.fecha}T${formData.hora_inicio}`
+        );
+        const fechaFin = new Date(`${formData.fecha}T${formData.hora_fin}`);
         const opcionesFecha = {
           day: "2-digit",
           month: "2-digit",
@@ -170,14 +177,132 @@ export default function VistaFuncionario() {
   }, [
     esCita,
     formData.id_categoria,
-    formData.fecha_inicio,
-    formData.fecha_fin,
+    formData.fecha,
+    formData.hora_inicio,
+    formData.hora_fin,
     categorias,
   ]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     document.activeElement?.blur();
+
+    // Combina fecha y horas a formato ISO local: "YYYY-MM-DDTHH:mm"
+    const { fecha, hora_inicio, hora_fin } = formData;
+    const fecha_inicio = fecha && hora_inicio ? `${fecha}T${hora_inicio}` : "";
+    const fecha_fin = fecha && hora_fin ? `${fecha}T${hora_fin}` : "";
+
+    // Validaciones
+    const fechaInicio = new Date(fecha_inicio);
+    const fechaFin = new Date(fecha_fin);
+    const ahora = new Date();
+
+    if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
+      setShowForm(false);
+      await showSwal({
+        title: "Error",
+        text: "Debes ingresar fechas y horas válidas.",
+        icon: "error",
+      });
+      setShowForm(true);
+      return;
+    }
+
+    // Solo permite el mismo día (si así lo quieres)
+    if (
+      fechaInicio.getFullYear() !== fechaFin.getFullYear() ||
+      fechaInicio.getMonth() !== fechaFin.getMonth() ||
+      fechaInicio.getDate() !== fechaFin.getDate()
+    ) {
+      setShowForm(false);
+      await showSwal({
+        title: "Error",
+        text: "La fecha de inicio y la fecha de finalización deben ser el mismo día.",
+        icon: "error",
+      });
+      setShowForm(true);
+      return;
+    }
+
+    if (fechaFin < fechaInicio) {
+      setShowForm(false);
+      await showSwal({
+        title: "Error",
+        text: "La hora de finalización no puede ser menor que la de inicio.",
+        icon: "error",
+      });
+      setShowForm(true);
+      return;
+    }
+
+    // No permite fechas pasadas
+    const inicioSinHoras = new Date(
+      fechaInicio.getFullYear(),
+      fechaInicio.getMonth(),
+      fechaInicio.getDate()
+    );
+    const hoySinHoras = new Date(
+      ahora.getFullYear(),
+      ahora.getMonth(),
+      ahora.getDate()
+    );
+    if (inicioSinHoras < hoySinHoras) {
+      setShowForm(false);
+      await showSwal({
+        title: "Error",
+        text: "No puedes seleccionar una fecha pasada.",
+        icon: "error",
+      });
+      setShowForm(true);
+      return;
+    }
+    if (fechaFin < ahora) {
+      setShowForm(false);
+      await showSwal({
+        title: "Error",
+        text: "No puedes seleccionar una hora de finalización pasada.",
+        icon: "error",
+      });
+      setShowForm(true);
+      return;
+    }
+
+    // Valida horas permitidas
+    const horaInicio = fechaInicio.getHours() + fechaInicio.getMinutes() / 60;
+    const horaFin = fechaFin.getHours() + fechaFin.getMinutes() / 60;
+    if (horaInicio < 8 || horaInicio > 21) {
+      setShowForm(false);
+      await showSwal({
+        title: "Error",
+        text: "La hora de inicio debe estar entre las 8:00 am y las 9:00 pm.",
+        icon: "error",
+      });
+      setShowForm(true);
+      return;
+    }
+    if (horaFin < 8 || horaFin > 21) {
+      setShowForm(false);
+      await showSwal({
+        title: "Error",
+        text: "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm.",
+        icon: "error",
+      });
+      setShowForm(true);
+      return;
+    }
+
+    // Prepara datos para enviar (solo los campos que tu API necesita)
+    const eventoData = {
+      ...formData,
+      fecha_inicio,
+      fecha_fin,
+    };
+
+    // Opcional: borra los auxiliares para que no se envíen al backend si no los necesitas
+    delete eventoData.fecha;
+    delete eventoData.hora_inicio;
+    delete eventoData.hora_fin;
+
     try {
       setShowForm(false);
       Swal.fire({
@@ -186,7 +311,7 @@ export default function VistaFuncionario() {
         didOpen: () => Swal.showLoading(),
         customClass: { container: "z-[100000]" },
       });
-      const res = await crearEvento(formData);
+      const res = await crearEvento(eventoData);
       if (res.data.success) {
         await Swal.fire({
           title: "¡Éxito!",
@@ -198,6 +323,9 @@ export default function VistaFuncionario() {
           titulo: "",
           descripcion: "",
           ubicacion: "",
+          fecha: "",
+          hora_inicio: "",
+          hora_fin: "",
           fecha_inicio: "",
           fecha_fin: "",
           id_categoria: "",
@@ -215,8 +343,6 @@ export default function VistaFuncionario() {
         setFiltros({ ...filtros });
       } else {
         const mensaje = res.data.message || "No se pudo agregar el evento";
-
-        // Mostrar si fue por bloqueo de eventos antiguos
         await Swal.fire({
           title: "No se puede crear el evento",
           html: mensaje,
@@ -411,36 +537,53 @@ export default function VistaFuncionario() {
                 className={inputStyle}
                 required
               />
-              {/* Fecha de inicio */}
+              {/* Fecha */}
               <label
-                htmlFor="f1"
+                htmlFor="fecha"
                 className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Fecha de inicio
+                Fecha
               </label>
               <input
-                id="f1"
-                type="datetime-local"
-                value={formData.fecha_inicio}
+                id="fecha"
+                type="date"
+                value={formData.fecha}
                 onChange={(e) =>
-                  setFormData({ ...formData, fecha_inicio: e.target.value })
+                  setFormData({ ...formData, fecha: e.target.value })
                 }
                 className={inputStyle}
                 required
               />
-              {/* Fecha de fin */}
+              {/* Hora de inicio */}
               <label
-                htmlFor="f2"
+                htmlFor="hora_inicio"
                 className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
               >
-                Fecha de finalización
+                Hora de inicio
               </label>
               <input
-                id="f2"
-                type="datetime-local"
-                value={formData.fecha_fin}
+                id="hora_inicio"
+                type="time"
+                value={formData.hora_inicio}
                 onChange={(e) =>
-                  setFormData({ ...formData, fecha_fin: e.target.value })
+                  setFormData({ ...formData, hora_inicio: e.target.value })
+                }
+                className={inputStyle}
+                required
+              />
+              {/* Hora de fin */}
+              <label
+                htmlFor="hora_fin"
+                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+              >
+                Hora de finalización
+              </label>
+              <input
+                id="hora_fin"
+                type="time"
+                value={formData.hora_fin}
+                onChange={(e) =>
+                  setFormData({ ...formData, hora_fin: e.target.value })
                 }
                 className={inputStyle}
                 required

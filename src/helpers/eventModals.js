@@ -151,44 +151,127 @@ export async function showEditarModal(
 
 export async function showTrasladarModal(event, setFiltros) {
   const mostrarCita = event.id_ticket > 0;
+  const styleInput = "border p-2 rounded w-full mb-2";
+
   const { value: form } = await Swal.fire({
     title: `Trasladar fecha del evento #${event.event_id}`,
     html: `
-      <label for="f1" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Nueva fecha inicio</label>
-      <input id="f1" type="datetime-local" class="${styleInput}">
-      <label for="f2" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Nueva fecha fin</label>
-      <input id="f2" type="datetime-local" class="${styleInput}">
+      <label for="fecha" class="block mb-2 mt-3 text-sm font-medium text-gray-900 dark:text-white">Nueva fecha</label>
+      <input id="fecha" type="date" class="${styleInput}">
+
+      <label for="hora_inicio" class="block mb-2 mt-3 text-sm font-medium text-gray-900 dark:text-white">Hora de inicio</label>
+      <input id="hora_inicio" type="time" class="${styleInput}" min="08:00" max="21:00">
+
+      <label for="hora_fin" class="block mb-2 mt-3 text-sm font-medium text-gray-900 dark:text-white">Hora de finalización</label>
+      <input id="hora_fin" type="time" class="${styleInput}" min="08:00" max="21:00">
+
       ${
         mostrarCita
-          ? `<label for="es_cita" class="block mt-3 mb-1 font-medium">¿Es cita?</label>
+          ? `<label for="es_cita" class="block mb-2 mt-3 text-sm font-medium text-gray-900 dark:text-white">¿Es cita?</label>
              <select id="es_cita" class="${styleInput}">
                <option value="">Responde si el traslado corresponde a una cita</option>
-               <option value="si">Si</option>
+               <option value="si">Sí</option>
                <option value="no">No</option>
              </select>`
           : ``
       }
-      <label for="obs" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Ingresa el motivo por el cual trasladas el evento. Ten en cuenta que si marcas si en ¿Es cita? saldra en el ticket.</label>
+      <label for="obs" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">Motivo del traslado</label>
       <textarea id="obs" class="${styleInput}"></textarea>
     `,
     focusConfirm: false,
     preConfirm: () => {
-      const fecha_inicio = document.getElementById("f1").value;
-      const fecha_fin = document.getElementById("f2").value;
+      const fecha = document.getElementById("fecha").value;
+      const hora_inicio = document.getElementById("hora_inicio").value;
+      const hora_fin = document.getElementById("hora_fin").value;
       const observacion = document.getElementById("obs").value;
       const selectEl = document.getElementById("es_cita");
       const es_cita =
         selectEl?.value && selectEl.value !== "" ? selectEl.value : "no";
-      if (!fecha_inicio || !fecha_fin || !observacion) {
-        Swal.showValidationMessage("Todos los campos son obligatorios");
+
+      // Validación: todos los campos obligatorios
+      if (!fecha || !hora_inicio || !hora_fin || !observacion) {
+        Swal.showValidationMessage("Todos los campos son obligatorios.");
         return false;
       }
+
+      const fecha_inicio = `${fecha}T${hora_inicio}`;
+      const fecha_fin = `${fecha}T${hora_fin}`;
+      const fInicio = new Date(fecha_inicio);
+      const fFin = new Date(fecha_fin);
+      const ahora = new Date();
+
+      // Validación: fechas válidas
+      if (isNaN(fInicio.getTime()) || isNaN(fFin.getTime())) {
+        Swal.showValidationMessage("Debes ingresar fechas y horas válidas.");
+        return false;
+      }
+
+      // Validación: ambos días iguales
+      if (
+        fInicio.getFullYear() !== fFin.getFullYear() ||
+        fInicio.getMonth() !== fFin.getMonth() ||
+        fInicio.getDate() !== fFin.getDate()
+      ) {
+        Swal.showValidationMessage(
+          "La fecha de inicio y la de finalización deben ser el mismo día."
+        );
+        return false;
+      }
+
+      // Validación: hora fin no menor que inicio
+      if (fFin < fInicio) {
+        Swal.showValidationMessage(
+          "La hora de finalización no puede ser menor que la de inicio."
+        );
+        return false;
+      }
+
+      // Validación: no fechas pasadas
+      const inicioSinHoras = new Date(
+        fInicio.getFullYear(),
+        fInicio.getMonth(),
+        fInicio.getDate()
+      );
+      const hoySinHoras = new Date(
+        ahora.getFullYear(),
+        ahora.getMonth(),
+        ahora.getDate()
+      );
+      if (inicioSinHoras < hoySinHoras) {
+        Swal.showValidationMessage("No puedes seleccionar una fecha pasada.");
+        return false;
+      }
+      if (fFin < ahora) {
+        Swal.showValidationMessage(
+          "No puedes seleccionar una hora de finalización pasada."
+        );
+        return false;
+      }
+
+      // Validación: horas entre 8 y 21
+      const horaI = fInicio.getHours() + fInicio.getMinutes() / 60;
+      const horaF = fFin.getHours() + fFin.getMinutes() / 60;
+      if (horaI < 8 || horaI > 21) {
+        Swal.showValidationMessage(
+          "La hora de inicio debe estar entre las 8:00 am y las 9:00 pm."
+        );
+        return false;
+      }
+      if (horaF < 8 || horaF > 21) {
+        Swal.showValidationMessage(
+          "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm."
+        );
+        return false;
+      }
+
       return { fecha_inicio, fecha_fin, es_cita, observacion };
     },
     showCancelButton: true,
     customClass: { container: "z-[2000]" },
   });
+
   if (!form) return;
+
   const fechaInicio = new Date(form.fecha_inicio);
   const fechaFin = new Date(form.fecha_fin);
   const opcionesFecha = { day: "2-digit", month: "2-digit", year: "numeric" };
@@ -197,12 +280,14 @@ export async function showTrasladarModal(event, setFiltros) {
   const horaInicioStr = fechaInicio.toLocaleTimeString("es-CO", opcionesHora);
   const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
   const descripcionGenerada = `Por medio de la presente, se ha reprogramado el evento <b>${event.title}</b> para el día <b>${fechaStr}</b> de <b>${horaInicioStr}</b> a <b>${horaFinStr}</b><br/><br/><br/><b>Motivo:</b> ${form.observacion}`;
+
   Swal.fire({
     title: "Trasladando evento...",
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading(),
     customClass: { container: "z-[2000]" },
   });
+
   const resp = await trasladarEvento(
     event.event_id,
     form.fecha_inicio,
@@ -211,6 +296,7 @@ export async function showTrasladarModal(event, setFiltros) {
     form.es_cita,
     descripcionGenerada
   );
+
   Swal.close();
   if (resp.success) {
     await Swal.fire("¡Hecho!", resp.message, "success");
