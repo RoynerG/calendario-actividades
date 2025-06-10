@@ -8,6 +8,7 @@ import CrearEventoTicket from "../components/CrearEventoTicket";
 import VistaEvento from "../views/VistaEvento";
 import CrearEventoMultiple from "../components/CrearEventoMultiple";
 import TablaBloqueos from "../views/TablaBloqueos";
+import CrearEventoFuncionario from "../components/CrearEventoFuncionario";
 
 export default function AppRoutes() {
   return (
@@ -37,6 +38,10 @@ export default function AppRoutes() {
         />
         <Route path="/evento/:id_evento" element={<VistaEvento />} />
         <Route path="/tabla-bloqueos" element={<TablaBloqueos />} />
+        <Route
+          path="/crear-evento-funcionario/:id_funcionario"
+          element={<CrearEventoFuncionario />}
+        />
       </Routes>
     </BrowserRouter>
   );
