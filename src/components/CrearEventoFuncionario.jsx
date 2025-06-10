@@ -536,6 +536,14 @@ export default function CrearEventoFuncionario() {
                   value: "En actividad comercial",
                   label: "En actividad comercial",
                 },
+                {
+                  value: "Por publicar",
+                  label: "Por publicar",
+                },
+                {
+                  value: "Pendiente colocar aviso",
+                  label: "Pendiente colocar aviso",
+                },
               ]}
               onChange={(opt) => {
                 const estadoComercial = opt?.value ?? "";

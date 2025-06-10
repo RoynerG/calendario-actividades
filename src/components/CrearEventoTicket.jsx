@@ -177,6 +177,14 @@ export default function CrearEventoTicket() {
                 value: "En actividad comercial",
                 label: "En actividad comercial",
               },
+              {
+                value: "Por publicar",
+                label: "Por publicar",
+              },
+              {
+                value: "Pendiente colocar aviso",
+                label: "Pendiente colocar aviso",
+              },
             ]}
             value={
               [
@@ -191,6 +199,14 @@ export default function CrearEventoTicket() {
                 {
                   value: "En actividad comercial",
                   label: "En actividad comercial",
+                },
+                {
+                  value: "Por publicar",
+                  label: "Por publicar",
+                },
+                {
+                  value: "Pendiente colocar aviso",
+                  label: "Pendiente colocar aviso",
                 },
               ].find((o) => o.value === formData.estado_comercial) || null
             }
