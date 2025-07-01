@@ -9,12 +9,14 @@ import VistaEvento from "../views/VistaEvento";
 import CrearEventoMultiple from "../components/CrearEventoMultiple";
 import TablaBloqueos from "../views/TablaBloqueos";
 import CrearEventoFuncionario from "../components/CrearEventoFuncionario";
+import AdminEventos from "../views/AdminEventos";
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<VistaGeneral />} />
+        <Route path="/eventos-admin" element={<AdminEventos />} />
         <Route
           path="/funcionario/:id_funcionario"
           element={<VistaFuncionario />}
