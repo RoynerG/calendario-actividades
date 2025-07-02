@@ -11,6 +11,7 @@ import TablaBloqueos from "../views/TablaBloqueos";
 import CrearEventoFuncionario from "../components/CrearEventoFuncionario";
 import ConsolidadoEventos from "../views/ConsolidadoEventos";
 import ConsolidadoFuncionario from "../views/ConsolidadoFuncionario";
+import InformeEventos from "../views/InformeEventos";
 
 export default function AppRoutes() {
   return (
@@ -18,6 +19,7 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<VistaGeneral />} />
         <Route path="/consolidado-eventos" element={<ConsolidadoEventos />} />
+        <Route path="/informe-eventos" element={<InformeEventos />} />
         <Route
           path="/consolidado-funcionario/:id_funcionario"
           element={<ConsolidadoFuncionario />}
