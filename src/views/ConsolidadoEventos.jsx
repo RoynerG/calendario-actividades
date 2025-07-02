@@ -3,18 +3,18 @@ import DataTable from "react-data-table-component";
 import {
   filtrarEventosAdmin,
   listarFuncionarios,
+  listarCategorias,
 } from "../services/eventService";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
-export default function AdminEventos() {
+export default function ConsolidadoEventos() {
   const [data, setData] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [perPage, setPerPage] = useState(50);
   const [pagina, setPagina] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // Filtros dinámicos
   const [filtros, setFiltros] = useState({
     id_categoria: "",
     id_empleado: "",
@@ -24,10 +24,9 @@ export default function AdminEventos() {
     fue_trasladado: "",
   });
 
-  // Lista de funcionarios
   const [funcionarios, setFuncionarios] = useState([]);
+  const [categorias, setCategorias] = useState([]);
 
-  // Cargar funcionarios una sola vez
   useEffect(() => {
     const cargarFuncionarios = async () => {
       const res = await listarFuncionarios();
@@ -35,18 +34,22 @@ export default function AdminEventos() {
         setFuncionarios(res.data);
       }
     };
+    const cargarCategorias = async () => {
+      const res = await listarCategorias();
+      if (res.success) {
+        setCategorias(res.data);
+      }
+    };
     cargarFuncionarios();
+    cargarCategorias();
   }, []);
 
-  // Resetear página cuando cambian filtros
   useEffect(() => {
     setPagina(1);
   }, [filtros]);
 
-  // Cargar datos cuando cambian página o filtros
   useEffect(() => {
     fetchData(pagina, perPage);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagina, perPage, filtros]);
 
   const fetchData = async (page, limit) => {
@@ -59,9 +62,13 @@ export default function AdminEventos() {
       });
 
       if (res.data.success) {
+        if (res.data.data.data.length === 0 && page > 1) {
+          setPagina(1);
+          return;
+        }
+
         setData(res.data.data.data);
         setTotalRows(res.data.data.total);
-        console.log(res);
       }
     } catch (error) {
       console.error("Error al cargar eventos:", error);
@@ -74,13 +81,36 @@ export default function AdminEventos() {
     setPagina(page);
   };
 
-  const handlePerRowsChange = async (newPerPage, page) => {
+  const handlePerRowsChange = async (newPerPage) => {
     setPerPage(newPerPage);
   };
 
-  // Exportar a Excel
-  const exportarExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
+  const exportarExcel = async () => {
+    const res = await filtrarEventosAdmin({
+      ...filtros,
+      pagina: 1,
+      limite: 9999999,
+    });
+
+    const todos = res.data.data.data;
+
+    const datosFiltrados = todos.map((row) => ({
+      Título: row.titulo,
+      Funcionario: row.funcionario,
+      Categoría: row.categoria,
+      Ubicación: row.ubicacion,
+      Realizado: row.estado,
+      Trasladado: row.fue_trasladado,
+      Inicio: row.fecha_inicio,
+      Fin: row.fecha_fin,
+      Evento: `https://mango-mushroom-0f4d0671e.6.azurestaticapps.net/evento/${row.id}`,
+      Ticket:
+        row.id_ticket > 0
+          ? `https://sucasainmobiliaria.com.co/ticket/?id_ticket=${row.id_ticket}`
+          : "",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(datosFiltrados);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Eventos");
 
@@ -93,39 +123,25 @@ export default function AdminEventos() {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
 
-    saveAs(blob, "eventos.xlsx");
+    const funcionarioSeleccionado = funcionarios.find(
+      (f) => f.id_empleado === filtros.id_empleado
+    );
+    const nombreFuncionario = funcionarioSeleccionado
+      ? funcionarioSeleccionado.nombre.replace(/\s+/g, "_")
+      : "todos";
+
+    const nombreArchivo = `eventos_${nombreFuncionario}.xlsx`;
+
+    saveAs(blob, nombreArchivo);
   };
 
   const columnas = [
-    {
-      name: "Título",
-      selector: (row) => row.titulo,
-      sortable: true,
-    },
-    {
-      name: "Funcionario",
-      selector: (row) => row.funcionario,
-      sortable: true,
-    },
-    {
-      name: "Inicio",
-      selector: (row) => row.fecha_inicio,
-      sortable: true,
-    },
-    {
-      name: "Fin",
-      selector: (row) => row.fecha_fin,
-      sortable: true,
-    },
-    {
-      name: "Categoría",
-      selector: (row) => row.categoria,
-      sortable: true,
-    },
-    {
-      name: "Estado",
-      selector: (row) => row.estado,
-    },
+    { name: "Título", selector: (row) => row.titulo, sortable: true },
+    { name: "Funcionario", selector: (row) => row.funcionario, sortable: true },
+    { name: "Inicio", selector: (row) => row.fecha_inicio, sortable: true },
+    { name: "Fin", selector: (row) => row.fecha_fin, sortable: true },
+    { name: "Categoría", selector: (row) => row.categoria, sortable: true },
+    { name: "Realizado", selector: (row) => row.estado },
     {
       name: "Acciones",
       cell: (row) => (
@@ -157,7 +173,11 @@ export default function AdminEventos() {
     <div className="p-4">
       <h1 className="text-xl font-bold mb-4">Eventos</h1>
 
-      {/* Filtros dinámicos */}
+      <div className="mb-2 text-sm text-gray-700">
+        Total eventos encontrados: <strong>{totalRows}</strong>
+      </div>
+
+      {/* Filtros */}
       <div className="flex flex-wrap gap-4 mb-4">
         <input
           type="date"
@@ -179,6 +199,20 @@ export default function AdminEventos() {
           placeholder="Fecha fin"
         />
 
+        <select
+          value={filtros.id_categoria}
+          onChange={(e) =>
+            setFiltros((f) => ({ ...f, id_categoria: e.target.value }))
+          }
+          className="border p-2 rounded"
+        >
+          <option value="">Todos las categorias</option>
+          {categorias.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.nombre}
+            </option>
+          ))}
+        </select>
         <select
           value={filtros.id_empleado}
           onChange={(e) =>
