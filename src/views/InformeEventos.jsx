@@ -25,7 +25,17 @@ export default function InformeEventos() {
     fecha_inicio: "",
     fecha_fin: "",
   });
-
+  const buttonStyle = {
+    backgroundColor: "black",
+    color: "white",
+    paddingLeft: "1rem",
+    paddingRight: "1rem",
+    paddingTop: "0.5rem",
+    paddingBottom: "0.5rem",
+    borderRadius: "0.25rem",
+    width: "auto",
+    whiteSpace: "nowrap",
+  };
   useEffect(() => {
     const cargarFuncionarios = async () => {
       const res = await listarFuncionarios();
@@ -73,7 +83,16 @@ export default function InformeEventos() {
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Informe de Eventos</h1>
+      <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
+        <a
+          href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario/`}
+          style={buttonStyle}
+          className="flex-1 sm:flex-none text-center"
+        >
+          Regresar a mi cuenta
+        </a>
+      </div>
+      <h1 className="text-sm md:text-5xl font-bold">Informe de Eventos</h1>
 
       <div className="flex flex-wrap gap-4 mb-4">
         <select

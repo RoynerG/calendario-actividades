@@ -14,6 +14,17 @@ export default function ConsolidadoEventos() {
   const [perPage, setPerPage] = useState(50);
   const [pagina, setPagina] = useState(1);
   const [loading, setLoading] = useState(false);
+  const buttonStyle = {
+    backgroundColor: "black",
+    color: "white",
+    paddingLeft: "1rem",
+    paddingRight: "1rem",
+    paddingTop: "0.5rem",
+    paddingBottom: "0.5rem",
+    borderRadius: "0.25rem",
+    width: "auto",
+    whiteSpace: "nowrap",
+  };
 
   const [filtros, setFiltros] = useState({
     id_categoria: "",
@@ -171,7 +182,16 @@ export default function ConsolidadoEventos() {
 
   return (
     <div className="p-4">
-      <h1 className="text-xl font-bold mb-4">Eventos</h1>
+      <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
+        <a
+          href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario/`}
+          style={buttonStyle}
+          className="flex-1 sm:flex-none text-center"
+        >
+          Regresar a mi cuenta
+        </a>
+      </div>
+      <h1 className="text-sm md:text-5xl font-bold">Consolidado de eventos</h1>
 
       <div className="mb-2 text-sm text-gray-700">
         Total eventos encontrados: <strong>{totalRows}</strong>
