@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import {
   filtrarEventosAdmin,
-  listarFuncionarios,
   listarCategorias,
 } from "../services/eventService";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import { useParams } from "react-router-dom";
 
 export default function ConsolidadoFuncionario() {
+  const { id_funcionario } = useParams();
   const [data, setData] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [perPage, setPerPage] = useState(50);
@@ -17,30 +16,22 @@ export default function ConsolidadoFuncionario() {
 
   const [filtros, setFiltros] = useState({
     id_categoria: "",
-    id_empleado: "",
+    id_empleado: id_funcionario,
     fecha_inicio: "",
     fecha_fin: "",
     estado: "",
     fue_trasladado: "",
   });
 
-  const [funcionarios, setFuncionarios] = useState([]);
   const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
-    const cargarFuncionarios = async () => {
-      const res = await listarFuncionarios();
-      if (res.success) {
-        setFuncionarios(res.data);
-      }
-    };
     const cargarCategorias = async () => {
       const res = await listarCategorias();
       if (res.success) {
         setCategorias(res.data);
       }
     };
-    cargarFuncionarios();
     cargarCategorias();
   }, []);
 
@@ -83,56 +74,6 @@ export default function ConsolidadoFuncionario() {
 
   const handlePerRowsChange = async (newPerPage) => {
     setPerPage(newPerPage);
-  };
-
-  const exportarExcel = async () => {
-    const res = await filtrarEventosAdmin({
-      ...filtros,
-      pagina: 1,
-      limite: 9999999,
-    });
-
-    const todos = res.data.data.data;
-
-    const datosFiltrados = todos.map((row) => ({
-      Título: row.titulo,
-      Funcionario: row.funcionario,
-      Categoría: row.categoria,
-      Ubicación: row.ubicacion,
-      Realizado: row.estado,
-      Trasladado: row.fue_trasladado,
-      Inicio: row.fecha_inicio,
-      Fin: row.fecha_fin,
-      Evento: `https://mango-mushroom-0f4d0671e.6.azurestaticapps.net/evento/${row.id}`,
-      Ticket:
-        row.id_ticket > 0
-          ? `https://sucasainmobiliaria.com.co/ticket/?id_ticket=${row.id_ticket}`
-          : "",
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(datosFiltrados);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Eventos");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const blob = new Blob([excelBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-
-    const funcionarioSeleccionado = funcionarios.find(
-      (f) => f.id_empleado === filtros.id_empleado
-    );
-    const nombreFuncionario = funcionarioSeleccionado
-      ? funcionarioSeleccionado.nombre.replace(/\s+/g, "_")
-      : "todos";
-
-    const nombreArchivo = `eventos_${nombreFuncionario}.xlsx`;
-
-    saveAs(blob, nombreArchivo);
   };
 
   const columnas = [
@@ -213,20 +154,6 @@ export default function ConsolidadoFuncionario() {
             </option>
           ))}
         </select>
-        <select
-          value={filtros.id_empleado}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, id_empleado: e.target.value }))
-          }
-          className="border p-2 rounded"
-        >
-          <option value="">Todos los funcionarios</option>
-          {funcionarios.map((f) => (
-            <option key={f.id_empleado} value={f.id_empleado}>
-              {f.nombre}
-            </option>
-          ))}
-        </select>
 
         <select
           value={filtros.estado}
@@ -266,13 +193,6 @@ export default function ConsolidadoFuncionario() {
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
         >
           Eliminar filtros
-        </button>
-
-        <button
-          onClick={exportarExcel}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Exportar Excel
         </button>
       </div>
 
