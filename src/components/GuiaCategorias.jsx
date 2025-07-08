@@ -162,6 +162,12 @@ export default function GuiaCategorias({ buttonStyle }) {
       descripcion:
         "Todas las actividades relacionadas de incapacidad laboral y enfermad.",
     },
+    {
+      color: "#BDC3C7",
+      categoria: "Llaves",
+      descripcion:
+        "Todas las actividades relacionadas con recoger y entregar llaves.",
+    },
   ];
 
   const pageCount = Math.ceil(rows.length / rowsPerPage);
