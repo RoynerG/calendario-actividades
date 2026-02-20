@@ -2,14 +2,58 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { obtenerEvento } from "../services/eventService";
 import Swal from "sweetalert2";
-import { FaClock, FaTag, FaPowerOff, FaMapLocationDot } from "react-icons/fa6";
-import { FaCalendarAlt } from "react-icons/fa";
+import {
+  FaClock,
+  FaTag,
+  FaPowerOff,
+  FaMapLocationDot,
+  FaClipboardList,
+  FaEye,
+} from "react-icons/fa6";
+import { FaCalendarAlt, FaHistory } from "react-icons/fa";
+import {
+  showVerSeguimientosModal,
+  showCrearSeguimientoModal,
+} from "../helpers/seguimientoModals";
+import { showHistorialModal } from "../helpers/eventModals";
 
 export default function VistaEvento() {
   const { id_evento } = useParams();
   const navigate = useNavigate();
   const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const checkAdminAndExecute = async (callback) => {
+    const isAdmin = localStorage.getItem("modo_admin") === "true";
+    if (isAdmin) {
+      callback();
+    } else {
+      const { value: password } = await Swal.fire({
+        title: "Ingrese clave de administrador",
+        input: "password",
+        inputPlaceholder: "Clave...",
+        showCancelButton: true,
+      });
+
+      if (password === "admin123") {
+        localStorage.setItem("modo_admin", "true");
+        await Swal.fire("Modo Admin Activado", "", "success");
+        callback();
+      } else if (password) {
+        Swal.fire("Clave incorrecta", "", "error");
+      }
+    }
+  };
+
+  const handleVerSeguimiento = () => {
+    showVerSeguimientosModal(id_evento, "evento");
+  };
+
+  const handleHacerSeguimiento = () => {
+    checkAdminAndExecute(() => {
+      showCrearSeguimientoModal(id_evento, "evento", "Admin");
+    });
+  };
 
   useEffect(() => {
     obtenerEvento(id_evento)
@@ -68,7 +112,7 @@ export default function VistaEvento() {
     <div className="px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
         <a
-          href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario`}
+          href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario/`}
           style={buttonStyle}
           className="flex-1 sm:flex-none text-center"
         >
@@ -80,6 +124,7 @@ export default function VistaEvento() {
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">
           {evento.titulo}
         </h2>
+
         {evento.ubicacion && (
           <div className="mb-4 flex items-center">
             <FaMapLocationDot className="mr-2 text-green-900" />
@@ -87,17 +132,6 @@ export default function VistaEvento() {
               {evento.ubicacion}
             </span>
           </div>
-        )}
-        <div
-          className="text-sm sm:text-md text-gray-600 mb-4 text-left"
-          dangerouslySetInnerHTML={{ __html: evento.descripcion }}
-        />
-
-        {evento.observacion && (
-          <p className="text-sm sm:text-md text-gray-600 mb-4 text-left">
-            <span className="font-bold">Observacion/Motivo: </span>{" "}
-            {evento.observacion}
-          </p>
         )}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
@@ -137,8 +171,20 @@ export default function VistaEvento() {
           </div>
         </div>
 
-        <div className="flex justify-end">
-          {evento.id_ticket > 0 ? (
+        <div
+          className="text-sm sm:text-md text-gray-600 mb-4 text-left"
+          dangerouslySetInnerHTML={{ __html: evento.descripcion }}
+        />
+
+        {evento.observacion && (
+          <p className="text-sm sm:text-md text-gray-600 mb-4 text-left">
+            <span className="font-bold">Observacion/Motivo: </span>{" "}
+            {evento.observacion}
+          </p>
+        )}
+
+        <div className="flex justify-end mb-4">
+          {evento.id_ticket > 0 && (
             <a
               href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${evento.id_ticket}`}
               target="_blank"
@@ -152,11 +198,36 @@ export default function VistaEvento() {
                 paddingBottom: "0.5rem",
                 borderRadius: "0.25rem",
                 width: "100%",
+                textAlign: "center",
               }}
             >
               Ver ticket
             </a>
-          ) : null}
+          )}
+        </div>
+
+        <div className="mt-4 border-t pt-4 flex gap-2 flex-col">
+          <button
+            onClick={handleHacerSeguimiento}
+            className="flex items-center justify-center w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+          >
+            <FaClipboardList className="mr-2" />
+            Hacer seguimiento
+          </button>
+          <button
+            onClick={handleVerSeguimiento}
+            className="flex items-center justify-center w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+          >
+            <FaEye className="mr-2" />
+            Ver seguimiento
+          </button>
+          <button
+            onClick={() => showHistorialModal(evento.id)}
+            className="flex items-center justify-center w-full bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
+          >
+            <FaHistory className="mr-2" />
+            Ver historial
+          </button>
         </div>
       </div>
     </div>

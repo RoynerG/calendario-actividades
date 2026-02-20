@@ -1,4 +1,9 @@
-import { FaPowerOff, FaMapLocationDot } from "react-icons/fa6";
+import {
+  FaPowerOff,
+  FaMapLocationDot,
+  FaClipboardList,
+  FaEye,
+} from "react-icons/fa6";
 import { IoTimeSharp } from "react-icons/io5";
 import {
   showRealizadoModal,
@@ -7,7 +12,14 @@ import {
   showHistorialModal,
 } from "../helpers/eventModals";
 
-export default function EventoViewer({ event, categorias, setFiltros }) {
+export default function EventoViewer({
+  event,
+  categorias,
+  setFiltros,
+  onVerSeguimiento,
+  onHacerSeguimiento,
+  allowActions = true,
+}) {
   return (
     <div>
       <ul>
@@ -95,13 +107,31 @@ export default function EventoViewer({ event, categorias, setFiltros }) {
         </li>
       </ul>
       <div className="flex flex-col gap-2 mt-4">
+        {onHacerSeguimiento && (
+          <button
+            className="px-2 py-1 bg-purple-600 text-white rounded flex items-center justify-center"
+            onClick={() => onHacerSeguimiento(event.event_id)}
+          >
+            <FaClipboardList className="mr-2" />
+            Hacer Seguimiento
+          </button>
+        )}
+        {onVerSeguimiento && (
+          <button
+            className="px-2 py-1 bg-blue-500 text-white rounded flex items-center justify-center"
+            onClick={() => onVerSeguimiento(event.event_id)}
+          >
+            <FaEye className="mr-2" />
+            Ver Seguimiento
+          </button>
+        )}
         <button
           className="px-2 py-1 bg-gray-500 text-white rounded"
           onClick={() => showHistorialModal(event.event_id)}
         >
           Ver cambios
         </button>
-        {event?.estado === "No" && (
+        {allowActions && event?.estado === "No" && (
           <>
             <button
               className="px-2 py-1 bg-green-600 text-white rounded"

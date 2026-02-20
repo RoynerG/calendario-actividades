@@ -8,17 +8,27 @@ import {
   crearEvento,
   obtenerTicketsFuncionario,
   verificarBloqueo,
+  listarPendientesVencidos,
+  cambiarEstadoEvento,
 } from "../services/eventService";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
 import Select from "react-select";
 import GuiaCategorias from "../components/GuiaCategorias";
 import EventoViewer from "../components/EventoViewer";
 import { showSwal } from "../helpers/swalUtils";
+import { FaClipboardList, FaExclamationTriangle } from "react-icons/fa";
+import {
+  showVerSeguimientosModal,
+  showCrearSeguimientoModal,
+} from "../helpers/seguimientoModals";
+
+import { checkAdminAndExecute } from "../helpers/auth";
 
 export default function VistaFuncionario() {
   const { id_funcionario } = useParams();
+  const navigate = useNavigate();
   const [eventos, setEventos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [tickets, setTickets] = useState([]);
@@ -53,7 +63,165 @@ export default function VistaFuncionario() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [esCita, setEsCita] = useState(null);
+  const [pendientesCount, setPendientesCount] = useState(0);
   const schedulerRef = useRef(null);
+
+  // Función para mostrar modal de eventos pendientes
+  const mostrarPendientes = async () => {
+    // Mostrar loading
+    Swal.fire({
+      title: "Cargando pendientes...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+      customClass: { container: "z-[10000]" },
+    });
+
+    try {
+      const res = await listarPendientesVencidos(id_funcionario);
+      Swal.close();
+
+      if (res.success) {
+        const pendientes = res.data;
+        setPendientesCount(pendientes.length);
+        if (pendientes.length === 0) {
+          Swal.fire({
+            title: "¡Todo al día!",
+            text: "No tienes eventos pendientes vencidos.",
+            icon: "success",
+            customClass: { container: "z-[10000]" },
+          });
+          return;
+        }
+
+        // Construir HTML del listado
+        // Usaremos un div contenedor con ID para poder actualizarlo si es necesario,
+        // aunque con SweetAlert es más fácil regenerar el modal completo tras una acción.
+        // Pero como Swal es una promesa, manejaremos la acción dentro de preConfirm o html con eventos delegados.
+        // Mejor opción: Renderizar HTML y usar eventos delegados en el didOpen del Swal.
+
+        let htmlList = `<div class="text-left max-h-[60vh] overflow-y-auto space-y-3 p-2">`;
+        pendientes.forEach((ev) => {
+          htmlList += `
+            <div class="bg-red-50 p-3 rounded border-l-4 border-red-500 shadow-sm mb-2 flex flex-col sm:flex-row justify-between items-center gap-2">
+              <div class="flex-1">
+                <div class="font-bold text-red-700 text-sm">${ev.titulo}</div>
+                <div class="text-xs text-gray-600">
+                  ${new Date(ev.fecha_inicio).toLocaleString()}
+                </div>
+                <div class="text-xs text-gray-500 mt-1">${ev.categoria}</div>
+              </div>
+              <button 
+                class="btn-marcar-realizado bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 px-3 rounded shadow"
+                data-id="${ev.id}"
+              >
+                Marcar Realizado
+              </button>
+            </div>
+          `;
+        });
+        htmlList += `</div>`;
+
+        await Swal.fire({
+          title: "Eventos Pendientes Vencidos",
+          html: htmlList,
+          width: "700px",
+          showCloseButton: true,
+          showConfirmButton: false,
+          customClass: { container: "z-[10000]" },
+          didOpen: (modalElement) => {
+            // Agregar listeners a los botones
+            const buttons = modalElement.querySelectorAll(
+              ".btn-marcar-realizado"
+            );
+            buttons.forEach((btn) => {
+              btn.addEventListener("click", async () => {
+                const idEvento = btn.getAttribute("data-id");
+
+                // Pedir observación
+                const { value: observacion } = await Swal.fire({
+                  title: "Finalizar Evento",
+                  input: "textarea",
+                  inputLabel: "Observación / Motivo",
+                  inputPlaceholder: "Escribe una observación...",
+                  inputAttributes: {
+                    "aria-label": "Escribe una observación",
+                  },
+                  showCancelButton: true,
+                  customClass: { container: "z-[100001]" }, // Z-index mayor
+                });
+
+                if (observacion) {
+                  try {
+                    // Mostrar loading pequeño
+                    Swal.showLoading();
+                    const resp = await cambiarEstadoEvento(
+                      idEvento,
+                      observacion
+                    );
+                    if (resp.success) {
+                      await Swal.fire({
+                        title: "¡Evento finalizado!",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false,
+                        customClass: { container: "z-[100001]" },
+                      });
+                      // Recargar la lista de pendientes (llamada recursiva a mostrarPendientes)
+                      mostrarPendientes();
+                      // Recargar eventos del calendario
+                      // No podemos llamar fetchEventos directamente porque está en useEffect, pero podemos forzar reload o actualizar estado si lo sacamos.
+                      // Por simplicidad, recargaremos la página al cerrar todo, o confiamos en que el usuario refresque.
+                      // O mejor: window.location.reload() si queremos ser drásticos, o dejamos así.
+                    } else {
+                      Swal.fire(
+                        "Error",
+                        resp.message || "Error al finalizar",
+                        "error"
+                      );
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    Swal.fire(
+                      "Error",
+                      "Ocurrió un error al finalizar el evento",
+                      "error"
+                    );
+                  }
+                }
+              });
+            });
+          },
+        });
+      } else {
+        Swal.fire(
+          "Error",
+          res.message || "No se pudieron cargar pendientes",
+          "error"
+        );
+      }
+    } catch (e) {
+      console.error(e);
+      Swal.fire("Error", "Error de conexión", "error");
+    }
+  };
+
+  // Funciones wrapper para verificar Admin antes de abrir modales de seguimiento
+  const handleVerSeguimiento = (idEvento = null) => {
+    const tipo = idEvento ? "evento" : "funcionario";
+    showVerSeguimientosModal(idEvento, tipo, id_funcionario);
+  };
+
+  const handleHacerSeguimiento = (idEvento = null) => {
+    const tipo = idEvento ? "evento" : "funcionario";
+    checkAdminAndExecute(() => {
+      showCrearSeguimientoModal(idEvento, tipo, "Admin", id_funcionario);
+    });
+  };
+
+  const handleVerSeguimientoGlobal = () => {
+    navigate("/consolidado-seguimientos");
+  };
+
   const buttonStyle = {
     backgroundColor: "black",
     color: "white",
@@ -67,6 +235,18 @@ export default function VistaFuncionario() {
   };
   const inputStyle =
     "border p-2 rounded w-bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
+
+  // Efecto para detectar evento_id en la URL y abrir modal de seguimiento
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const eventoId = params.get("evento_id");
+    if (eventoId) {
+      // Pequeño delay para asegurar que Swal no entre en conflicto con otros
+      setTimeout(() => {
+        handleVerSeguimiento(eventoId);
+      }, 500);
+    }
+  }, []);
 
   useEffect(() => {
     listarCategorias().then((res) => {
@@ -124,13 +304,36 @@ export default function VistaFuncionario() {
       try {
         const res = await verificarBloqueo(id_funcionario);
         console.log(res);
-        if (res.success && res.data.bloqueado) {
-          Swal.fire({
-            title: "¡Atención!",
-            html: `Tienes <b>${res.data.cantidad}</b> evento(s) sin realizar con más de 2 días de antigüedad. No puedes agendar nuevos eventos hasta resolverlos.`,
-            icon: "warning",
-            customClass: { container: "z-[100000]" },
-          });
+        if (res.success) {
+          setPendientesCount(res.data.cantidad || 0);
+          if (res.data.bloqueado) {
+            Swal.fire({
+              title: "¡Atención!",
+              html: `
+              <p class="mb-4">Tienes <b>${res.data.cantidad}</b> evento(s) sin realizar con más de 2 días de antigüedad.</p>
+              <p class="mb-4 text-sm text-red-600 font-bold">No puedes agendar nuevos eventos hasta resolverlos.</p>
+              <button id="btn-ver-pendientes-alert" class="bg-red-600 text-white font-bold py-2 px-4 rounded hover:bg-red-700 shadow-lg transition-all">
+                Ver Pendientes y Resolver
+              </button>
+            `,
+              icon: "warning",
+              showConfirmButton: false,
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              customClass: { container: "z-[100000]" },
+              didOpen: (modalElement) => {
+                const btn = modalElement.querySelector(
+                  "#btn-ver-pendientes-alert"
+                );
+                if (btn) {
+                  btn.addEventListener("click", () => {
+                    Swal.close(); // Cerrar alerta de bloqueo
+                    mostrarPendientes(); // Abrir modal de pendientes
+                  });
+                }
+              },
+            });
+          }
         }
       } catch (err) {
         console.error("Error verificando bloqueo:", err);
@@ -378,12 +581,50 @@ export default function VistaFuncionario() {
       <h1 className="text-sm md:text-5xl font-bold">
         Calendario de {funcionario.nombre || "Funcionario"}
       </h1>
-      <button
-        onClick={() => setShowForm(!showForm)}
-        className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded shadow"
-      >
-        {showForm ? "Cerrar formulario" : "+ Crear Evento"}
-      </button>
+      <div className="flex flex-wrap justify-center gap-4 mb-4">
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+        >
+          {showForm ? "Cerrar formulario" : "+ Crear Evento"}
+        </button>
+
+        {/* Botón de Pendientes */}
+        <button
+          onClick={mostrarPendientes}
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow-md flex items-center transition duration-300 ease-in-out transform hover:-translate-y-1 relative"
+        >
+          <FaExclamationTriangle className="mr-2" />
+          Eventos Pendientes
+          {pendientesCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-800 text-xs font-bold px-2 py-1 rounded-full shadow-sm border border-white">
+              {pendientesCount}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => handleHacerSeguimiento(null)}
+          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded shadow-md flex items-center transition duration-300 ease-in-out transform hover:-translate-y-1"
+        >
+          <FaClipboardList className="mr-2" />
+          Hacer Seguimiento Global
+        </button>
+        <button
+          onClick={() => handleVerSeguimiento(null)}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow-md flex items-center transition duration-300 ease-in-out transform hover:-translate-y-1"
+        >
+          <FaClipboardList className="mr-2" />
+          Ver Mi Seguimiento
+        </button>
+        <button
+          onClick={handleVerSeguimientoGlobal}
+          className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded shadow-md flex items-center transition duration-300 ease-in-out transform hover:-translate-y-1"
+        >
+          <FaClipboardList className="mr-2" />
+          Ver Seguimiento Global
+        </button>
+      </div>
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
         <input
           type="date"
@@ -484,6 +725,11 @@ export default function VistaFuncionario() {
                 event={event}
                 categorias={categorias}
                 setFiltros={setFiltros}
+                onVerSeguimiento={() => handleVerSeguimiento(event.event_id)}
+                onHacerSeguimiento={() =>
+                  handleHacerSeguimiento(event.event_id)
+                }
+                allowActions={true}
               />
             )}
             editable={false}

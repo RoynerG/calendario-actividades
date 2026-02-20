@@ -30,6 +30,11 @@ export async function listarFuncionarios() {
   return await res.json();
 }
 
+export async function listarFuncionariosAdmin() {
+  const res = await fetch(BASE_URL + "listar_funcionarios_admin");
+  return await res.json();
+}
+
 export async function listarTickets() {
   const res = await fetch(BASE_URL + "listar_tickets");
   return await res.json();
@@ -109,16 +114,70 @@ export async function obtenerHistorialEvento(id_evento) {
   });
   return data;
 }
+
 export async function verificarBloqueo(id_empleado) {
-  const res = await axios.post(BASE_URL + "verificar_bloqueo", {
+  const { data } = await axios.post(BASE_URL + "verificar_bloqueo", {
     id_empleado,
   });
-  return res.data;
+  return data;
 }
 
-export async function listarBloqueos(offset = 0, limit = 10) {
-  const res = await axios.get(
-    `${BASE_URL}listar_bloqueos&offset=${offset}&limit=${limit}`
+export async function listarBloqueos() {
+  const { data } = await axios.get(BASE_URL + "listar_bloqueos");
+  return data;
+}
+
+// === SEGUIMIENTO DE ACTIVIDADES ===
+
+export async function crearSeguimiento(
+  detalle,
+  usuario,
+  id_evento = null,
+  tipo = "evento",
+  id_funcionario = null,
+  id_autor = null
+) {
+  const { data } = await axios.post(BASE_URL + "crear_seguimiento", {
+    detalle,
+    usuario,
+    id_evento,
+    tipo,
+    id_funcionario,
+    id_autor,
+  });
+  return data;
+}
+
+export async function listarPendientesVencidos(id_empleado) {
+  const { data } = await axios.post(BASE_URL + "listar_pendientes_vencidos", {
+    id_empleado,
+  });
+  return data;
+}
+
+export async function listarSeguimientosEvento(id_evento) {
+  const { data } = await axios.post(BASE_URL + "listar_seguimientos_evento", {
+    id_evento,
+  });
+  return data;
+}
+
+export async function listarSeguimientosFuncionario(id_funcionario) {
+  const { data } = await axios.post(
+    BASE_URL + "listar_seguimientos_funcionario",
+    {
+      id_funcionario,
+    }
   );
-  return res.data;
+  return data;
+}
+
+export async function listarSeguimientosGlobales() {
+  const { data } = await axios.get(BASE_URL + "listar_seguimientos_globales");
+  return data;
+}
+
+export async function listarTodosSeguimientos() {
+  const { data } = await axios.get(BASE_URL + "listar_todos_seguimientos");
+  return data;
 }

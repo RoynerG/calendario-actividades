@@ -10,6 +10,18 @@ const styleInput =
   "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
 export async function showRealizadoModal(event, setFiltros) {
+  // Intentar cerrar el visor del scheduler antes de abrir el modal
+  try {
+    // Simular clic en el body para cerrar popovers
+    document.body.click();
+    
+    // Intentar encontrar botón de cierre específico (MUI o clase común)
+    const closeBtn = document.querySelector('button[aria-label="Close"]');
+    if (closeBtn) closeBtn.click();
+  } catch (e) {
+    console.error("No se pudo cerrar el visor del evento", e);
+  }
+
   const { value: obs } = await Swal.fire({
     customClass: { container: "z-[2000]" },
     title: `Resultado del evento #${event.event_id}`,
@@ -19,7 +31,7 @@ export async function showRealizadoModal(event, setFiltros) {
       </label>
       <textarea id="obs" 
         class="${styleInput}"
-      ></textarea>
+      >Realizado</textarea>
     `,
     focusConfirm: false,
     preConfirm: () => {

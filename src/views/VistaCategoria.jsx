@@ -8,9 +8,13 @@ import {
 import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
-import { FaPowerOff, FaMapLocationDot } from "react-icons/fa6";
-import { IoTimeSharp } from "react-icons/io5";
-import { showHistorialModal } from "../helpers/eventModals";
+import EventoViewer from "../components/EventoViewer";
+import { checkAdminAndExecute } from "../helpers/auth";
+import {
+  showVerSeguimientosModal,
+  showCrearSeguimientoModal,
+} from "../helpers/seguimientoModals";
+
 export default function VistaCategoria() {
   const { id_categoria } = useParams();
   const [eventos, setEventos] = useState([]);
@@ -34,6 +38,16 @@ export default function VistaCategoria() {
     borderRadius: "0.25rem",
     width: "auto",
     whiteSpace: "nowrap",
+  };
+
+  const handleVerSeguimiento = (idEvento) => {
+    showVerSeguimientosModal(idEvento, "evento", null);
+  };
+
+  const handleHacerSeguimiento = (idEvento) => {
+    checkAdminAndExecute(() => {
+      showCrearSeguimientoModal(idEvento, "evento", "Admin", null);
+    });
   };
 
   useEffect(() => {
@@ -183,75 +197,16 @@ export default function VistaCategoria() {
             }}
             locale={es}
             viewerExtraComponent={(fields, event) => (
-              <div>
-                <ul>
-                  <li className="flex items-center">
-                    {event?.estado === "Si" ? (
-                      <FaPowerOff className="mr-2 text-green-500 transform rotate-180" />
-                    ) : (
-                      <FaPowerOff className="mr-2 text-red-500" />
-                    )}
-
-                    <span
-                      className={`block text-xs font-semibold px-3 py-1 rounded-full ${
-                        event?.estado === "Si"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {event?.estado === "Si" ? "Realizado" : "Sin realizar"}
-                    </span>
-                  </li>
-                  {event?.fue_trasladado === "Si" ? (
-                    <li className="flex items-center mt-2">
-                      <IoTimeSharp className="mr-2 text-red-500 transform rotate-180" />
-                      <span
-                        className={`block text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-red-700`}
-                      >
-                        Fue trasladado
-                      </span>
-                    </li>
-                  ) : null}
-                  {event?.ubicacion && (
-                    <li>
-                      <FaMapLocationDot className="inline" /> {event?.ubicacion}
-                    </li>
-                  )}
-
-                  <li>
-                    <strong>Categoría:</strong> {event?.categoria}
-                  </li>
-                  {event?.id_ticket > 0 ? (
-                    <li>
-                      <strong>Ticket: </strong>
-                      <a
-                        href={`https://sucasainmobiliaria.com.co/ticket/?id_ticket=${event?.id_ticket}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Ver ticket
-                      </a>
-                    </li>
-                  ) : null}
-                  <li>
-                    <a
-                      href={`/evento/${event?.event_id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Ver evento
-                    </a>
-                  </li>
-                </ul>
-                <div className="flex flex-col gap-2 mt-4">
-                  <button
-                    className="px-2 py-1 bg-gray-500 text-white rounded"
-                    onClick={() => showHistorialModal(event.event_id)}
-                  >
-                    Ver cambios
-                  </button>
-                </div>
-              </div>
+              <EventoViewer
+                event={event}
+                categorias={null}
+                setFiltros={setFiltros}
+                onVerSeguimiento={() => handleVerSeguimiento(event.event_id)}
+                onHacerSeguimiento={() =>
+                  handleHacerSeguimiento(event.event_id)
+                }
+                allowActions={false}
+              />
             )}
             editable={false}
             deletable={false}
