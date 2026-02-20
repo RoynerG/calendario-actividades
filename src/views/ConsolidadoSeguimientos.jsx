@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import {
   listarTodosSeguimientos,
@@ -8,11 +10,13 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export default function ConsolidadoSeguimientos() {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filterText, setFilterText] = useState("");
   const [funcionarios, setFuncionarios] = useState([]);
   const [selectedFuncionario, setSelectedFuncionario] = useState("");
+  const [isAllowed, setIsAllowed] = useState(false);
 
   const columns = [
     {

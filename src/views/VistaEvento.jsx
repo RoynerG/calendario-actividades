@@ -16,34 +16,13 @@ import {
   showCrearSeguimientoModal,
 } from "../helpers/seguimientoModals";
 import { showHistorialModal } from "../helpers/eventModals";
+import { checkAdminAndExecute } from "../helpers/auth";
 
 export default function VistaEvento() {
   const { id_evento } = useParams();
   const navigate = useNavigate();
   const [evento, setEvento] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const checkAdminAndExecute = async (callback) => {
-    const isAdmin = localStorage.getItem("modo_admin") === "true";
-    if (isAdmin) {
-      callback();
-    } else {
-      const { value: password } = await Swal.fire({
-        title: "Ingrese clave de administrador",
-        input: "password",
-        inputPlaceholder: "Clave...",
-        showCancelButton: true,
-      });
-
-      if (password === "admin123") {
-        localStorage.setItem("modo_admin", "true");
-        await Swal.fire("Modo Admin Activado", "", "success");
-        callback();
-      } else if (password) {
-        Swal.fire("Clave incorrecta", "", "error");
-      }
-    }
-  };
 
   const handleVerSeguimiento = () => {
     showVerSeguimientosModal(id_evento, "evento");

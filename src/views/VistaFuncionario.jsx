@@ -219,7 +219,9 @@ export default function VistaFuncionario() {
   };
 
   const handleVerSeguimientoGlobal = () => {
-    navigate("/consolidado-seguimientos");
+    checkAdminAndExecute(() => {
+      navigate("/consolidado-seguimientos");
+    });
   };
 
   const buttonStyle = {

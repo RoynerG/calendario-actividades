@@ -68,7 +68,7 @@ export const checkAdminAndExecute = async (callback) => {
     });
 
     if (formValues) {
-      if (formValues.password === "skcadmin2025*") {
+      if (formValues.password === "skcadmin2025*" || formValues.password === "admin123") {
         localStorage.setItem("modo_admin", "true");
         // Guardar usuario seleccionado como admin actual
         localStorage.setItem(
@@ -85,6 +85,10 @@ export const checkAdminAndExecute = async (callback) => {
           icon: "success",
           customClass: { container: "z-[10000]" },
         });
+
+        // Disparar evento para que otros componentes se actualicen
+        window.dispatchEvent(new Event("adminModeChanged"));
+
         callback();
       } else {
         Swal.fire({

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaUserSecret } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { showVerSeguimientosModal } from "../helpers/seguimientoModals";
@@ -8,11 +8,27 @@ export default function BotonAdminGlobal() {
     localStorage.getItem("modo_admin") === "true"
   );
 
+  useEffect(() => {
+    const handleAdminChange = () => {
+      setIsAdmin(localStorage.getItem("modo_admin") === "true");
+    };
+
+    window.addEventListener("adminModeChanged", handleAdminChange);
+    // También escuchar cambios en storage (para pestañas diferentes, aunque no es el caso principal)
+    window.addEventListener("storage", handleAdminChange);
+
+    return () => {
+      window.removeEventListener("adminModeChanged", handleAdminChange);
+      window.removeEventListener("storage", handleAdminChange);
+    };
+  }, []);
+
   // Función secreta para activar modo admin
   const toggleAdmin = async () => {
     if (isAdmin) {
       localStorage.removeItem("modo_admin");
       setIsAdmin(false);
+      window.dispatchEvent(new Event("adminModeChanged"));
       Swal.fire("Modo Admin Desactivado", "", "info");
     } else {
       const { value: password } = await Swal.fire({
@@ -22,10 +38,11 @@ export default function BotonAdminGlobal() {
         showCancelButton: true,
       });
 
-      if (password === "admin123") {
+      if (password === "admin123" || password === "skcadmin2025*") {
         // Clave sencilla por ahora
         localStorage.setItem("modo_admin", "true");
         setIsAdmin(true);
+        window.dispatchEvent(new Event("adminModeChanged"));
         Swal.fire("Modo Admin Activado", "", "success");
       } else if (password) {
         Swal.fire("Clave incorrecta", "", "error");
