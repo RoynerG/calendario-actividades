@@ -5,6 +5,7 @@ import {
   listarSeguimientosGlobales,
   listarSeguimientosFuncionario,
 } from "../services/eventService";
+import { checkAdminAndExecute } from "./auth";
 
 /**
  * Muestra un modal (SweetAlert2) con la lista de seguimientos.
@@ -104,7 +105,9 @@ export async function showVerSeguimientosModal(
     });
 
     if (result.isDenied) {
-      showCrearSeguimientoModal(idEvento, tipo, "Admin", idFuncionario);
+      checkAdminAndExecute(() => {
+        showCrearSeguimientoModal(idEvento, tipo, "Admin", idFuncionario);
+      });
     }
   } catch (error) {
     console.error("Error cargando seguimientos", error);

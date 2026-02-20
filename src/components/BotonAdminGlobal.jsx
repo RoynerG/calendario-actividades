@@ -27,6 +27,7 @@ export default function BotonAdminGlobal() {
   const toggleAdmin = async () => {
     if (isAdmin) {
       localStorage.removeItem("modo_admin");
+      localStorage.removeItem("admin_user");
       setIsAdmin(false);
       window.dispatchEvent(new Event("adminModeChanged"));
       Swal.fire("Modo Admin Desactivado", "", "info");
