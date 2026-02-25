@@ -50,6 +50,26 @@ export async function obtenerCategoria(id) {
   return res.data;
 }
 
+export async function crearCategoria(categoria) {
+  const res = await axios.post(BASE_URL + "crear_categoria", categoria);
+  return res.data;
+}
+
+export async function actualizarCategoria(categoria) {
+  const res = await axios.post(BASE_URL + "actualizar_categoria", categoria);
+  return res.data;
+}
+
+export async function eliminarCategoria(id) {
+  const res = await axios.post(BASE_URL + "eliminar_categoria", { id });
+  return res.data;
+}
+
+export async function actualizarEsquemaCategorias() {
+  const res = await fetch(BASE_URL + "actualizar_esquema_categorias");
+  return await res.json();
+}
+
 export async function obtenerTicketsFuncionario(id_empleado) {
   const res = await axios.post(BASE_URL + "obtener_tickets_funcionario", {
     id_empleado,

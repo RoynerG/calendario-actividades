@@ -13,12 +13,14 @@ import ConsolidadoEventos from "../views/ConsolidadoEventos";
 import ConsolidadoFuncionario from "../views/ConsolidadoFuncionario";
 import InformeEventos from "../views/InformeEventos";
 import ConsolidadoSeguimientos from "../views/ConsolidadoSeguimientos";
+import GestionCategorias from "../views/GestionCategorias";
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<VistaGeneral />} />
+        <Route path="/gestion-categorias" element={<GestionCategorias />} />
         <Route path="/consolidado-eventos" element={<ConsolidadoEventos />} />
         <Route path="/consolidado-seguimientos" element={<ConsolidadoSeguimientos />} />
         <Route path="/informe-eventos" element={<InformeEventos />} />
