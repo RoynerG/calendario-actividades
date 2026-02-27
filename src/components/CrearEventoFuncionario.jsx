@@ -41,6 +41,9 @@ export default function CrearEventoFuncionario() {
     contrato: "",
     inmueble: "",
     es_cita: "",
+    recordatorio_activo: false,
+    recordatorio_minutos: "",
+    recordatorio_canal: "whatsapp",
   });
   const [relacionadoConTicket, setRelacionadoConTicket] = useState(null);
   const [ticketSelecionado, setTicketSelecionado] = useState(null);
@@ -157,6 +160,9 @@ export default function CrearEventoFuncionario() {
       contrato: "",
       inmueble: "",
       es_cita: "",
+      recordatorio_activo: false,
+      recordatorio_minutos: "",
+      recordatorio_canal: "whatsapp",
     });
     setRelacionadoConTicket(null);
     setEsCita(null);
@@ -220,6 +226,15 @@ export default function CrearEventoFuncionario() {
 
     const { fecha, hora_inicio, hora_fin } = formData;
 
+    if (formData.recordatorio_activo && !formData.recordatorio_minutos) {
+      await showSwal({
+        title: "Error",
+        text: "Selecciona la anticipación del recordatorio.",
+        icon: "error",
+      });
+      return;
+    }
+
     if (!esRecurrente) {
       // Combina fecha y horas a formato ISO local: "YYYY-MM-DDTHH:mm"
       const fecha_inicio =
@@ -248,38 +263,38 @@ export default function CrearEventoFuncionario() {
       delete eventoData.hora_fin;
 
       try {
-      Swal.fire({
-        title: "Guardando...",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-        ...swalBaseOptions,
-      });
-        const res = await crearEvento(eventoData);
-        if (res.data.success) {
-        await Swal.fire({
-          title: "¡Éxito!",
-          text: "El evento fue agregado correctamente",
-          icon: "success",
+        Swal.fire({
+          title: "Guardando...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
           ...swalBaseOptions,
         });
+        const res = await crearEvento(eventoData);
+        if (res.data.success) {
+          await Swal.fire({
+            title: "¡Éxito!",
+            text: "El evento fue agregado correctamente",
+            icon: "success",
+            ...swalBaseOptions,
+          });
           resetForm();
         } else {
           const mensaje = `El funcionario <b>${funcionario.nombre}</b> tiene eventos sin marcar.`;
-        await Swal.fire({
-          title: "No se puede crear el evento",
-          html: mensaje,
-          icon: "warning",
-          ...swalBaseOptions,
-        });
+          await Swal.fire({
+            title: "No se puede crear el evento",
+            html: mensaje,
+            icon: "warning",
+            ...swalBaseOptions,
+          });
         }
       } catch (error) {
         console.error(error);
-      await Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error al agregar el evento",
-        icon: "error",
-        ...swalBaseOptions,
-      });
+        await Swal.fire({
+          title: "Error",
+          text: "Ocurrió un error al agregar el evento",
+          icon: "error",
+          ...swalBaseOptions,
+        });
       }
     } else {
       // LÓGICA RECURRENTE
@@ -518,6 +533,79 @@ export default function CrearEventoFuncionario() {
           className={inputStyle}
           required={!(esRecurrente && tipoRecurrencia === "personalizado")}
         />
+
+        <div className="flex items-center mb-4">
+          <input
+            id="recordatorio_activo"
+            type="checkbox"
+            checked={formData.recordatorio_activo}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                recordatorio_activo: e.target.checked,
+              })
+            }
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+          />
+          <label
+            htmlFor="recordatorio_activo"
+            className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+          >
+            Enviar recordatorio
+          </label>
+        </div>
+
+        {formData.recordatorio_activo && (
+          <>
+            <label
+              htmlFor="recordatorio_minutos"
+              className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Anticipación del recordatorio
+            </label>
+            <select
+              id="recordatorio_minutos"
+              value={formData.recordatorio_minutos}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  recordatorio_minutos: e.target.value,
+                })
+              }
+              className={inputStyle}
+              required
+            >
+              <option value="">Selecciona</option>
+              <option value="10">10 minutos antes</option>
+              <option value="30">30 minutos antes</option>
+              <option value="60">1 hora antes</option>
+              <option value="120">2 horas antes</option>
+              <option value="1440">1 día antes</option>
+            </select>
+            <label
+              htmlFor="recordatorio_canal"
+              className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+            >
+              Canal del recordatorio
+            </label>
+            <select
+              id="recordatorio_canal"
+              value={formData.recordatorio_canal}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  recordatorio_canal: e.target.value,
+                })
+              }
+              className={inputStyle}
+              required
+            >
+              <option value="whatsapp">WhatsApp</option>
+              <option value="email">Correo</option>
+              <option value="ambos">WhatsApp y correo</option>
+            </select>
+          </>
+        )}
 
         {/* Sección de Recurrencia */}
         <div className="flex items-center mb-4">

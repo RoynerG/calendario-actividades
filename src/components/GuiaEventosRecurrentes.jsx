@@ -17,14 +17,20 @@ export default function GuiaEventosRecurrentes({ buttonStyle }) {
         Guía de eventos recurrentes
       </a>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Guía para crear eventos recurrentes</DialogTitle>
         <DialogContent dividers>
           <Typography component="div" gutterBottom>
             <div className="space-y-3 text-sm text-gray-800">
               <p>
                 Usa esta opción cuando necesitas crear varias fechas similares
-                en un solo paso.
+                en un solo paso. Primero completa título, categoría, ubicación y
+                horario base. Luego elige el tipo de recurrencia.
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-lg border border-gray-200 p-3">
@@ -37,8 +43,8 @@ export default function GuiaEventosRecurrentes({ buttonStyle }) {
                 <div className="rounded-lg border border-gray-200 p-3">
                   <p className="font-semibold mb-1">Semanal</p>
                   <p>
-                    Escoge días específicos de la semana y se repetirán hasta
-                    la fecha fin.
+                    Escoge días específicos de la semana y se repetirán hasta la
+                    fecha fin.
                   </p>
                 </div>
                 <div className="rounded-lg border border-gray-200 p-3 sm:col-span-2">
@@ -46,6 +52,13 @@ export default function GuiaEventosRecurrentes({ buttonStyle }) {
                   <p>
                     Selecciona fechas puntuales no consecutivas y crea eventos
                     solo en esas fechas.
+                  </p>
+                </div>
+                <div className="rounded-lg border border-gray-200 p-3 sm:col-span-2">
+                  <p className="font-semibold mb-1">Paso a paso</p>
+                  <p>
+                    1) Elige el tipo de recurrencia. 2) Define la fecha final o
+                    agrega fechas personalizadas. 3) Revisa el resumen y guarda.
                   </p>
                 </div>
               </div>
@@ -56,11 +69,13 @@ export default function GuiaEventosRecurrentes({ buttonStyle }) {
                     Verifica categoría y horario antes de guardar para evitar
                     bloqueos.
                   </li>
-                  <li>
-                    Usa “Personalizado” si necesitas fechas no regulares.
-                  </li>
+                  <li>Usa “Personalizado” si necesitas fechas no regulares.</li>
                   <li>
                     Revisa eventos pendientes antes de crear nuevos eventos.
+                  </li>
+                  <li>
+                    Si necesitas excluir un día, usa “Personalizado” y solo
+                    agrega las fechas correctas.
                   </li>
                 </ul>
               </div>

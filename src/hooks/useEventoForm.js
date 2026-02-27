@@ -29,6 +29,9 @@ export function useEventoForm(mode = "simple", id) {
     inmueble: "",
     es_cita: "",
     empleados: [],
+    recordatorio_activo: false,
+    recordatorio_minutos: "",
+    recordatorio_canal: "whatsapp",
   };
 
   const [categorias, setCategorias] = useState([]);
@@ -60,7 +63,6 @@ export function useEventoForm(mode = "simple", id) {
       );
     }
     Promise.all(tasks).finally(() => setLoading(false));
-    // eslint-disable-next-line
   }, [mode, id]);
 
   // Generar automáticamente la descripción para citas
@@ -83,7 +85,6 @@ export function useEventoForm(mode = "simple", id) {
     } else if (mode === "ticket" && formData.es_cita === "no") {
       setFormData((f) => ({ ...f, descripcion: "" }));
     }
-    // eslint-disable-next-line
   }, [
     formData.id_categoria,
     formData.fecha,
@@ -196,8 +197,7 @@ export function useEventoForm(mode = "simple", id) {
     if (hFin < 8 || hFin > 21) {
       return Swal.fire({
         title: "Error",
-        text:
-          "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm.",
+        text: "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm.",
         icon: "warning",
         ...swalBaseOptions,
       });
@@ -208,6 +208,15 @@ export function useEventoForm(mode = "simple", id) {
       return Swal.fire({
         title: "Error",
         text: "La descripción es obligatoria si el evento no es una cita.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
+    }
+
+    if (formData.recordatorio_activo && !formData.recordatorio_minutos) {
+      return Swal.fire({
+        title: "Error",
+        text: "Selecciona la anticipación del recordatorio.",
         icon: "warning",
         ...swalBaseOptions,
       });
@@ -259,7 +268,8 @@ export function useEventoForm(mode = "simple", id) {
           ...swalBaseOptions,
         });
       }
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       Swal.fire({
         title: "Error",
         text: "Hubo un error.",

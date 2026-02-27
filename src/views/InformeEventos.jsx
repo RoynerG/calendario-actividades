@@ -26,9 +26,6 @@ import {
   format,
   eachDayOfInterval,
   isSunday,
-  setHours,
-  setMinutes,
-  addMinutes,
   differenceInMinutes,
   parseISO,
   isSaturday,
@@ -705,7 +702,7 @@ export default function InformeEventos() {
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          label={({ name, percent }) =>
+                          label={({ percent }) =>
                             percent > 0.05
                               ? `${(percent * 100).toFixed(0)}%`
                               : ""
@@ -748,7 +745,7 @@ export default function InformeEventos() {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) =>
+                    label={({ percent }) =>
                       percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ""
                     }
                     outerRadius={100}
