@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { FaUserSecret } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { showVerSeguimientosModal } from "../helpers/seguimientoModals";
+import { swalBaseOptions } from "../helpers/swalUtils";
 
 export default function BotonAdminGlobal() {
   const [isAdmin, setIsAdmin] = useState(
@@ -30,13 +31,18 @@ export default function BotonAdminGlobal() {
       localStorage.removeItem("admin_user");
       setIsAdmin(false);
       window.dispatchEvent(new Event("adminModeChanged"));
-      Swal.fire("Modo Admin Desactivado", "", "info");
+      Swal.fire({
+        title: "Modo Admin Desactivado",
+        icon: "info",
+        ...swalBaseOptions,
+      });
     } else {
       const { value: password } = await Swal.fire({
         title: "Ingrese clave de administrador",
         input: "password",
         inputPlaceholder: "Clave...",
         showCancelButton: true,
+        ...swalBaseOptions,
       });
 
       if (password === "admin123" || password === "skcadmin2025*") {
@@ -44,9 +50,17 @@ export default function BotonAdminGlobal() {
         localStorage.setItem("modo_admin", "true");
         setIsAdmin(true);
         window.dispatchEvent(new Event("adminModeChanged"));
-        Swal.fire("Modo Admin Activado", "", "success");
+        Swal.fire({
+          title: "Modo Admin Activado",
+          icon: "success",
+          ...swalBaseOptions,
+        });
       } else if (password) {
-        Swal.fire("Clave incorrecta", "", "error");
+        Swal.fire({
+          title: "Clave incorrecta",
+          icon: "error",
+          ...swalBaseOptions,
+        });
       }
     }
   };

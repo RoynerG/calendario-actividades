@@ -7,6 +7,7 @@ import {
   crearEvento,
   crearEventos,
 } from "../services/eventService";
+import { swalBaseOptions } from "../helpers/swalUtils";
 
 export function useEventoForm(mode = "simple", id) {
   // Campos de formulario, ahora con fecha y horas separadas
@@ -110,7 +111,12 @@ export function useEventoForm(mode = "simple", id) {
       !fecha_fin ||
       !formData.id_categoria
     ) {
-      return Swal.fire("Error", "Todos los campos obligatorios.", "warning");
+      return Swal.fire({
+        title: "Error",
+        text: "Todos los campos obligatorios.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
 
     const fInicio = new Date(fecha_inicio);
@@ -118,11 +124,12 @@ export function useEventoForm(mode = "simple", id) {
     const ahora = new Date();
 
     if (isNaN(fInicio.getTime()) || isNaN(fFin.getTime())) {
-      return Swal.fire(
-        "Error",
-        "Debes ingresar fechas y horas válidas.",
-        "warning"
-      );
+      return Swal.fire({
+        title: "Error",
+        text: "Debes ingresar fechas y horas válidas.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
 
     if (
@@ -130,19 +137,21 @@ export function useEventoForm(mode = "simple", id) {
       fInicio.getMonth() !== fFin.getMonth() ||
       fInicio.getDate() !== fFin.getDate()
     ) {
-      return Swal.fire(
-        "Error",
-        "La fecha de inicio y la de finalización deben ser el mismo día.",
-        "warning"
-      );
+      return Swal.fire({
+        title: "Error",
+        text: "La fecha de inicio y la de finalización deben ser el mismo día.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
 
     if (fFin < fInicio) {
-      return Swal.fire(
-        "Error",
-        "La hora de finalización no puede ser menor que la de inicio.",
-        "warning"
-      );
+      return Swal.fire({
+        title: "Error",
+        text: "La hora de finalización no puede ser menor que la de inicio.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
 
     // No permite fechas pasadas
@@ -157,51 +166,58 @@ export function useEventoForm(mode = "simple", id) {
       ahora.getDate()
     );
     if (inicioSinHoras < hoySinHoras) {
-      return Swal.fire(
-        "Error",
-        "No puedes seleccionar una fecha pasada.",
-        "warning"
-      );
+      return Swal.fire({
+        title: "Error",
+        text: "No puedes seleccionar una fecha pasada.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
     if (fFin < ahora) {
-      return Swal.fire(
-        "Error",
-        "No puedes seleccionar una hora de finalización pasada.",
-        "warning"
-      );
+      return Swal.fire({
+        title: "Error",
+        text: "No puedes seleccionar una hora de finalización pasada.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
 
     // Horas entre 8:00 y 21:00
     const hInicio = fInicio.getHours() + fInicio.getMinutes() / 60;
     const hFin = fFin.getHours() + fFin.getMinutes() / 60;
     if (hInicio < 8 || hInicio > 21) {
-      return Swal.fire(
-        "Error",
-        "La hora de inicio debe estar entre las 8:00 am y las 9:00 pm.",
-        "warning"
-      );
+      return Swal.fire({
+        title: "Error",
+        text: "La hora de inicio debe estar entre las 8:00 am y las 9:00 pm.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
     if (hFin < 8 || hFin > 21) {
-      return Swal.fire(
-        "Error",
-        "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm.",
-        "warning"
-      );
+      return Swal.fire({
+        title: "Error",
+        text:
+          "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
 
     // Si no es cita, descripción obligatoria
     if (formData.es_cita === "no" && !formData.descripcion) {
-      return Swal.fire(
-        "Error",
-        "La descripción es obligatoria si el evento no es una cita.",
-        "warning"
-      );
+      return Swal.fire({
+        title: "Error",
+        text: "La descripción es obligatoria si el evento no es una cita.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
     }
 
     Swal.fire({
       title: "Guardando…",
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading(),
+      ...swalBaseOptions,
     });
     try {
       // Solo envía los campos requeridos por la API
@@ -223,7 +239,12 @@ export function useEventoForm(mode = "simple", id) {
       else resp = (await crearEvento(payload)).data;
       Swal.close();
       if (resp.success) {
-        Swal.fire("¡Éxito!", resp.message || "Evento creado.", "success");
+        Swal.fire({
+          title: "¡Éxito!",
+          text: resp.message || "Evento creado.",
+          icon: "success",
+          ...swalBaseOptions,
+        });
         setFormData({
           ...initialData,
           id_ticket: mode === "ticket" ? id : "",
@@ -235,11 +256,16 @@ export function useEventoForm(mode = "simple", id) {
           title: "No se puede crear el evento",
           html: mensaje,
           icon: "warning",
-          customClass: { container: "z-[100000]" },
+          ...swalBaseOptions,
         });
       }
     } catch (err) {
-      Swal.fire("Error", "Hubo un error.", "error");
+      Swal.fire({
+        title: "Error",
+        text: "Hubo un error.",
+        icon: "error",
+        ...swalBaseOptions,
+      });
     }
   };
 

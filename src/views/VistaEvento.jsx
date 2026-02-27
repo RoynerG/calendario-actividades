@@ -17,6 +17,7 @@ import {
 } from "../helpers/seguimientoModals";
 import { showHistorialModal } from "../helpers/eventModals";
 import { checkAdminAndExecute } from "../helpers/auth";
+import { swalBaseOptions } from "../helpers/swalUtils";
 
 export default function VistaEvento() {
   const { id_evento } = useParams();
@@ -39,7 +40,12 @@ export default function VistaEvento() {
       .then((evt) => setEvento(evt))
       .catch((err) => {
         console.error(err);
-        Swal.fire("Error", err.message, "error");
+        Swal.fire({
+          title: "Error",
+          text: err.message,
+          icon: "error",
+          ...swalBaseOptions,
+        });
         navigate(-1);
       })
       .finally(() => setLoading(false));

@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
 import { listarFuncionariosAdmin } from "../services/eventService";
+import { swalBaseOptions } from "./swalUtils";
 
 export const checkAdminAndExecute = async (callback) => {
   const isAdmin = localStorage.getItem("modo_admin") === "true";
@@ -44,7 +45,7 @@ export const checkAdminAndExecute = async (callback) => {
       `,
       focusConfirm: false,
       showCancelButton: true,
-      customClass: { container: "z-[10000]" },
+      ...swalBaseOptions,
       preConfirm: () => {
         const userSelect = document.getElementById("swal-input-user");
         const password = document.getElementById("swal-input-pass").value;
@@ -83,7 +84,7 @@ export const checkAdminAndExecute = async (callback) => {
           title: "Modo Admin Activado",
           text: `Bienvenido, ${formValues.nombre}`,
           icon: "success",
-          customClass: { container: "z-[10000]" },
+          ...swalBaseOptions,
         });
 
         // Disparar evento para que otros componentes se actualicen
@@ -94,7 +95,7 @@ export const checkAdminAndExecute = async (callback) => {
         Swal.fire({
           title: "Clave incorrecta",
           icon: "error",
-          customClass: { container: "z-[10000]" },
+          ...swalBaseOptions,
         });
       }
     }

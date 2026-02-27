@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
 import GuiaCategorias from "../components/GuiaCategorias";
+import GuiaEventosRecurrentes from "../components/GuiaEventosRecurrentes";
 import EventoViewer from "../components/EventoViewer";
 import { checkAdminAndExecute } from "../helpers/auth";
 import {
@@ -99,6 +100,7 @@ export default function VistaComercial() {
           Regresar a mi cuenta
         </a>
         <GuiaCategorias buttonStyle={buttonStyle} />
+        <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
       </div>
       <h1 className="text-sm md:text-5xl font-bold">Calendario Comercial</h1>
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">

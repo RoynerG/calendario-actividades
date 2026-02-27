@@ -6,6 +6,7 @@ import {
   obtenerFuncionario,
   filtrarEventos,
   crearEvento,
+  crearEventos,
   obtenerTicketsFuncionario,
   verificarBloqueo,
   listarPendientesVencidos,
@@ -16,8 +17,9 @@ import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
 import Select from "react-select";
 import GuiaCategorias from "../components/GuiaCategorias";
+import GuiaEventosRecurrentes from "../components/GuiaEventosRecurrentes";
 import EventoViewer from "../components/EventoViewer";
-import { showSwal } from "../helpers/swalUtils";
+import { showSwal, swalBaseOptions } from "../helpers/swalUtils";
 import { FaClipboardList, FaExclamationTriangle } from "react-icons/fa";
 import {
   showVerSeguimientosModal,
@@ -66,6 +68,19 @@ export default function VistaFuncionario() {
   const [pendientesCount, setPendientesCount] = useState(0);
   const schedulerRef = useRef(null);
 
+  // Estados para recurrencia
+  const [esRecurrente, setEsRecurrente] = useState(false);
+  const [tipoRecurrencia, setTipoRecurrencia] = useState("diario"); // diario, semanal, personalizado
+  const [fechaFinRecurrencia, setFechaFinRecurrencia] = useState("");
+  const [diasSemana, setDiasSemana] = useState([]); // [0, 1, 2, 3, 4, 5, 6] (Sun-Sat)
+  const [fechasPersonalizadas, setFechasPersonalizadas] = useState([]);
+  const [fechaPersonalizada, setFechaPersonalizada] = useState("");
+  const [horaInicioPersonalizada, setHoraInicioPersonalizada] = useState("");
+  const [horaFinPersonalizada, setHoraFinPersonalizada] = useState("");
+
+  const inputStyle =
+    "bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition";
+
   // Función para mostrar modal de eventos pendientes
   const mostrarPendientes = async () => {
     // Mostrar loading
@@ -73,7 +88,7 @@ export default function VistaFuncionario() {
       title: "Cargando pendientes...",
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading(),
-      customClass: { container: "z-[10000]" },
+      ...swalBaseOptions,
     });
 
     try {
@@ -88,7 +103,7 @@ export default function VistaFuncionario() {
             title: "¡Todo al día!",
             text: "No tienes eventos pendientes vencidos.",
             icon: "success",
-            customClass: { container: "z-[10000]" },
+            ...swalBaseOptions,
           });
           return;
         }
@@ -127,7 +142,7 @@ export default function VistaFuncionario() {
           width: "700px",
           showCloseButton: true,
           showConfirmButton: false,
-          customClass: { container: "z-[10000]" },
+          ...swalBaseOptions,
           didOpen: (modalElement) => {
             // Agregar listeners a los botones
             const buttons = modalElement.querySelectorAll(
@@ -147,7 +162,7 @@ export default function VistaFuncionario() {
                     "aria-label": "Escribe una observación",
                   },
                   showCancelButton: true,
-                  customClass: { container: "z-[100001]" }, // Z-index mayor
+                  ...swalBaseOptions,
                 });
 
                 if (observacion) {
@@ -164,7 +179,7 @@ export default function VistaFuncionario() {
                         icon: "success",
                         timer: 1500,
                         showConfirmButton: false,
-                        customClass: { container: "z-[100001]" },
+                        ...swalBaseOptions,
                       });
                       // Recargar la lista de pendientes (llamada recursiva a mostrarPendientes)
                       mostrarPendientes();
@@ -173,19 +188,21 @@ export default function VistaFuncionario() {
                       // Por simplicidad, recargaremos la página al cerrar todo, o confiamos en que el usuario refresque.
                       // O mejor: window.location.reload() si queremos ser drásticos, o dejamos así.
                     } else {
-                      Swal.fire(
-                        "Error",
-                        resp.message || "Error al finalizar",
-                        "error"
-                      );
+                      Swal.fire({
+                        title: "Error",
+                        text: resp.message || "Error al finalizar",
+                        icon: "error",
+                        ...swalBaseOptions,
+                      });
                     }
                   } catch (e) {
                     console.error(e);
-                    Swal.fire(
-                      "Error",
-                      "Ocurrió un error al finalizar el evento",
-                      "error"
-                    );
+                    Swal.fire({
+                      title: "Error",
+                      text: "Ocurrió un error al finalizar el evento",
+                      icon: "error",
+                      ...swalBaseOptions,
+                    });
                   }
                 }
               });
@@ -193,15 +210,21 @@ export default function VistaFuncionario() {
           },
         });
       } else {
-        Swal.fire(
-          "Error",
-          res.message || "No se pudieron cargar pendientes",
-          "error"
-        );
+        Swal.fire({
+          title: "Error",
+          text: res.message || "No se pudieron cargar pendientes",
+          icon: "error",
+          ...swalBaseOptions,
+        });
       }
     } catch (e) {
       console.error(e);
-      Swal.fire("Error", "Error de conexión", "error");
+      Swal.fire({
+        title: "Error",
+        text: "Error de conexión",
+        icon: "error",
+        ...swalBaseOptions,
+      });
     }
   };
 
@@ -235,8 +258,6 @@ export default function VistaFuncionario() {
     width: "auto",
     whiteSpace: "nowrap",
   };
-  const inputStyle =
-    "border p-2 rounded w-bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
   // Efecto para detectar evento_id en la URL y abrir modal de seguimiento
   useEffect(() => {
@@ -322,7 +343,7 @@ export default function VistaFuncionario() {
               showConfirmButton: false,
               allowOutsideClick: false,
               allowEscapeKey: false,
-              customClass: { container: "z-[100000]" },
+              ...swalBaseOptions,
               didOpen: (modalElement) => {
                 const btn = modalElement.querySelector(
                   "#btn-ver-pendientes-alert"
@@ -388,59 +409,47 @@ export default function VistaFuncionario() {
     categorias,
   ]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    document.activeElement?.blur();
+  const resetFormState = () => {
+    setFormData({
+      titulo: "",
+      descripcion: "",
+      ubicacion: "",
+      fecha: "",
+      hora_inicio: "",
+      hora_fin: "",
+      fecha_inicio: "",
+      fecha_fin: "",
+      id_categoria: "",
+      id_empleado: id_funcionario,
+      id_ticket: "",
+      estado_administrativo: "",
+      estado_comercial: "",
+      contrato: "",
+      inmueble: "",
+      es_cita: "",
+    });
+    setRelacionadoConTicket(null);
+    setEsCita(null);
+    setTicketSelecionado(null);
+    setEsRecurrente(false);
+    setFechasPersonalizadas([]);
+    setFechaFinRecurrencia("");
+    setDiasSemana([]);
+  };
 
-    // Combina fecha y horas a formato ISO local: "YYYY-MM-DDTHH:mm"
-    const { fecha, hora_inicio, hora_fin } = formData;
-    const fecha_inicio = fecha && hora_inicio ? `${fecha}T${hora_inicio}` : "";
-    const fecha_fin = fecha && hora_fin ? `${fecha}T${hora_fin}` : "";
-
-    // Validaciones
-    const fechaInicio = new Date(fecha_inicio);
-    const fechaFin = new Date(fecha_fin);
+  const validarEventoIndividual = (fecha, hora_inicio, hora_fin) => {
+    const fechaInicio = new Date(`${fecha}T${hora_inicio}`);
+    const fechaFin = new Date(`${fecha}T${hora_fin}`);
     const ahora = new Date();
 
     if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-      setShowForm(false);
-      await showSwal({
-        title: "Error",
-        text: "Debes ingresar fechas y horas válidas.",
-        icon: "error",
-      });
-      setShowForm(true);
-      return;
-    }
-
-    // Solo permite el mismo día (si así lo quieres)
-    if (
-      fechaInicio.getFullYear() !== fechaFin.getFullYear() ||
-      fechaInicio.getMonth() !== fechaFin.getMonth() ||
-      fechaInicio.getDate() !== fechaFin.getDate()
-    ) {
-      setShowForm(false);
-      await showSwal({
-        title: "Error",
-        text: "La fecha de inicio y la fecha de finalización deben ser el mismo día.",
-        icon: "error",
-      });
-      setShowForm(true);
-      return;
+      return "Debes ingresar fechas y horas válidas.";
     }
 
     if (fechaFin < fechaInicio) {
-      setShowForm(false);
-      await showSwal({
-        title: "Error",
-        text: "La hora de finalización no puede ser menor que la de inicio.",
-        icon: "error",
-      });
-      setShowForm(true);
-      return;
+      return "La hora de finalización no puede ser menor que la de inicio.";
     }
 
-    // No permite fechas pasadas
     const inicioSinHoras = new Date(
       fechaInicio.getFullYear(),
       fechaInicio.getMonth(),
@@ -451,59 +460,205 @@ export default function VistaFuncionario() {
       ahora.getMonth(),
       ahora.getDate()
     );
+
     if (inicioSinHoras < hoySinHoras) {
-      setShowForm(false);
-      await showSwal({
-        title: "Error",
-        text: "No puedes seleccionar una fecha pasada.",
-        icon: "error",
-      });
-      setShowForm(true);
-      return;
+      return "No puedes seleccionar una fecha pasada.";
     }
+
     if (fechaFin < ahora) {
-      setShowForm(false);
-      await showSwal({
-        title: "Error",
-        text: "No puedes seleccionar una hora de finalización pasada.",
-        icon: "error",
+      return "No puedes seleccionar una hora de finalización pasada.";
+    }
+
+    const horaInicioVal =
+      fechaInicio.getHours() + fechaInicio.getMinutes() / 60;
+    const horaFinVal = fechaFin.getHours() + fechaFin.getMinutes() / 60;
+
+    if (horaInicioVal < 8 || horaInicioVal > 21) {
+      return "La hora de inicio debe estar entre las 8:00 am y las 9:00 pm.";
+    }
+    if (horaFinVal < 8 || horaFinVal > 21) {
+      return "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm.";
+    }
+
+    return null;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    document.activeElement?.blur();
+
+    // Combina fecha y horas a formato ISO local: "YYYY-MM-DDTHH:mm"
+    const { fecha, hora_inicio, hora_fin } = formData;
+
+    if (esRecurrente) {
+      let eventosParaCrear = [];
+
+      if (tipoRecurrencia === "personalizado") {
+        if (fechasPersonalizadas.length === 0) {
+          await showSwal({
+            title: "Error",
+            text: "Debes agregar al menos una fecha personalizada.",
+            icon: "error",
+          });
+          return;
+        }
+        fechasPersonalizadas.forEach((item) => {
+          eventosParaCrear.push({
+            ...formData,
+            fecha_inicio: `${item.fecha}T${item.hora_inicio}`,
+            fecha_fin: `${item.fecha}T${item.hora_fin}`,
+          });
+        });
+      } else {
+        if (!fechaFinRecurrencia) {
+          await showSwal({
+            title: "Error",
+            text: "Debes seleccionar una fecha de fin para la recurrencia.",
+            icon: "error",
+          });
+          return;
+        }
+        if (tipoRecurrencia === "semanal" && diasSemana.length === 0) {
+          await showSwal({
+            title: "Error",
+            text: "Debes seleccionar al menos un día de la semana.",
+            icon: "error",
+          });
+          return;
+        }
+
+        const error = validarEventoIndividual(fecha, hora_inicio, hora_fin);
+        if (error) {
+          await showSwal({
+            title: "Error",
+            text: error,
+            icon: "error",
+          });
+          return;
+        }
+
+        const [y, m, d] = fecha.split("-").map(Number);
+        const [yEnd, mEnd, dEnd] = fechaFinRecurrencia.split("-").map(Number);
+
+        let currentDate = new Date(y, m - 1, d);
+        const endDate = new Date(yEnd, mEnd - 1, dEnd);
+
+        if (endDate < currentDate) {
+          await showSwal({
+            title: "Error",
+            text: "La fecha fin de recurrencia no puede ser menor a la fecha de inicio.",
+            icon: "error",
+          });
+          return;
+        }
+
+        while (currentDate <= endDate) {
+          let agregar = false;
+          if (tipoRecurrencia === "diario") agregar = true;
+          else if (tipoRecurrencia === "semanal") {
+            if (diasSemana.includes(currentDate.getDay())) agregar = true;
+          }
+
+          if (agregar) {
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+            const day = String(currentDate.getDate()).padStart(2, "0");
+            const fechaStr = `${year}-${month}-${day}`;
+
+            eventosParaCrear.push({
+              ...formData,
+              fecha_inicio: `${fechaStr}T${hora_inicio}`,
+              fecha_fin: `${fechaStr}T${hora_fin}`,
+            });
+          }
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      }
+
+      if (eventosParaCrear.length === 0) {
+        await showSwal({
+          title: "Error",
+          text: "No se generaron eventos con la configuración seleccionada.",
+          icon: "error",
+        });
+        return;
+      }
+
+      eventosParaCrear = eventosParaCrear.map((ev) => {
+        const copia = { ...ev };
+        delete copia.fecha;
+        delete copia.hora_inicio;
+        delete copia.hora_fin;
+        return copia;
       });
-      setShowForm(true);
+
+      try {
+        setShowForm(false);
+        Swal.fire({
+          title: "Procesando...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+          ...swalBaseOptions,
+        });
+
+        const payload = {
+          eventos: eventosParaCrear,
+          empleados: [id_funcionario],
+        };
+
+        const res = await crearEventos(payload);
+
+        if (res.success) {
+          const count = res.data?.count || eventosParaCrear.length;
+          await Swal.fire({
+            title: "¡Éxito!",
+            text: `Se crearon ${count} eventos correctamente.`,
+            icon: "success",
+            ...swalBaseOptions,
+          });
+          resetFormState();
+          setFiltros({ ...filtros });
+        } else {
+          await Swal.fire({
+            title: "Error",
+            text: res.message || "Error al crear eventos.",
+            icon: "error",
+            ...swalBaseOptions,
+          });
+          setShowForm(true);
+        }
+      } catch (error) {
+        console.error(error);
+        await Swal.fire({
+          title: "Error",
+          text: "Ocurrió un error al procesar la solicitud.",
+          icon: "error",
+          ...swalBaseOptions,
+        });
+        setShowForm(true);
+      }
       return;
     }
 
-    // Valida horas permitidas
-    const horaInicio = fechaInicio.getHours() + fechaInicio.getMinutes() / 60;
-    const horaFin = fechaFin.getHours() + fechaFin.getMinutes() / 60;
-    if (horaInicio < 8 || horaInicio > 21) {
-      setShowForm(false);
+    const fecha_inicio = fecha && hora_inicio ? `${fecha}T${hora_inicio}` : "";
+    const fecha_fin = fecha && hora_fin ? `${fecha}T${hora_fin}` : "";
+
+    const error = validarEventoIndividual(fecha, hora_inicio, hora_fin);
+    if (error) {
       await showSwal({
         title: "Error",
-        text: "La hora de inicio debe estar entre las 8:00 am y las 9:00 pm.",
+        text: error,
         icon: "error",
       });
-      setShowForm(true);
-      return;
-    }
-    if (horaFin < 8 || horaFin > 21) {
-      setShowForm(false);
-      await showSwal({
-        title: "Error",
-        text: "La hora de finalización debe estar entre las 8:00 am y las 9:00 pm.",
-        icon: "error",
-      });
-      setShowForm(true);
       return;
     }
 
-    // Prepara datos para enviar (solo los campos que tu API necesita)
     const eventoData = {
       ...formData,
       fecha_inicio,
       fecha_fin,
     };
 
-    // Opcional: borra los auxiliares para que no se envíen al backend si no los necesitas
     delete eventoData.fecha;
     delete eventoData.hora_inicio;
     delete eventoData.hora_fin;
@@ -514,7 +669,7 @@ export default function VistaFuncionario() {
         title: "Guardando...",
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
-        customClass: { container: "z-[100000]" },
+        ...swalBaseOptions,
       });
       const res = await crearEvento(eventoData);
       if (res.data.success) {
@@ -522,29 +677,9 @@ export default function VistaFuncionario() {
           title: "¡Éxito!",
           text: "El evento fue agregado correctamente",
           icon: "success",
-          customClass: { container: "z-[100000]" },
+          ...swalBaseOptions,
         });
-        setFormData({
-          titulo: "",
-          descripcion: "",
-          ubicacion: "",
-          fecha: "",
-          hora_inicio: "",
-          hora_fin: "",
-          fecha_inicio: "",
-          fecha_fin: "",
-          id_categoria: "",
-          id_empleado: id_funcionario,
-          id_ticket: "",
-          estado_administrativo: "",
-          estado_comercial: "",
-          contrato: "",
-          inmueble: "",
-          es_cita: "",
-        });
-        setRelacionadoConTicket(null);
-        setEsCita(null);
-        setTicketSelecionado(null);
+        resetFormState();
         setFiltros({ ...filtros });
       } else {
         const mensaje = res.data.message || "No se pudo agregar el evento";
@@ -552,7 +687,7 @@ export default function VistaFuncionario() {
           title: "No se puede crear el evento",
           html: mensaje,
           icon: "warning",
-          customClass: { container: "z-[100000]" },
+          ...swalBaseOptions,
         });
         setShowForm(true);
       }
@@ -562,7 +697,7 @@ export default function VistaFuncionario() {
         title: "Error",
         text: "Ocurrió un error al agregar el evento",
         icon: "error",
-        customClass: { container: "z-[100000]" },
+        ...swalBaseOptions,
       });
       setShowForm(true);
     }
@@ -579,16 +714,32 @@ export default function VistaFuncionario() {
           Regresar a mi cuenta
         </a>
         <GuiaCategorias buttonStyle={buttonStyle} />
+        <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
       </div>
       <h1 className="text-sm md:text-5xl font-bold">
         Calendario de {funcionario.nombre || "Funcionario"}
       </h1>
       <div className="flex flex-wrap justify-center gap-4 mb-4">
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            resetFormState();
+            setEsRecurrente(false);
+            setShowForm(true);
+          }}
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
         >
-          {showForm ? "Cerrar formulario" : "+ Crear Evento"}
+          + Crear Evento
+        </button>
+
+        <button
+          onClick={() => {
+            resetFormState();
+            setEsRecurrente(true);
+            setShowForm(true);
+          }}
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+        >
+          + Eventos Recurrentes
         </button>
 
         {/* Botón de Pendientes */}
@@ -742,13 +893,56 @@ export default function VistaFuncionario() {
       )}
       {/* Crear evento */}
       {showForm && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120000] flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-[9999]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[120000]"
             onClick={() => setShowForm(false)}
           />
-          <div className="relative bg-white rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto z-[10000]">
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <div
+            className={`relative bg-white rounded-2xl shadow-2xl w-full ${
+              esRecurrente ? "max-w-2xl" : "max-w-xl"
+            } max-h-[90vh] overflow-y-auto z-[120001]`}
+          >
+            <div
+              className={`px-6 py-5 text-white ${
+                esRecurrente
+                  ? "bg-gradient-to-r from-emerald-600 to-emerald-500"
+                  : "bg-gradient-to-r from-blue-600 to-indigo-600"
+              }`}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold">
+                    {esRecurrente
+                      ? "Crear eventos recurrentes"
+                      : "Crear evento"}
+                  </h2>
+                  <p className="text-sm text-white/80">
+                    {esRecurrente
+                      ? "Programa varias fechas en un solo paso."
+                      : "Agenda una actividad puntual en tu calendario."}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="h-9 w-9 rounded-full bg-white/15 hover:bg-white/25 transition flex items-center justify-center text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-white/15">
+                  {esRecurrente ? "Recurrente" : "Único"}
+                </span>
+                <span className="text-xs font-medium px-3 py-1 rounded-full bg-white/10">
+                  {esRecurrente
+                    ? "Diario, días específicos o fechas personalizadas"
+                    : "Fecha y horario único"}
+                </span>
+              </div>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-4 p-6">
               {/* Título */}
               <label
                 htmlFor="titulo"
@@ -800,7 +994,9 @@ export default function VistaFuncionario() {
                   setFormData({ ...formData, fecha: e.target.value })
                 }
                 className={inputStyle}
-                required
+                required={
+                  !(esRecurrente && tipoRecurrencia === "personalizado")
+                }
               />
               {/* Hora de inicio */}
               <label
@@ -817,7 +1013,9 @@ export default function VistaFuncionario() {
                   setFormData({ ...formData, hora_inicio: e.target.value })
                 }
                 className={inputStyle}
-                required
+                required={
+                  !(esRecurrente && tipoRecurrencia === "personalizado")
+                }
               />
               {/* Hora de fin */}
               <label
@@ -834,8 +1032,235 @@ export default function VistaFuncionario() {
                   setFormData({ ...formData, hora_fin: e.target.value })
                 }
                 className={inputStyle}
-                required
+                required={
+                  !(esRecurrente && tipoRecurrencia === "personalizado")
+                }
               />
+
+              {esRecurrente && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+                  <div className="rounded-xl border border-emerald-100 bg-white p-4">
+                    <p className="mb-2 text-sm font-bold text-gray-900">
+                      Tipo de recurrencia:
+                    </p>
+                    <div className="flex flex-wrap gap-4 mb-4">
+                      <div className="flex items-center">
+                        <input
+                          id="tipo-diario"
+                          type="radio"
+                          name="tipoRecurrencia"
+                          value="diario"
+                          checked={tipoRecurrencia === "diario"}
+                          onChange={(e) => setTipoRecurrencia(e.target.value)}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                        />
+                        <label
+                          htmlFor="tipo-diario"
+                          className="ml-2 text-sm font-medium text-gray-900"
+                        >
+                          Todos los días
+                        </label>
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          id="tipo-semanal"
+                          type="radio"
+                          name="tipoRecurrencia"
+                          value="semanal"
+                          checked={tipoRecurrencia === "semanal"}
+                          onChange={(e) => setTipoRecurrencia(e.target.value)}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                        />
+                        <label
+                          htmlFor="tipo-semanal"
+                          className="ml-2 text-sm font-medium text-gray-900"
+                        >
+                          Días específicos
+                        </label>
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          id="tipo-personalizado"
+                          type="radio"
+                          name="tipoRecurrencia"
+                          value="personalizado"
+                          checked={tipoRecurrencia === "personalizado"}
+                          onChange={(e) => setTipoRecurrencia(e.target.value)}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                        />
+                        <label
+                          htmlFor="tipo-personalizado"
+                          className="ml-2 text-sm font-medium text-gray-900"
+                        >
+                          Fechas personalizadas
+                        </label>
+                      </div>
+                    </div>
+
+                    {tipoRecurrencia === "semanal" && (
+                      <div className="mb-4">
+                        <p className="mb-2 text-sm text-gray-700">
+                          Selecciona los días:
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            "Dom",
+                            "Lun",
+                            "Mar",
+                            "Mié",
+                            "Jue",
+                            "Vie",
+                            "Sáb",
+                          ].map((dia, index) => (
+                            <label
+                              key={index}
+                              className="inline-flex items-center"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={diasSemana.includes(index)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setDiasSemana([...diasSemana, index]);
+                                  } else {
+                                    setDiasSemana(
+                                      diasSemana.filter((d) => d !== index)
+                                    );
+                                  }
+                                }}
+                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                              />
+                              <span className="ml-1 text-sm text-gray-900 mr-3">
+                                {dia}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {tipoRecurrencia !== "personalizado" && (
+                      <div className="mb-4">
+                        <label className="block mb-2 text-sm font-medium text-gray-900">
+                          Fecha fin de recurrencia
+                        </label>
+                        <input
+                          type="date"
+                          value={fechaFinRecurrencia}
+                          onChange={(e) =>
+                            setFechaFinRecurrencia(e.target.value)
+                          }
+                          className={inputStyle}
+                          required={tipoRecurrencia !== "personalizado"}
+                        />
+                      </div>
+                    )}
+
+                    {tipoRecurrencia === "personalizado" && (
+                      <div className="mb-4">
+                        <p className="mb-2 text-sm text-gray-700">
+                          Agrega fechas y horas específicas:
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
+                          <input
+                            type="date"
+                            value={fechaPersonalizada}
+                            onChange={(e) =>
+                              setFechaPersonalizada(e.target.value)
+                            }
+                            className={inputStyle}
+                            placeholder="Fecha"
+                          />
+                          <input
+                            type="time"
+                            value={horaInicioPersonalizada}
+                            onChange={(e) =>
+                              setHoraInicioPersonalizada(e.target.value)
+                            }
+                            className={inputStyle}
+                            placeholder="Hora Inicio"
+                          />
+                          <input
+                            type="time"
+                            value={horaFinPersonalizada}
+                            onChange={(e) =>
+                              setHoraFinPersonalizada(e.target.value)
+                            }
+                            className={inputStyle}
+                            placeholder="Hora Fin"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const error = validarEventoIndividual(
+                              fechaPersonalizada,
+                              horaInicioPersonalizada,
+                              horaFinPersonalizada
+                            );
+                            if (error) {
+                              await showSwal({
+                                title: "Error",
+                                text: error,
+                                icon: "error",
+                              });
+                              return;
+                            }
+                            setFechasPersonalizadas([
+                              ...fechasPersonalizadas,
+                              {
+                                fecha: fechaPersonalizada,
+                                hora_inicio: horaInicioPersonalizada,
+                                hora_fin: horaFinPersonalizada,
+                              },
+                            ]);
+                            setFechaPersonalizada("");
+                            setHoraInicioPersonalizada("");
+                            setHoraFinPersonalizada("");
+                          }}
+                          className="text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-lg text-sm px-4 py-2 text-center"
+                        >
+                          Agregar fecha
+                        </button>
+
+                        {fechasPersonalizadas.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-sm font-semibold mb-1">
+                              Fechas agregadas:
+                            </p>
+                            <ul className="list-disc pl-5 text-sm text-gray-700 max-h-32 overflow-y-auto">
+                              {fechasPersonalizadas.map((item, idx) => (
+                                <li
+                                  key={idx}
+                                  className="flex justify-between items-center mb-1"
+                                >
+                                  <span>
+                                    {item.fecha} ({item.hora_inicio} -{" "}
+                                    {item.hora_fin})
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setFechasPersonalizadas(
+                                        fechasPersonalizadas.filter(
+                                          (_, i) => i !== idx
+                                        )
+                                      );
+                                    }}
+                                    className="text-red-600 hover:text-red-800 ml-2 text-xs font-semibold px-2 py-1 rounded-full hover:bg-red-50"
+                                  >
+                                    Eliminar
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
               {/* Categoría */}
               <Select
                 options={categorias.map((cat) => ({

@@ -7,6 +7,7 @@ import { es } from "date-fns/locale";
 import { FaPowerOff, FaMapLocationDot } from "react-icons/fa6";
 import { IoTimeSharp } from "react-icons/io5";
 import GuiaCategorias from "../components/GuiaCategorias";
+import GuiaEventosRecurrentes from "../components/GuiaEventosRecurrentes";
 import { checkAdminAndExecute } from "../helpers/auth";
 import EventoViewer from "../components/EventoViewer";
 import {
@@ -101,6 +102,7 @@ export default function VistaAdministrativo() {
           Regresar a mi cuenta
         </a>
         <GuiaCategorias buttonStyle={buttonStyle} />
+        <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
       </div>
       <h1 className="text-sm md:text-5xl font-bold">
         Calendario Administrativo

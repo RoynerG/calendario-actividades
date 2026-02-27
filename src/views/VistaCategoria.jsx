@@ -9,6 +9,8 @@ import { useParams } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
 import { es } from "date-fns/locale";
 import EventoViewer from "../components/EventoViewer";
+import GuiaCategorias from "../components/GuiaCategorias";
+import GuiaEventosRecurrentes from "../components/GuiaEventosRecurrentes";
 import { checkAdminAndExecute } from "../helpers/auth";
 import {
   showVerSeguimientosModal,
@@ -104,6 +106,8 @@ export default function VistaCategoria() {
         >
           Regresar a mi cuenta
         </a>
+        <GuiaCategorias buttonStyle={buttonStyle} />
+        <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
       </div>
       <h1 className="text-sm md:text-5xl font-bold">
         Calendario de {categoria.nombre}

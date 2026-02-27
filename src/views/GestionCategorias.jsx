@@ -8,6 +8,7 @@ import {
   actualizarEsquemaCategorias,
 } from "../services/eventService";
 import { FaPlus, FaEdit, FaTrash, FaDatabase } from "react-icons/fa";
+import { swalBaseOptions } from "../helpers/swalUtils";
 
 export default function GestionCategorias() {
   const [categorias, setCategorias] = useState([]);
@@ -44,11 +45,21 @@ export default function GestionCategorias() {
       if (res.success) {
         setCategorias(res.data);
       } else {
-        Swal.fire("Error", "No se pudieron cargar las categorías", "error");
+        Swal.fire({
+          title: "Error",
+          text: "No se pudieron cargar las categorías",
+          icon: "error",
+          ...swalBaseOptions,
+        });
       }
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "Error de conexión", "error");
+      Swal.fire({
+        title: "Error",
+        text: "Error de conexión",
+        icon: "error",
+        ...swalBaseOptions,
+      });
     } finally {
       setLoading(false);
     }
@@ -91,19 +102,32 @@ export default function GestionCategorias() {
       }
 
       if (res.success) {
-        Swal.fire(
-          "Éxito",
-          `Categoría ${editingCat ? "actualizada" : "creada"} correctamente`,
-          "success"
-        );
+        Swal.fire({
+          title: "Éxito",
+          text: `Categoría ${
+            editingCat ? "actualizada" : "creada"
+          } correctamente`,
+          icon: "success",
+          ...swalBaseOptions,
+        });
         handleCloseModal();
         loadCategorias();
       } else {
-        Swal.fire("Error", res.message || "Ocurrió un error", "error");
+        Swal.fire({
+          title: "Error",
+          text: res.message || "Ocurrió un error",
+          icon: "error",
+          ...swalBaseOptions,
+        });
       }
     } catch (error) {
       console.error(error);
-      Swal.fire("Error", "Error al guardar", "error");
+      Swal.fire({
+        title: "Error",
+        text: "Error al guardar",
+        icon: "error",
+        ...swalBaseOptions,
+      });
     }
   };
 
@@ -113,28 +137,43 @@ export default function GestionCategorias() {
       text: "Esto eliminará TODOS los eventos asociados a esta categoría. Esta acción no se puede deshacer.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
       confirmButtonText: "Sí, eliminar todo",
       cancelButtonText: "Cancelar",
+      customClass: {
+        ...swalBaseOptions.customClass,
+        confirmButton:
+          "bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg",
+      },
+      buttonsStyling: false,
     });
 
     if (result.isConfirmed) {
       try {
         const res = await eliminarCategoria(cat.id);
         if (res.success) {
-          Swal.fire(
-            "Eliminado",
-            "La categoría y sus eventos han sido eliminados.",
-            "success"
-          );
+          Swal.fire({
+            title: "Eliminado",
+            text: "La categoría y sus eventos han sido eliminados.",
+            icon: "success",
+            ...swalBaseOptions,
+          });
           loadCategorias();
         } else {
-          Swal.fire("Error", "No se pudo eliminar la categoría.", "error");
+          Swal.fire({
+            title: "Error",
+            text: "No se pudo eliminar la categoría.",
+            icon: "error",
+            ...swalBaseOptions,
+          });
         }
       } catch (error) {
         console.error(error);
-        Swal.fire("Error", "Error al eliminar", "error");
+        Swal.fire({
+          title: "Error",
+          text: "Error al eliminar",
+          icon: "error",
+          ...swalBaseOptions,
+        });
       }
     }
   };

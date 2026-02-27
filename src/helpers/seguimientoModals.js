@@ -6,6 +6,7 @@ import {
   listarSeguimientosFuncionario,
 } from "../services/eventService";
 import { checkAdminAndExecute } from "./auth";
+import { swalBaseOptions } from "./swalUtils";
 
 /**
  * Muestra un modal (SweetAlert2) con la lista de seguimientos.
@@ -23,7 +24,7 @@ export async function showVerSeguimientosModal(
     title: "Cargando seguimientos...",
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading(),
-    customClass: { container: "z-[10000]" },
+    ...swalBaseOptions,
   });
 
   try {
@@ -101,7 +102,7 @@ export async function showVerSeguimientosModal(
       showDenyButton: true,
       denyButtonText: "+ Nuevo Seguimiento",
       width: "600px",
-      customClass: { container: "z-[10000]" },
+      ...swalBaseOptions,
     });
 
     if (result.isDenied) {
@@ -115,7 +116,7 @@ export async function showVerSeguimientosModal(
       icon: "error",
       title: "Error",
       text: "No se pudieron cargar los seguimientos",
-      customClass: { container: "z-[10000]" },
+      ...swalBaseOptions,
     });
   }
 }
@@ -162,7 +163,7 @@ export async function showCrearSeguimientoModal(
     confirmButtonText: "Guardar",
     cancelButtonText: "Cancelar",
     showLoaderOnConfirm: true,
-    customClass: { container: "z-[10000]" },
+    ...swalBaseOptions,
     preConfirm: async () => {
       const texto = document.getElementById("swal-input-detalle").value;
       if (!texto || !texto.trim()) {
@@ -195,7 +196,7 @@ export async function showCrearSeguimientoModal(
       title: "¡Guardado!",
       text: "El seguimiento ha sido registrado.",
       icon: "success",
-      customClass: { container: "z-[10000]" },
+      ...swalBaseOptions,
     });
     // Recargar vista si es necesario
     if (onSuccess) onSuccess();

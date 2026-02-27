@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
 import Select from "react-select";
 import { useEventoForm } from "../hooks/useEventoForm";
+import GuiaCategorias from "./GuiaCategorias";
+import GuiaEventosRecurrentes from "./GuiaEventosRecurrentes";
 
 export default function CrearEventoTicket() {
   const { id_ticket } = useParams();
@@ -17,6 +19,17 @@ export default function CrearEventoTicket() {
     "block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white";
   const styleInput =
     "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
+  const buttonStyle = {
+    backgroundColor: "black",
+    color: "white",
+    paddingLeft: "1rem",
+    paddingRight: "1rem",
+    paddingTop: "0.5rem",
+    paddingBottom: "0.5rem",
+    borderRadius: "0.25rem",
+    width: "auto",
+    whiteSpace: "nowrap",
+  };
 
   if (loading) {
     return (
@@ -27,12 +40,25 @@ export default function CrearEventoTicket() {
   }
 
   return (
-    <div className="p-4 space-y-4 mx-auto max-w-lg">
-      <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded px-4 py-2 mb-4">
-        Recuerda marcar como realizados tus eventos anteriores. Los eventos sin
-        realizar con más de 2 días te bloquearán para crear nuevos.
+    <div className="p-4 space-y-4 mx-auto max-w-2xl">
+      <div className="flex flex-col sm:flex-row justify-center gap-2">
+        <GuiaCategorias buttonStyle={buttonStyle} />
+        <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
       </div>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="bg-white shadow-lg rounded-xl border border-gray-100 p-6 space-y-4">
+        <div className="space-y-1">
+          <h1 className="text-xl font-semibold text-gray-900">
+            Crear evento desde ticket
+          </h1>
+          <p className="text-sm text-gray-600">
+            Completa la información del evento antes de guardar.
+          </p>
+        </div>
+        <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded px-4 py-2">
+          Recuerda marcar como realizados tus eventos anteriores. Los eventos
+          sin realizar con más de 2 días te bloquearán para crear nuevos.
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
         {/* Título */}
         <label htmlFor="titulo" className={styleLabel}>
           Título
@@ -276,13 +302,14 @@ export default function CrearEventoTicket() {
           )}
 
         {/* Submit */}
-        <button
-          type="submit"
-          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
-        >
-          Crear evento
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+          >
+            Crear evento
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import {
   trasladarEvento,
   obtenerHistorialEvento,
 } from "../services/eventService";
+import { swalBaseOptions } from "./swalUtils";
 const styleInput =
   "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
@@ -23,7 +24,7 @@ export async function showRealizadoModal(event, setFiltros) {
   }
 
   const { value: obs } = await Swal.fire({
-    customClass: { container: "z-[2000]" },
+    ...swalBaseOptions,
     title: `Resultado del evento #${event.event_id}`,
     html: `
       <label for="obs" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">
@@ -49,15 +50,25 @@ export async function showRealizadoModal(event, setFiltros) {
     title: "Actualizando estado...",
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading(),
-    customClass: { container: "z-[2000]" },
+    ...swalBaseOptions,
   });
   const resp = await cambiarEstadoEvento(event.event_id, obs);
   Swal.close();
   if (resp.success) {
-    await Swal.fire("¡Hecho!", resp.message, "success");
+    await Swal.fire({
+      title: "¡Hecho!",
+      text: resp.message,
+      icon: "success",
+      ...swalBaseOptions,
+    });
     setFiltros((prev) => ({ ...prev }));
   } else {
-    Swal.fire("Error", resp.message, "error");
+    Swal.fire({
+      title: "Error",
+      text: resp.message,
+      icon: "error",
+      ...swalBaseOptions,
+    });
   }
 }
 
@@ -128,7 +139,7 @@ export async function showEditarModal(
       return { titulo, ubicacion, descripcion, id_categoria };
     },
     showCancelButton: true,
-    customClass: { container: "z-[2000]" },
+    ...swalBaseOptions,
   });
 
   if (!form) return;
@@ -137,7 +148,7 @@ export async function showEditarModal(
     title: "Guardando cambios...",
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading(),
-    customClass: { container: "z-[2000]" },
+    ...swalBaseOptions,
   });
 
   const resp = await actualizarEvento(
@@ -150,14 +161,20 @@ export async function showEditarModal(
   Swal.close();
 
   if (resp.success) {
-    await Swal.fire(
-      "¡Editado!",
-      "El evento fue editado correctamente",
-      "success"
-    );
+    await Swal.fire({
+      title: "¡Editado!",
+      text: "El evento fue editado correctamente",
+      icon: "success",
+      ...swalBaseOptions,
+    });
     setFiltros((prev) => ({ ...prev }));
   } else {
-    Swal.fire("Error", resp.message || "No se pudo editar", "error");
+    Swal.fire({
+      title: "Error",
+      text: resp.message || "No se pudo editar",
+      icon: "error",
+      ...swalBaseOptions,
+    });
   }
 }
 
@@ -279,7 +296,7 @@ export async function showTrasladarModal(event, setFiltros) {
       return { fecha_inicio, fecha_fin, es_cita, observacion };
     },
     showCancelButton: true,
-    customClass: { container: "z-[2000]" },
+    ...swalBaseOptions,
   });
 
   if (!form) return;
@@ -297,7 +314,7 @@ export async function showTrasladarModal(event, setFiltros) {
     title: "Trasladando evento...",
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading(),
-    customClass: { container: "z-[2000]" },
+    ...swalBaseOptions,
   });
 
   const resp = await trasladarEvento(
@@ -311,10 +328,20 @@ export async function showTrasladarModal(event, setFiltros) {
 
   Swal.close();
   if (resp.success) {
-    await Swal.fire("¡Hecho!", resp.message, "success");
+    await Swal.fire({
+      title: "¡Hecho!",
+      text: resp.message,
+      icon: "success",
+      ...swalBaseOptions,
+    });
     setFiltros((prev) => ({ ...prev }));
   } else {
-    Swal.fire("Error", resp.message, "error");
+    Swal.fire({
+      title: "Error",
+      text: resp.message,
+      icon: "error",
+      ...swalBaseOptions,
+    });
   }
 }
 
@@ -326,7 +353,12 @@ export async function showHistorialModal(event_id, page = 1) {
     message,
   } = await obtenerHistorialEvento(event_id);
   if (!success) {
-    return Swal.fire("Error", message, "error");
+    return Swal.fire({
+      title: "Error",
+      text: message,
+      icon: "error",
+      ...swalBaseOptions,
+    });
   }
 
   if (!historial.length) {
@@ -334,7 +366,7 @@ export async function showHistorialModal(event_id, page = 1) {
       title: `Historial del evento #${event_id}`,
       html: `<p>Aún no se han registrado cambios para este evento.</p>`,
       icon: "info",
-      customClass: { container: "z-[2000]" },
+      ...swalBaseOptions,
     });
   }
   const totalPages = Math.ceil(historial.length / pageSize);
@@ -379,7 +411,7 @@ export async function showHistorialModal(event_id, page = 1) {
     denyButtonText: "Anterior",
     showConfirmButton: page < totalPages,
     confirmButtonText: "Siguiente",
-    customClass: { container: "z-[2000]" },
+    ...swalBaseOptions,
   });
 
   if (result.isDenied) {
