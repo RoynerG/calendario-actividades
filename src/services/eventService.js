@@ -15,6 +15,10 @@ export const crearEventos = (payload) =>
   axios.post(BASE_URL + "crear_eventos", payload).then((res) => res.data);
 export const crearRecordatorioLibre = (payload) =>
   axios.post(BASE_URL + "crear_recordatorio_libre", payload).then((res) => res.data);
+export const listarRecordatoriosLibres = (id_empleado) =>
+  axios.post(BASE_URL + "listar_recordatorios_libres", { id_empleado }).then((res) => res.data);
+export const listarRecordatoriosEventos = (id_empleado) =>
+  axios.post(BASE_URL + "listar_recordatorios_eventos", { id_empleado }).then((res) => res.data);
 export async function obtenerEvento(id) {
   const res = await axios.post(BASE_URL + "obtener_evento", { id });
   return res.data.data;

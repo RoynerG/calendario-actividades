@@ -8,6 +8,8 @@ import {
   crearEvento,
   crearEventos,
   crearRecordatorioLibre,
+  listarRecordatoriosLibres,
+  listarRecordatoriosEventos,
   obtenerTicketsFuncionario,
   verificarBloqueo,
   listarPendientesVencidos,
@@ -94,6 +96,43 @@ export default function VistaFuncionario() {
 
   const inputStyle =
     "bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition";
+
+  const formatearFechaBogota = (fechaUtc) => {
+    if (!fechaUtc) return "";
+    const base = fechaUtc.includes("T") ? fechaUtc : fechaUtc.replace(" ", "T");
+    const date = new Date(`${base}Z`);
+    if (Number.isNaN(date.getTime())) return fechaUtc;
+    return date.toLocaleString("es-CO", { timeZone: "America/Bogota" });
+  };
+
+  const formatearFechaBogotaLocal = (fechaBogota) => {
+    if (!fechaBogota) return "";
+    const base = fechaBogota.includes("T")
+      ? fechaBogota
+      : fechaBogota.replace(" ", "T");
+    const date = new Date(`${base}-05:00`);
+    if (Number.isNaN(date.getTime())) return fechaBogota;
+    return date.toLocaleString("es-CO", { timeZone: "America/Bogota" });
+  };
+
+  const calcularProgramadoEvento = (fechaInicio, minutos) => {
+    const base = fechaInicio?.includes("T")
+      ? fechaInicio
+      : fechaInicio?.replace(" ", "T");
+    const date = base ? new Date(`${base}-05:00`) : null;
+    if (!date || Number.isNaN(date.getTime())) return "";
+    const programado = new Date(
+      date.getTime() - (Number(minutos) || 0) * 60 * 1000
+    );
+    return programado.toLocaleString("es-CO", { timeZone: "America/Bogota" });
+  };
+
+  const canalLabel = (canal) =>
+    canal === "ambos"
+      ? "WhatsApp y correo"
+      : canal === "email"
+      ? "Correo"
+      : "WhatsApp";
 
   // Función para mostrar modal de eventos pendientes
   const mostrarPendientes = async () => {
@@ -236,6 +275,129 @@ export default function VistaFuncionario() {
       Swal.fire({
         title: "Error",
         text: "Error de conexión",
+        icon: "error",
+        ...swalBaseOptions,
+      });
+    }
+  };
+
+  const mostrarRecordatoriosLibres = async () => {
+    Swal.fire({
+      title: "Cargando recordatorios...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+      ...swalBaseOptions,
+    });
+
+    try {
+      const [resLibres, resEventos] = await Promise.all([
+        listarRecordatoriosLibres(id_funcionario),
+        listarRecordatoriosEventos(id_funcionario),
+      ]);
+      Swal.close();
+
+      if (resLibres.success && resEventos.success) {
+        const recordatorios = resLibres.data || [];
+        const recordatoriosEventos = resEventos.data || [];
+        if (recordatorios.length === 0 && recordatoriosEventos.length === 0) {
+          Swal.fire({
+            title: "Sin recordatorios",
+            text: "No tienes recordatorios creados.",
+            icon: "info",
+            ...swalBaseOptions,
+          });
+          return;
+        }
+
+        let htmlList = `<div class="text-left max-h-[60vh] overflow-y-auto space-y-4 p-2">`;
+        htmlList += `<div class="text-sm font-bold text-gray-700">Recordatorios de eventos</div>`;
+        if (recordatoriosEventos.length === 0) {
+          htmlList += `<div class="text-xs text-gray-500">No hay recordatorios de eventos.</div>`;
+        } else {
+          recordatoriosEventos.forEach((rec) => {
+            const fechaEvento = formatearFechaBogotaLocal(rec.fecha_inicio);
+            const fechaProgramada = calcularProgramadoEvento(
+              rec.fecha_inicio,
+              rec.recordatorio_minutos
+            );
+            htmlList += `
+              <div class="bg-white p-3 rounded border-l-4 border-blue-500 shadow-sm mb-2">
+                <div class="font-bold text-gray-800 text-sm">${rec.titulo}</div>
+                <div class="text-xs text-gray-500 mt-1">Evento: ${fechaEvento}</div>
+                <div class="text-xs text-gray-500 mt-1">Programado: ${fechaProgramada}</div>
+                <div class="text-xs text-gray-500 mt-1">Anticipación: ${
+                  rec.recordatorio_minutos
+                } minutos</div>
+                <div class="text-xs text-gray-500 mt-1">Canal: ${canalLabel(
+                  rec.recordatorio_canal
+                )}</div>
+                <div class="text-xs text-gray-500 mt-1">Estado evento: ${
+                  rec.estado
+                }</div>
+              </div>
+            `;
+          });
+        }
+
+        htmlList += `<div class="text-sm font-bold text-gray-700 mt-3">Recordatorios libres</div>`;
+        if (recordatorios.length === 0) {
+          htmlList += `<div class="text-xs text-gray-500">No hay recordatorios libres.</div>`;
+        } else {
+          recordatorios.forEach((rec) => {
+            const estado = rec.estado || "pendiente";
+            const estadoColor =
+              estado === "enviado"
+                ? "border-green-500"
+                : estado === "error"
+                ? "border-red-500"
+                : estado === "bloqueado"
+                ? "border-yellow-500"
+                : "border-gray-300";
+            const fechaProgramada = formatearFechaBogota(rec.fecha_programada);
+            const fechaEnvio = rec.fecha_envio
+              ? formatearFechaBogota(rec.fecha_envio)
+              : "Pendiente";
+
+            htmlList += `
+              <div class="bg-white p-3 rounded border-l-4 ${estadoColor} shadow-sm mb-2">
+                <div class="font-bold text-gray-800 text-sm">${rec.titulo}</div>
+                <div class="text-xs text-gray-600 mt-1">${rec.mensaje}</div>
+                <div class="text-xs text-gray-500 mt-2">Programado: ${fechaProgramada}</div>
+                <div class="text-xs text-gray-500 mt-1">Enviado: ${fechaEnvio}</div>
+                <div class="text-xs text-gray-500 mt-1">Canal: ${canalLabel(
+                  rec.canal
+                )}</div>
+                <div class="text-xs text-gray-500 mt-1">Estado: ${estado}</div>
+              </div>
+            `;
+          });
+        }
+        htmlList += `</div>`;
+
+        await Swal.fire({
+          title: "Mis recordatorios",
+          html: htmlList,
+          width: "700px",
+          showCloseButton: true,
+          showConfirmButton: false,
+          ...swalBaseOptions,
+        });
+      } else {
+        await Swal.fire({
+          title: "Error",
+          text:
+            resLibres.message ||
+            resEventos.message ||
+            "No se pudo cargar la lista de recordatorios.",
+          icon: "error",
+          ...swalBaseOptions,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      await Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error al cargar los recordatorios.",
         icon: "error",
         ...swalBaseOptions,
       });
@@ -865,6 +1027,13 @@ export default function VistaFuncionario() {
           className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
         >
           + Recordatorio Libre
+        </button>
+
+        <button
+          onClick={mostrarRecordatoriosLibres}
+          className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+        >
+          Mis Recordatorios
         </button>
 
         {/* Botón de Pendientes */}
