@@ -105,26 +105,26 @@ export default function VistaEvento() {
         </a>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 max-w-md mx-auto border border-gray-200">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-4 sm:p-6 max-w-md mx-auto border border-gray-200 dark:border-slate-700">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-3">
           {evento.titulo}
         </h2>
 
         {evento.ubicacion && (
           <div className="mb-4 flex items-center">
             <FaMapLocationDot className="mr-2 text-green-900" />
-            <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full">
+            <span className="inline-block text-xs font-bold px-3 py-1 rounded-full dark:text-white">
               {evento.ubicacion}
             </span>
           </div>
         )}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
-          <span className="flex items-center text-sm text-gray-600">
+          <span className="flex items-center text-sm font-bold text-gray-600 dark:text-gray-300">
             <FaCalendarAlt className="mr-1 text-blue-500" />
             {fechaStr}
           </span>
-          <span className="flex items-center text-sm text-gray-600">
+          <span className="flex items-center text-sm font-bold text-gray-600 dark:text-gray-300">
             <FaClock className="mr-1 text-pink-500" />
             {horaInicioStr} - {horaFinStr}
           </span>
@@ -133,7 +133,7 @@ export default function VistaEvento() {
         <div className="mb-4 flex flex-col">
           <div className="mb-4 flex items-center">
             <FaTag className="mr-2 text-yellow-500" />
-            <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-700">
+            <span className="inline-block text-xs font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
               {evento.categoria}
             </span>
           </div>
@@ -145,10 +145,10 @@ export default function VistaEvento() {
             )}
 
             <span
-              className={`block text-xs font-semibold px-3 py-1 rounded-full ${
+              className={`block text-xs font-bold px-3 py-1 rounded-full ${
                 evento.estado === "Si"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-200"
+                  : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-200"
               }`}
             >
               {evento.estado === "Si" ? "Realizado" : "Sin realizar"}
@@ -157,12 +157,12 @@ export default function VistaEvento() {
         </div>
 
         <div
-          className="text-sm sm:text-md text-gray-600 mb-4 text-left"
+          className="text-sm sm:text-md font-bold text-gray-600 dark:text-gray-300 mb-4 text-left"
           dangerouslySetInnerHTML={{ __html: evento.descripcion }}
         />
 
         {evento.observacion && (
-          <p className="text-sm sm:text-md text-gray-600 mb-4 text-left">
+          <p className="text-sm sm:text-md font-bold text-gray-600 dark:text-gray-300 mb-4 text-left">
             <span className="font-bold">Observacion/Motivo: </span>{" "}
             {evento.observacion}
           </p>
@@ -194,21 +194,21 @@ export default function VistaEvento() {
         <div className="mt-4 border-t pt-4 flex gap-2 flex-col">
           <button
             onClick={handleHacerSeguimiento}
-            className="flex items-center justify-center w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+            className="flex items-center justify-center w-full bg-purple-600 text-white font-bold px-4 py-2 rounded hover:bg-purple-700 transition-colors"
           >
             <FaClipboardList className="mr-2" />
             Hacer seguimiento
           </button>
           <button
             onClick={handleVerSeguimiento}
-            className="flex items-center justify-center w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+            className="flex items-center justify-center w-full bg-blue-500 text-white font-bold px-4 py-2 rounded hover:bg-blue-600 transition-colors"
           >
             <FaEye className="mr-2" />
             Ver seguimiento
           </button>
           <button
             onClick={() => showHistorialModal(evento.id)}
-            className="flex items-center justify-center w-full bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
+            className="flex items-center justify-center w-full bg-gray-500 text-white font-bold px-4 py-2 rounded hover:bg-gray-600 transition-colors"
           >
             <FaHistory className="mr-2" />
             Ver historial

@@ -60,7 +60,10 @@ export default function CrearEventoFuncionario() {
   const [horaFinPersonalizada, setHoraFinPersonalizada] = useState("");
 
   const inputStyle =
-    "border p-2 rounded w-bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
+    "border p-2 rounded w-bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
+
+  const labelStyle =
+    "block mb-2 mt-3 text-sm font-bold text-gray-900 dark:text-white";
 
   useEffect(() => {
     listarCategorias().then((res) => {
@@ -453,7 +456,7 @@ export default function CrearEventoFuncionario() {
         {/* Título */}
         <label
           htmlFor="titulo"
-          className="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white"
+          className={labelStyle}
         >
           Título
         </label>
@@ -469,7 +472,7 @@ export default function CrearEventoFuncionario() {
         {/* Ubicación */}
         <label
           htmlFor="ubicacion"
-          className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+          className={labelStyle}
         >
           Ubicación / dirección del evento
         </label>
@@ -487,7 +490,7 @@ export default function CrearEventoFuncionario() {
         {/* Fecha */}
         <label
           htmlFor="fecha"
-          className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+          className={labelStyle}
         >
           Fecha
         </label>
@@ -502,7 +505,7 @@ export default function CrearEventoFuncionario() {
         {/* Hora de inicio */}
         <label
           htmlFor="hora_inicio"
-          className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+          className={labelStyle}
         >
           Hora de inicio
         </label>
@@ -519,7 +522,7 @@ export default function CrearEventoFuncionario() {
         {/* Hora de fin */}
         <label
           htmlFor="hora_fin"
-          className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+          className={labelStyle}
         >
           Hora de finalización
         </label>
@@ -549,7 +552,7 @@ export default function CrearEventoFuncionario() {
           />
           <label
             htmlFor="recordatorio_activo"
-            className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+            className="ml-2 text-sm font-bold text-gray-900 dark:text-white"
           >
             Enviar recordatorio
           </label>
@@ -559,7 +562,7 @@ export default function CrearEventoFuncionario() {
           <>
             <label
               htmlFor="recordatorio_minutos"
-              className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+              className={labelStyle}
             >
               Anticipación del recordatorio
             </label>
@@ -584,7 +587,7 @@ export default function CrearEventoFuncionario() {
             </select>
             <label
               htmlFor="recordatorio_canal"
-              className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+              className={labelStyle}
             >
               Canal del recordatorio
             </label>
@@ -618,7 +621,7 @@ export default function CrearEventoFuncionario() {
           />
           <label
             htmlFor="esRecurrente"
-            className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+            className="ml-2 text-sm font-bold text-gray-900 dark:text-white"
           >
             ¿Evento recurrente / múltiples fechas?
           </label>
@@ -626,7 +629,7 @@ export default function CrearEventoFuncionario() {
 
         {esRecurrente && (
           <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
-            <h3 className="mb-4 font-semibold text-gray-900 dark:text-white">
+            <h3 className="mb-4 font-bold text-gray-900 dark:text-white">
               Configuración de Recurrencia
             </h3>
 
@@ -641,7 +644,7 @@ export default function CrearEventoFuncionario() {
                   onChange={(e) => setTipoRecurrencia(e.target.value)}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
                 />
-                <span className="ml-2 text-sm text-gray-900 dark:text-gray-300">
+                <span className="ml-2 text-sm font-bold text-gray-900 dark:text-white">
                   Diario
                 </span>
               </label>
@@ -654,7 +657,7 @@ export default function CrearEventoFuncionario() {
                   onChange={(e) => setTipoRecurrencia(e.target.value)}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
                 />
-                <span className="ml-2 text-sm text-gray-900 dark:text-gray-300">
+                <span className="ml-2 text-sm font-bold text-gray-900 dark:text-white">
                   Días Seleccionados
                 </span>
               </label>
@@ -667,7 +670,7 @@ export default function CrearEventoFuncionario() {
                   onChange={(e) => setTipoRecurrencia(e.target.value)}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
                 />
-                <span className="ml-2 text-sm text-gray-900 dark:text-gray-300">
+                <span className="ml-2 text-sm font-bold text-gray-900 dark:text-white">
                   Personalizado
                 </span>
               </label>
@@ -677,7 +680,7 @@ export default function CrearEventoFuncionario() {
             {(tipoRecurrencia === "diario" ||
               tipoRecurrencia === "semanal") && (
               <div className="mb-4">
-                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                <label className={labelStyle}>
                   Repetir hasta
                 </label>
                 <input
@@ -693,7 +696,7 @@ export default function CrearEventoFuncionario() {
             {/* Opciones para Semanal (Días de la semana) */}
             {tipoRecurrencia === "semanal" && (
               <div className="mb-4">
-                <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                <label className={labelStyle}>
                   Selecciona los días
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -717,7 +720,7 @@ export default function CrearEventoFuncionario() {
                           }}
                           className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
                         />
-                        <span className="ml-2 text-sm text-gray-900 dark:text-gray-300">
+                        <span className="ml-2 text-sm font-bold text-gray-900 dark:text-white">
                           {dia}
                         </span>
                       </label>
@@ -1056,7 +1059,7 @@ export default function CrearEventoFuncionario() {
         {/* Descripción */}
         <label
           htmlFor="descripcion"
-          className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+          className={labelStyle}
         >
           Descripción
         </label>

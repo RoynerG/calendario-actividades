@@ -17,9 +17,9 @@ export default function CrearEventoTicket() {
   } = useEventoForm("ticket", id_ticket);
 
   const styleLabel =
-    "block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white";
+    "block mb-2 mt-3 text-sm font-bold text-gray-900 dark:text-white";
   const styleInput =
-    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
+    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
   const buttonStyle = {
     backgroundColor: "black",
     color: "white",
@@ -47,12 +47,12 @@ export default function CrearEventoTicket() {
         <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
         <GuiaRecordatorios buttonStyle={buttonStyle} />
       </div>
-      <div className="bg-white shadow-lg rounded-xl border border-gray-100 p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-800 shadow-lg rounded-xl border border-gray-100 dark:border-slate-700 p-6 space-y-4">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-gray-900">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             Crear evento desde ticket
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm font-bold text-gray-600 dark:text-gray-300">
             Completa la información del evento antes de guardar.
           </p>
         </div>
@@ -152,7 +152,7 @@ export default function CrearEventoTicket() {
             />
             <label
               htmlFor="recordatorio_activo"
-              className="text-sm text-gray-700"
+              className="text-sm font-bold text-gray-900 dark:text-white"
             >
               Enviar recordatorio
             </label>

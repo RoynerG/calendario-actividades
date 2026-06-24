@@ -179,16 +179,16 @@ export default function GestionCategorias() {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-6">
+    <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
+      <div className="max-w-6xl mx-auto bg-white dark:bg-slate-800 shadow-md rounded-lg p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
+          <h1 className="page-title text-lg sm:text-3xl md:text-5xl font-bold text-center leading-tight">
             Gestión de Categorías
           </h1>
           <div className="flex gap-2">
             <button
               onClick={() => handleOpenModal()}
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              className="flex items-center gap-2 bg-blue-600 text-white font-bold px-4 py-2 rounded hover:bg-blue-700 transition"
             >
               <FaPlus /> Nueva Categoría
             </button>
@@ -196,12 +196,12 @@ export default function GestionCategorias() {
         </div>
 
         {loading ? (
-          <div className="text-center py-10">Cargando...</div>
+          <div className="text-center py-10 font-bold text-gray-900 dark:text-white">Cargando...</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-200 text-gray-700">
+                <tr className="bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-white">
                   <th className="p-3 border-b">ID</th>
                   <th className="p-3 border-b">Color</th>
                   <th className="p-3 border-b">Nombre</th>
@@ -212,8 +212,8 @@ export default function GestionCategorias() {
               </thead>
               <tbody>
                 {categorias.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-gray-50 border-b">
-                    <td className="p-3">{cat.id}</td>
+                  <tr key={cat.id} className="hover:bg-gray-50 dark:hover:bg-slate-700 border-b dark:border-slate-600">
+                    <td className="p-3 font-bold text-gray-900 dark:text-white">{cat.id}</td>
                     <td className="p-3">
                       <div
                         className="w-8 h-8 rounded-full border border-gray-300 shadow-sm"
@@ -221,17 +221,17 @@ export default function GestionCategorias() {
                         title={cat.color}
                       ></div>
                     </td>
-                    <td className="p-3 font-medium">{cat.nombre}</td>
-                    <td className="p-3 text-sm text-gray-600">
+                    <td className="p-3 font-bold text-gray-900 dark:text-white">{cat.nombre}</td>
+                    <td className="p-3 text-sm text-gray-600 dark:text-gray-300 font-bold">
                       {cat.roles_notificar ? (
-                        <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                        <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-900/40 dark:text-blue-200">
                           {cat.roles_notificar}
                         </span>
                       ) : (
                         <span className="text-gray-400 italic">Ninguno</span>
                       )}
                     </td>
-                    <td className="p-3 text-gray-600 text-sm">
+                    <td className="p-3 text-gray-600 dark:text-gray-300 text-sm font-bold">
                       {cat.descripcion || "Sin descripción"}
                     </td>
                     <td className="p-3 text-center">
@@ -256,7 +256,7 @@ export default function GestionCategorias() {
                 ))}
                 {categorias.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="p-6 text-center text-gray-500">
+                    <td colSpan="5" className="p-6 text-center text-gray-500 dark:text-gray-300 font-bold">
                       No hay categorías registradas.
                     </td>
                   </tr>
@@ -270,19 +270,19 @@ export default function GestionCategorias() {
       {/* Modal Crear/Editar */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md p-6">
+            <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
               {editingCat ? "Editar Categoría" : "Nueva Categoría"}
             </h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">
                   Nombre
                 </label>
                 <input
                   type="text"
                   required
-                  className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded focus:outline-none focus:border-blue-500"
                   value={formData.nombre}
                   onChange={(e) =>
                     setFormData({ ...formData, nombre: e.target.value })
@@ -291,7 +291,7 @@ export default function GestionCategorias() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">
                   Color
                 </label>
                 <div className="flex gap-2 items-center">
@@ -304,19 +304,19 @@ export default function GestionCategorias() {
                       setFormData({ ...formData, color: e.target.value })
                     }
                   />
-                  <span className="text-gray-500 text-sm">
+                  <span className="text-gray-500 dark:text-gray-300 text-sm font-bold">
                     {formData.color}
                   </span>
                 </div>
               </div>
 
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">
                   Roles a notificar
                 </label>
                 <input
                   type="text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded focus:outline-none focus:border-blue-500"
                   value={formData.roles_notificar}
                   onChange={(e) =>
                     setFormData({
@@ -326,17 +326,17 @@ export default function GestionCategorias() {
                   }
                   placeholder="Ej: Gerencia, Comercial, Soporte"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-bold">
                   Separa los roles por comas. (Roles disponibles en el sistema)
                 </p>
               </div>
 
               <div className="mb-6">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">
                   Descripción (Guía de uso)
                 </label>
                 <textarea
-                  className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded focus:outline-none focus:border-blue-500"
                   rows="3"
                   value={formData.descripcion}
                   onChange={(e) =>

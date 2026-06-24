@@ -24,13 +24,15 @@ import GuiaEventosRecurrentes from "../components/GuiaEventosRecurrentes";
 import GuiaRecordatorios from "../components/GuiaRecordatorios";
 import EventoViewer from "../components/EventoViewer";
 import { showSwal, swalBaseOptions } from "../helpers/swalUtils";
-import { FaClipboardList, FaExclamationTriangle } from "react-icons/fa";
+import { FaClipboardList, FaExclamationTriangle, FaTable, FaTags, FaPlus, FaCalendarPlus, FaBell, FaList, FaEye } from "react-icons/fa";
 import {
   showVerSeguimientosModal,
   showCrearSeguimientoModal,
 } from "../helpers/seguimientoModals";
 
 import { checkAdminAndExecute } from "../helpers/auth";
+import { useResponsiveView } from "../hooks/useResponsiveView";
+import FiltrosCalendario from "../components/FiltrosCalendario";
 
 export default function VistaFuncionario() {
   const { id_funcionario } = useParams();
@@ -82,7 +84,23 @@ export default function VistaFuncionario() {
   });
   const [esCita, setEsCita] = useState(null);
   const [pendientesCount, setPendientesCount] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(
+    typeof window !== "undefined" && localStorage.getItem("modo_admin") === "true"
+  );
+  const [view, setView] = useResponsiveView();
   const schedulerRef = useRef(null);
+
+  useEffect(() => {
+    const handleAdminChange = () => {
+      setIsAdmin(localStorage.getItem("modo_admin") === "true");
+    };
+    window.addEventListener("adminModeChanged", handleAdminChange);
+    window.addEventListener("storage", handleAdminChange);
+    return () => {
+      window.removeEventListener("adminModeChanged", handleAdminChange);
+      window.removeEventListener("storage", handleAdminChange);
+    };
+  }, []);
 
   // Estados para recurrencia
   const [esRecurrente, setEsRecurrente] = useState(false);
@@ -95,7 +113,10 @@ export default function VistaFuncionario() {
   const [horaFinPersonalizada, setHoraFinPersonalizada] = useState("");
 
   const inputStyle =
-    "bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition";
+    "bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm transition dark:bg-slate-900 dark:border-slate-600 dark:text-white dark:focus:ring-blue-400";
+
+  const labelStyle =
+    "block mb-2 text-sm font-bold text-gray-900 dark:text-white";
 
   const formatearFechaBogota = (fechaUtc) => {
     if (!fechaUtc) return "";
@@ -297,12 +318,22 @@ export default function VistaFuncionario() {
       Swal.close();
 
       if (resLibres.success && resEventos.success) {
-        const recordatorios = resLibres.data || [];
-        const recordatoriosEventos = resEventos.data || [];
+        const recordatoriosRaw = resLibres.data || [];
+        const recordatoriosEventosRaw = resEventos.data || [];
+
+        // Filtrar los pendientes: en "Mis recordatorios" sólo deben salir
+        // los que ya se procesaron (enviado, error, bloqueado).
+        const recordatoriosEventos = recordatoriosEventosRaw.filter(
+          (rec) => (rec.estado || "pendiente") !== "pendiente"
+        );
+        const recordatorios = recordatoriosRaw.filter(
+          (rec) => (rec.estado || "pendiente") !== "pendiente"
+        );
+
         if (recordatorios.length === 0 && recordatoriosEventos.length === 0) {
           Swal.fire({
             title: "Sin recordatorios",
-            text: "No tienes recordatorios creados.",
+            text: "No tienes recordatorios enviados todavía.",
             icon: "info",
             ...swalBaseOptions,
           });
@@ -312,7 +343,7 @@ export default function VistaFuncionario() {
         let htmlList = `<div class="text-left max-h-[60vh] overflow-y-auto space-y-4 p-2">`;
         htmlList += `<div class="text-sm font-bold text-gray-700">Recordatorios de eventos</div>`;
         if (recordatoriosEventos.length === 0) {
-          htmlList += `<div class="text-xs text-gray-500">No hay recordatorios de eventos.</div>`;
+          htmlList += `<div class="text-xs text-gray-500">No hay recordatorios de eventos enviados.</div>`;
         } else {
           recordatoriosEventos.forEach((rec) => {
             const fechaEvento = formatearFechaBogotaLocal(rec.fecha_inicio);
@@ -341,7 +372,7 @@ export default function VistaFuncionario() {
 
         htmlList += `<div class="text-sm font-bold text-gray-700 mt-3">Recordatorios libres</div>`;
         if (recordatorios.length === 0) {
-          htmlList += `<div class="text-xs text-gray-500">No hay recordatorios libres.</div>`;
+          htmlList += `<div class="text-xs text-gray-500">No hay recordatorios libres enviados.</div>`;
         } else {
           recordatorios.forEach((rec) => {
             const estado = rec.estado || "pendiente";
@@ -983,12 +1014,12 @@ export default function VistaFuncionario() {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
+    <div className="p-2 sm:p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-2 mb-3 sm:mb-6">
         <a
           href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario`}
           style={buttonStyle}
-          className="flex-1 sm:flex-none text-center"
+          className="flex-1 sm:flex-none text-center text-sm sm:text-base py-2"
         >
           Regresar a mi cuenta
         </a>
@@ -996,19 +1027,20 @@ export default function VistaFuncionario() {
         <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
         <GuiaRecordatorios buttonStyle={buttonStyle} />
       </div>
-      <h1 className="text-sm md:text-5xl font-bold">
+      <h1 className="page-title text-lg sm:text-3xl md:text-5xl font-bold text-center leading-tight">
         Calendario de {funcionario.nombre || "Funcionario"}
       </h1>
-      <div className="flex flex-wrap justify-center gap-4 mb-4">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-3 mb-4">
         <button
           onClick={() => {
             resetFormState();
             setEsRecurrente(false);
             setShowForm(true);
           }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
-          + Crear Evento
+          <FaPlus className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Crear Evento</span>
         </button>
 
         <button
@@ -1017,32 +1049,35 @@ export default function VistaFuncionario() {
             setEsRecurrente(true);
             setShowForm(true);
           }}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
-          + Eventos Recurrentes
+          <FaCalendarPlus className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Eventos Recurrentes</span>
         </button>
 
         <button
           onClick={() => setShowRecordatorioLibreForm(true)}
-          className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+          className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
-          + Recordatorio Libre
+          <FaBell className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Recordatorio Libre</span>
         </button>
 
         <button
           onClick={mostrarRecordatoriosLibres}
-          className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded shadow-md transition duration-300 ease-in-out transform hover:-translate-y-1"
+          className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
-          Mis Recordatorios
+          <FaList className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Mis Recordatorios</span>
         </button>
 
         {/* Botón de Pendientes */}
         <button
           onClick={mostrarPendientes}
-          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow-md flex items-center transition duration-300 ease-in-out transform hover:-translate-y-1 relative"
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0 relative"
         >
-          <FaExclamationTriangle className="mr-2" />
-          Eventos Pendientes
+          <FaExclamationTriangle className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Eventos Pendientes</span>
           {pendientesCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-800 text-xs font-bold px-2 py-1 rounded-full shadow-sm border border-white">
               {pendientesCount}
@@ -1052,100 +1087,74 @@ export default function VistaFuncionario() {
 
         <button
           onClick={() => handleHacerSeguimiento(null)}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded shadow-md flex items-center transition duration-300 ease-in-out transform hover:-translate-y-1"
+          className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
-          <FaClipboardList className="mr-2" />
-          Hacer Seguimiento Global
+          <FaClipboardList className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Hacer Seguimiento Global</span>
         </button>
         <button
           onClick={() => handleVerSeguimiento(null)}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow-md flex items-center transition duration-300 ease-in-out transform hover:-translate-y-1"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
-          <FaClipboardList className="mr-2" />
-          Ver Mi Seguimiento
+          <FaEye className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Ver Mi Seguimiento</span>
         </button>
         <button
           onClick={handleVerSeguimientoGlobal}
-          className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded shadow-md flex items-center transition duration-300 ease-in-out transform hover:-translate-y-1"
+          className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
-          <FaClipboardList className="mr-2" />
-          Ver Seguimiento Global
+          <FaClipboardList className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Ver Seguimiento Global</span>
         </button>
-      </div>
-      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
-        <input
-          type="date"
-          value={filtros.fecha_inicio}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, fecha_inicio: e.target.value }))
-          }
-          className="border p-2 rounded"
-        />
-        <input
-          type="date"
-          value={filtros.fecha_fin}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, fecha_fin: e.target.value }))
-          }
-          className="border p-2 rounded"
-        />
-        <select
-          value={filtros.id_categoria}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, id_categoria: e.target.value }))
-          }
-          className="border p-2 rounded"
-        >
-          <option value="">Todas las categorías</option>
-          {categorias.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.nombre}
-            </option>
-          ))}
-        </select>
-        <select
-          value={filtros.estado}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, estado: e.target.value }))
-          }
-          className="border p-2 rounded"
-        >
-          <option value="">¿Fue realizado?</option>
-          <option value="Si">Si</option>
-          <option value="No">No</option>
-        </select>
-        <select
-          value={filtros.fue_trasladado}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, fue_trasladado: e.target.value }))
-          }
-          className="border p-2 rounded"
-        >
-          <option value="">¿Fue trasladado?</option>
-          <option value="Si">Si</option>
-          <option value="No">No</option>
-        </select>
+
         <button
-          onClick={() =>
-            setFiltros({
-              id_categoria: "",
-              fecha_inicio: "",
-              fecha_fin: "",
-              estado: "",
-              fue_trasladado: "",
-            })
-          }
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
+          onClick={() => navigate(`/consolidado-funcionario/${id_funcionario}`)}
+          className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
-          Eliminar filtros
+          <FaTable className="text-lg sm:text-base" />
+          <span className="leading-tight text-center sm:text-left">Consolidado de Eventos</span>
         </button>
+
+        {isAdmin && (
+          <>
+            <button
+              onClick={() => navigate("/consolidado-eventos")}
+              style={{ backgroundColor: "#334155", color: "#ffffff" }}
+              className="hover:bg-slate-800 font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
+            >
+              <FaTable className="text-lg sm:text-base" />
+              <span className="leading-tight text-center sm:text-left">Consolidado Global</span>
+            </button>
+            <a
+              href="/gestion-categorias"
+              style={{
+                backgroundColor: "#78350f",
+                color: "#ffffff",
+                fontWeight: "700",
+                fontSize: "0.95rem",
+                letterSpacing: "0.01em",
+              }}
+              className="hover:bg-amber-900 py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
+            >
+              <FaTags className="text-lg sm:text-base" />
+              <span className="leading-tight text-center sm:text-left">Gestor Categorías</span>
+            </a>
+          </>
+        )}
       </div>
+      <FiltrosCalendario
+        filtros={filtros}
+        setFiltros={setFiltros}
+        categorias={categorias}
+        funcionarios={[]}
+        mostrarFuncionario={false}
+      />
       {loading ? (
         <div className="text-center text-xl py-10 text-gray-500">
           Cargando calendario...
         </div>
       ) : (
-        <div className="w-full overflow-auto">
+        <div className="calendar-wrapper w-full overflow-x-auto overflow-y-hidden">
           {loading === false && (
             <div className="bg-yellow-100 text-yellow-800 border border-yellow-300 rounded px-4 py-2 mb-4">
               Recuerda marcar como realizados tus eventos anteriores. Los
@@ -1153,9 +1162,12 @@ export default function VistaFuncionario() {
               nuevos.
             </div>
           )}
+          <div className="min-w-[640px]">
           <Scheduler
             ref={schedulerRef}
-            view="week"
+            view={view}
+            onViewChange={setView}
+            agenda={false}
             events={eventos}
             week={schedulerConfig.week}
             day={schedulerConfig.day}
@@ -1183,19 +1195,20 @@ export default function VistaFuncionario() {
             deletable={false}
             draggable={false}
           />
+          </div>
         </div>
       )}
       {/* Crear evento */}
       {showForm && (
-        <div className="fixed inset-0 z-[120000] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120000] flex items-center justify-center p-2 sm:p-4">
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[120000]"
             onClick={() => setShowForm(false)}
           />
           <div
-            className={`relative bg-white rounded-2xl shadow-2xl w-full ${
+            className={`relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${
               esRecurrente ? "max-w-2xl" : "max-w-xl"
-            } max-h-[90vh] overflow-y-auto z-[120001]`}
+            } max-h-[95vh] sm:max-h-[90vh] overflow-y-auto z-[120001]`}
           >
             <div
               className={`px-6 py-5 text-white ${
@@ -1236,11 +1249,11 @@ export default function VistaFuncionario() {
                 </span>
               </div>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4 p-6">
+            <form onSubmit={handleSubmit} className="space-y-4 p-6 dark:text-white">
               {/* Título */}
               <label
                 htmlFor="titulo"
-                className="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Título
               </label>
@@ -1258,7 +1271,7 @@ export default function VistaFuncionario() {
               {/* Ubicación */}
               <label
                 htmlFor="ubicacion"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Ubicación / dirección del evento
               </label>
@@ -1276,7 +1289,7 @@ export default function VistaFuncionario() {
               {/* Fecha */}
               <label
                 htmlFor="fecha"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Fecha
               </label>
@@ -1295,7 +1308,7 @@ export default function VistaFuncionario() {
               {/* Hora de inicio */}
               <label
                 htmlFor="hora_inicio"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Hora de inicio
               </label>
@@ -1314,7 +1327,7 @@ export default function VistaFuncionario() {
               {/* Hora de fin */}
               <label
                 htmlFor="hora_fin"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Hora de finalización
               </label>
@@ -1346,7 +1359,7 @@ export default function VistaFuncionario() {
                 />
                 <label
                   htmlFor="recordatorio_activo"
-                  className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                  className="ml-2 text-sm font-bold text-gray-900 dark:text-white"
                 >
                   Enviar recordatorio
                 </label>
@@ -1356,7 +1369,7 @@ export default function VistaFuncionario() {
                 <>
                   <label
                     htmlFor="recordatorio_minutos"
-                    className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                    className={labelStyle}
                   >
                     Anticipación del recordatorio
                   </label>
@@ -1381,7 +1394,7 @@ export default function VistaFuncionario() {
                   </select>
                   <label
                     htmlFor="recordatorio_canal"
-                    className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                    className={labelStyle}
                   >
                     Canal del recordatorio
                   </label>
@@ -1405,9 +1418,9 @@ export default function VistaFuncionario() {
               )}
 
               {esRecurrente && (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
-                  <div className="rounded-xl border border-emerald-100 bg-white p-4">
-                    <p className="mb-2 text-sm font-bold text-gray-900">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-700 dark:bg-emerald-900/30">
+                  <div className="rounded-xl border border-emerald-100 bg-white p-4 dark:border-emerald-700 dark:bg-slate-900">
+                    <p className="mb-2 text-sm font-bold text-gray-900 dark:text-white">
                       Tipo de recurrencia:
                     </p>
                     <div className="flex flex-wrap gap-4 mb-4">
@@ -1423,7 +1436,7 @@ export default function VistaFuncionario() {
                         />
                         <label
                           htmlFor="tipo-diario"
-                          className="ml-2 text-sm font-medium text-gray-900"
+                          className="ml-2 text-sm font-bold text-gray-900 dark:text-white"
                         >
                           Todos los días
                         </label>
@@ -1440,7 +1453,7 @@ export default function VistaFuncionario() {
                         />
                         <label
                           htmlFor="tipo-semanal"
-                          className="ml-2 text-sm font-medium text-gray-900"
+                          className="ml-2 text-sm font-bold text-gray-900 dark:text-white"
                         >
                           Días específicos
                         </label>
@@ -1457,7 +1470,7 @@ export default function VistaFuncionario() {
                         />
                         <label
                           htmlFor="tipo-personalizado"
-                          className="ml-2 text-sm font-medium text-gray-900"
+                          className="ml-2 text-sm font-bold text-gray-900 dark:text-white"
                         >
                           Fechas personalizadas
                         </label>
@@ -1466,7 +1479,7 @@ export default function VistaFuncionario() {
 
                     {tipoRecurrencia === "semanal" && (
                       <div className="mb-4">
-                        <p className="mb-2 text-sm text-gray-700">
+                        <p className="mb-2 text-sm font-bold text-gray-700 dark:text-gray-300">
                           Selecciona los días:
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -1497,7 +1510,7 @@ export default function VistaFuncionario() {
                                 }}
                                 className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                               />
-                              <span className="ml-1 text-sm text-gray-900 mr-3">
+                              <span className="ml-1 text-sm font-bold text-gray-900 dark:text-white mr-3">
                                 {dia}
                               </span>
                             </label>
@@ -1508,7 +1521,7 @@ export default function VistaFuncionario() {
 
                     {tipoRecurrencia !== "personalizado" && (
                       <div className="mb-4">
-                        <label className="block mb-2 text-sm font-medium text-gray-900">
+                        <label className={labelStyle}>
                           Fecha fin de recurrencia
                         </label>
                         <input
@@ -1525,7 +1538,7 @@ export default function VistaFuncionario() {
 
                     {tipoRecurrencia === "personalizado" && (
                       <div className="mb-4">
-                        <p className="mb-2 text-sm text-gray-700">
+                        <p className="mb-2 text-sm font-bold text-gray-700 dark:text-gray-300">
                           Agrega fechas y horas específicas:
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-2">
@@ -1835,7 +1848,7 @@ export default function VistaFuncionario() {
               {/* Descripción */}
               <label
                 htmlFor="descripcion"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Descripción
               </label>
@@ -1855,7 +1868,7 @@ export default function VistaFuncionario() {
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-white"
                 >
                   Cancelar
                 </button>
@@ -1871,12 +1884,12 @@ export default function VistaFuncionario() {
         </div>
       )}
       {showRecordatorioLibreForm && (
-        <div className="fixed inset-0 z-[120000] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120000] flex items-center justify-center p-2 sm:p-4">
           <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[120000]"
             onClick={() => setShowRecordatorioLibreForm(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto z-[120001]">
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto z-[120001]">
             <div className="px-6 py-5 text-white bg-gradient-to-r from-orange-600 to-amber-500">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -1902,7 +1915,7 @@ export default function VistaFuncionario() {
             >
               <label
                 htmlFor="recordatorio_libre_titulo"
-                className="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Título
               </label>
@@ -1922,7 +1935,7 @@ export default function VistaFuncionario() {
               />
               <label
                 htmlFor="recordatorio_libre_mensaje"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Mensaje
               </label>
@@ -1942,7 +1955,7 @@ export default function VistaFuncionario() {
               />
               <label
                 htmlFor="recordatorio_libre_fecha"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Fecha programada
               </label>
@@ -1961,7 +1974,7 @@ export default function VistaFuncionario() {
               />
               <label
                 htmlFor="recordatorio_libre_hora"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Hora programada
               </label>
@@ -1980,7 +1993,7 @@ export default function VistaFuncionario() {
               />
               <label
                 htmlFor="recordatorio_libre_canal"
-                className="block mb-3 text-sm font-medium text-gray-900 dark:text-white"
+                className={labelStyle}
               >
                 Canal
               </label>
@@ -2004,13 +2017,13 @@ export default function VistaFuncionario() {
                 <button
                   type="button"
                   onClick={() => setShowRecordatorioLibreForm(false)}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded"
+                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-2 rounded"
                 >
                   Crear
                 </button>

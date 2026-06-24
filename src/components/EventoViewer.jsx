@@ -109,7 +109,7 @@ export default function EventoViewer({
       <div className="flex flex-col gap-2 mt-4">
         {onHacerSeguimiento && (
           <button
-            className="px-2 py-1 bg-purple-600 text-white rounded flex items-center justify-center"
+            className="px-2 py-1 bg-purple-600 text-white font-bold rounded flex items-center justify-center"
             onClick={() => onHacerSeguimiento(event.event_id)}
           >
             <FaClipboardList className="mr-2" />
@@ -118,7 +118,7 @@ export default function EventoViewer({
         )}
         {onVerSeguimiento && (
           <button
-            className="px-2 py-1 bg-blue-500 text-white rounded flex items-center justify-center"
+            className="px-2 py-1 bg-blue-500 text-white font-bold rounded flex items-center justify-center"
             onClick={() => onVerSeguimiento(event.event_id)}
           >
             <FaEye className="mr-2" />
@@ -126,7 +126,7 @@ export default function EventoViewer({
           </button>
         )}
         <button
-          className="px-2 py-1 bg-gray-500 text-white rounded"
+          className="px-2 py-1 bg-gray-500 text-white font-bold rounded"
           onClick={() => showHistorialModal(event.event_id)}
         >
           Ver cambios
@@ -134,19 +134,19 @@ export default function EventoViewer({
         {allowActions && event?.estado === "No" && (
           <>
             <button
-              className="px-2 py-1 bg-green-600 text-white rounded"
+              className="px-2 py-1 bg-green-600 text-white font-bold rounded"
               onClick={() => showRealizadoModal(event, setFiltros)}
             >
               Marcar como realizado
             </button>
             <button
-              className="px-2 py-1 bg-yellow-600 text-white rounded"
+              className="px-2 py-1 bg-yellow-600 text-white font-bold rounded"
               onClick={() => showEditarModal(event, categorias, setFiltros)}
             >
               Editar evento
             </button>
             <button
-              className="px-2 py-1 bg-blue-600 text-white rounded"
+              className="px-2 py-1 bg-blue-600 text-white font-bold rounded"
               onClick={() => showTrasladarModal(event, setFiltros)}
             >
               Trasladar fecha

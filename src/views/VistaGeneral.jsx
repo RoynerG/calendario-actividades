@@ -15,6 +15,8 @@ import {
   showVerSeguimientosModal,
   showCrearSeguimientoModal,
 } from "../helpers/seguimientoModals";
+import { useResponsiveView } from "../hooks/useResponsiveView";
+import FiltrosCalendario from "../components/FiltrosCalendario";
 
 export default function VistaGeneral() {
   const [eventos, setEventos] = useState([]);
@@ -29,6 +31,7 @@ export default function VistaGeneral() {
     fue_trasladado: "",
   });
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useResponsiveView();
   const buttonStyle = {
     backgroundColor: "black",
     color: "white",
@@ -92,138 +95,66 @@ export default function VistaGeneral() {
   }, [filtros]);
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
+    <div className="p-2 sm:p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-2 mb-3 sm:mb-6">
         <a
           href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario/`}
           style={buttonStyle}
-          className="flex-1 sm:flex-none text-center"
+          className="flex-1 sm:flex-none text-center text-sm sm:text-base py-2"
         >
           Regresar a mi cuenta
         </a>
         <GuiaCategorias buttonStyle={buttonStyle} />
         <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
       </div>
-      <h1 className="text-sm md:text-5xl font-bold">Calendario</h1>
-      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
-        <input
-          type="date"
-          value={filtros.fecha_inicio}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, fecha_inicio: e.target.value }))
-          }
-          className="border p-2 rounded"
-        />
-
-        <input
-          type="date"
-          value={filtros.fecha_fin}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, fecha_fin: e.target.value }))
-          }
-          className="border p-2 rounded"
-        />
-        <select
-          value={filtros.id_categoria}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, id_categoria: e.target.value }))
-          }
-          className="border p-2 rounded"
-        >
-          <option value="">Todas las categorías</option>
-          {categorias.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.nombre}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={filtros.id_empleado}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, id_empleado: e.target.value }))
-          }
-          className="border p-2 rounded"
-        >
-          <option value="">Todos los funcionarios</option>
-          {funcionarios.map((f) => (
-            <option key={f.id_empleado} value={f.id_empleado}>
-              {f.nombre}
-            </option>
-          ))}
-        </select>
-        <select
-          value={filtros.estado}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, estado: e.target.value }))
-          }
-          className="border p-2 rounded"
-        >
-          <option value="">¿Fue realizado?</option>
-          <option value="Si">Si</option>
-          <option value="No">No</option>
-        </select>
-        <select
-          value={filtros.fue_trasladado}
-          onChange={(e) =>
-            setFiltros((f) => ({ ...f, fue_trasladado: e.target.value }))
-          }
-          className="border p-2 rounded"
-        >
-          <option value="">¿Fue trasladado?</option>
-          <option value="Si">Si</option>
-          <option value="No">No</option>
-        </select>
-        <button
-          onClick={() =>
-            setFiltros({
-              id_categoria: "",
-              fecha_inicio: "",
-              fecha_fin: "",
-              estado: "",
-              fue_trasladado: "",
-            })
-          }
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
-        >
-          Eliminar filtros
-        </button>
-      </div>
+      <h1 className="page-title text-lg sm:text-3xl md:text-5xl font-bold text-center leading-tight">
+        Calendario
+      </h1>
+      <FiltrosCalendario
+        filtros={filtros}
+        setFiltros={setFiltros}
+        categorias={categorias}
+        funcionarios={funcionarios}
+      />
       {loading ? (
         <div className="text-center text-xl py-10 text-gray-500">
           Cargando calendario...
         </div>
       ) : (
-        <div className="w-full overflow-auto">
-          <Scheduler
-            view="week"
-            events={eventos}
-            week={schedulerConfig.week}
-            day={schedulerConfig.day}
-            translations={{
-              navigation: schedulerConfig.navigation,
-              event: schedulerConfig.event,
-              moreEvents: schedulerConfig.moreEvents,
-              noDataToDisplay: schedulerConfig.noDataToDisplay,
-              loading: schedulerConfig.loading,
-            }}
-            locale={es}
-            viewerExtraComponent={(fields, event) => (
-              <EventoViewer
-                event={event}
-                categorias={categorias}
-                setFiltros={setFiltros}
-                onVerSeguimiento={() => handleVerSeguimiento(event.event_id)}
-                onHacerSeguimiento={() =>
-                  handleHacerSeguimiento(event.event_id)
-                }
-                allowActions={false}
-              />
-            )}
-            editable={false}
-            deletable={false}
-            draggable={false}
-          />
+        <div className="calendar-wrapper w-full overflow-x-auto overflow-y-hidden">
+          <div className="min-w-[640px]">
+            <Scheduler
+              view={view}
+              onViewChange={setView}
+              agenda={false}
+              events={eventos}
+              week={schedulerConfig.week}
+              day={schedulerConfig.day}
+              translations={{
+                navigation: schedulerConfig.navigation,
+                event: schedulerConfig.event,
+                moreEvents: schedulerConfig.moreEvents,
+                noDataToDisplay: schedulerConfig.noDataToDisplay,
+                loading: schedulerConfig.loading,
+              }}
+              locale={es}
+              viewerExtraComponent={(fields, event) => (
+                <EventoViewer
+                  event={event}
+                  categorias={categorias}
+                  setFiltros={setFiltros}
+                  onVerSeguimiento={() => handleVerSeguimiento(event.event_id)}
+                  onHacerSeguimiento={() =>
+                    handleHacerSeguimiento(event.event_id)
+                  }
+                  allowActions={false}
+                />
+              )}
+              editable={false}
+              deletable={false}
+              draggable={false}
+            />
+          </div>
         </div>
       )}
     </div>

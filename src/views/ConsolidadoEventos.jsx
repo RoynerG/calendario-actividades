@@ -7,6 +7,7 @@ import {
 } from "../services/eventService";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { useDarkMode } from "../hooks/useDarkMode";
 
 export default function ConsolidadoEventos() {
   const [data, setData] = useState([]);
@@ -14,6 +15,7 @@ export default function ConsolidadoEventos() {
   const [perPage, setPerPage] = useState(50);
   const [pagina, setPagina] = useState(1);
   const [loading, setLoading] = useState(false);
+  const isDark = useDarkMode();
   const buttonStyle = {
     backgroundColor: "black",
     color: "white",
@@ -181,19 +183,21 @@ export default function ConsolidadoEventos() {
   ];
 
   return (
-    <div className="p-4">
-      <div className="flex flex-col sm:flex-row justify-center gap-2 mb-6">
+    <div className="p-2 sm:p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-2 mb-3 sm:mb-6">
         <a
           href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario/`}
           style={buttonStyle}
-          className="flex-1 sm:flex-none text-center"
+          className="flex-1 sm:flex-none text-center text-sm sm:text-base py-2"
         >
           Regresar a mi cuenta
         </a>
       </div>
-      <h1 className="text-sm md:text-5xl font-bold">Consolidado de eventos</h1>
+      <h1 className="page-title text-lg sm:text-3xl md:text-5xl font-bold text-center leading-tight">
+        Consolidado de eventos
+      </h1>
 
-      <div className="mb-2 text-sm text-gray-700">
+      <div className="mb-2 text-sm font-bold text-gray-700 dark:text-gray-300">
         Total eventos encontrados: <strong>{totalRows}</strong>
       </div>
 
@@ -205,7 +209,7 @@ export default function ConsolidadoEventos() {
           onChange={(e) =>
             setFiltros((f) => ({ ...f, fecha_inicio: e.target.value }))
           }
-          className="border p-2 rounded"
+          className="border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
           placeholder="Fecha inicio"
         />
 
@@ -215,7 +219,7 @@ export default function ConsolidadoEventos() {
           onChange={(e) =>
             setFiltros((f) => ({ ...f, fecha_fin: e.target.value }))
           }
-          className="border p-2 rounded"
+          className="border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
           placeholder="Fecha fin"
         />
 
@@ -224,7 +228,7 @@ export default function ConsolidadoEventos() {
           onChange={(e) =>
             setFiltros((f) => ({ ...f, id_categoria: e.target.value }))
           }
-          className="border p-2 rounded"
+          className="border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
         >
           <option value="">Todos las categorias</option>
           {categorias.map((f) => (
@@ -238,7 +242,7 @@ export default function ConsolidadoEventos() {
           onChange={(e) =>
             setFiltros((f) => ({ ...f, id_empleado: e.target.value }))
           }
-          className="border p-2 rounded"
+          className="border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
         >
           <option value="">Todos los funcionarios</option>
           {funcionarios.map((f) => (
@@ -253,7 +257,7 @@ export default function ConsolidadoEventos() {
           onChange={(e) =>
             setFiltros((f) => ({ ...f, estado: e.target.value }))
           }
-          className="border p-2 rounded"
+          className="border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
         >
           <option value="">¿Fue realizado?</option>
           <option value="Si">Sí</option>
@@ -265,7 +269,7 @@ export default function ConsolidadoEventos() {
           onChange={(e) =>
             setFiltros((f) => ({ ...f, fue_trasladado: e.target.value }))
           }
-          className="border p-2 rounded"
+          className="border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
         >
           <option value="">¿Fue trasladado?</option>
           <option value="Si">Sí</option>
@@ -283,14 +287,14 @@ export default function ConsolidadoEventos() {
               fue_trasladado: "",
             })
           }
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800 p-2 rounded"
+          className="bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-white p-2 rounded font-bold"
         >
           Eliminar filtros
         </button>
 
         <button
           onClick={exportarExcel}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded"
         >
           Exportar Excel
         </button>
@@ -308,6 +312,7 @@ export default function ConsolidadoEventos() {
         onChangeRowsPerPage={handlePerRowsChange}
         highlightOnHover
         persistTableHead
+        theme={isDark ? "dark" : "default"}
       />
     </div>
   );

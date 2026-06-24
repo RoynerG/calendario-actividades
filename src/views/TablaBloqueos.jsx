@@ -51,17 +51,17 @@ export default function TablaBloqueos() {
       >
         Regresar a mi cuenta
       </a>
-      <h2 className="text-2xl font-bold mb-4 mt-4">Registro de Bloqueos</h2>
+      <h2 className="text-2xl font-bold mb-4 mt-4 text-gray-900 dark:text-white">Registro de Bloqueos</h2>
 
       {loading ? (
-        <div className="text-gray-500">Cargando bloqueos...</div>
+        <div className="text-gray-500 dark:text-gray-300 font-bold">Cargando bloqueos...</div>
       ) : bloqueos.length === 0 ? (
-        <div className="text-gray-500">No hay registros de bloqueo.</div>
+        <div className="text-gray-500 dark:text-gray-300 font-bold">No hay registros de bloqueo.</div>
       ) : (
         <>
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-300">
-              <thead className="bg-gray-100">
+            <table className="min-w-full bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600">
+              <thead className="bg-gray-100 dark:bg-slate-700">
                 <tr>
                   <th className="py-2 px-4 border">#</th>
                   <th className="py-2 px-4 border">Funcionario</th>
@@ -72,14 +72,14 @@ export default function TablaBloqueos() {
               <tbody>
                 {bloqueos.map((b, index) => (
                   <tr key={b.id} className="text-center">
-                    <td className="py-2 px-4 border">
+                    <td className="py-2 px-4 border font-bold text-gray-900 dark:text-white">
                       {(paginaActual - 1) * porPagina + index + 1}
                     </td>
-                    <td className="py-2 px-4 border">{b.nombre}</td>
-                    <td className="py-2 px-4 border">
+                    <td className="py-2 px-4 border font-bold text-gray-900 dark:text-white">{b.nombre}</td>
+                    <td className="py-2 px-4 border font-bold text-gray-900 dark:text-white">
                       {b.cantidad_pendientes}
                     </td>
-                    <td className="py-2 px-4 border">
+                    <td className="py-2 px-4 border font-bold text-gray-900 dark:text-white">
                       {new Date(b.fecha_registro).toLocaleDateString("es-CO")}
                     </td>
                   </tr>
@@ -96,8 +96,8 @@ export default function TablaBloqueos() {
                 onClick={() => fetchData(i + 1)}
                 className={`px-3 py-1 rounded border ${
                   i + 1 === paginaActual
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-800 hover:bg-gray-200"
+                    ? "bg-blue-600 text-white font-bold"
+                    : "bg-white dark:bg-slate-700 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-slate-600 font-bold"
                 }`}
               >
                 {i + 1}

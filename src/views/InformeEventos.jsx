@@ -4,6 +4,7 @@ import {
   listarFuncionarios,
   filtrarEventosAdmin,
 } from "../services/eventService";
+import { useDarkMode } from "../hooks/useDarkMode";
 import {
   BarChart,
   Bar,
@@ -99,6 +100,7 @@ export default function InformeEventos() {
   const [auditData, setAuditData] = useState([]);
   const [individualCompliance, setIndividualCompliance] = useState([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
+  const isDark = useDarkMode();
   const [topFuncionarios, setTopFuncionarios] = useState([]);
   const [topCategorias, setTopCategorias] = useState([]);
 
@@ -484,9 +486,9 @@ export default function InformeEventos() {
   };
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 bg-white p-4 rounded shadow">
-        <h1 className="text-2xl font-bold text-gray-800">Informe de Eventos</h1>
+    <div className="p-4 bg-gray-50 dark:bg-slate-900 min-h-screen">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 bg-white dark:bg-slate-800 p-4 rounded shadow">
+        <h1 className="page-title text-lg sm:text-3xl md:text-5xl font-bold text-center leading-tight">Informe de Eventos</h1>
         <a
           href={`https://sucasainmobiliaria.com.co/mi-cuenta/menu-calendario/`}
           style={buttonStyle}
@@ -496,16 +498,16 @@ export default function InformeEventos() {
         </a>
       </div>
 
-      <div className="bg-white p-4 rounded shadow mb-6">
+      <div className="bg-white dark:bg-slate-800 p-4 rounded shadow mb-6">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">
               Tipo de Funcionario
             </label>
             <select
               value={tipoFuncionario}
               onChange={(e) => setTipoFuncionario(e.target.value)}
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
             >
               <option value="todos">Todos</option>
               <option value="comercial">Comercial</option>
@@ -514,7 +516,7 @@ export default function InformeEventos() {
           </div>
 
           <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">
               Funcionario
             </label>
             <select
@@ -522,7 +524,7 @@ export default function InformeEventos() {
               onChange={(e) =>
                 setFiltros((f) => ({ ...f, id_empleado: e.target.value }))
               }
-              className="w-full border p-2 rounded"
+              className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
             >
               <option value="">Todos los funcionarios</option>
               {funcionariosFiltrados.map((f) => (
@@ -534,7 +536,7 @@ export default function InformeEventos() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">
               Fecha Inicio
             </label>
             <input
@@ -543,12 +545,12 @@ export default function InformeEventos() {
               onChange={(e) =>
                 setFiltros((f) => ({ ...f, fecha_inicio: e.target.value }))
               }
-              className="border p-2 rounded"
+              className="border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">
               Fecha Fin
             </label>
             <input
@@ -557,20 +559,20 @@ export default function InformeEventos() {
               onChange={(e) =>
                 setFiltros((f) => ({ ...f, fecha_fin: e.target.value }))
               }
-              className="border p-2 rounded"
+              className="border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded font-bold"
             />
           </div>
 
           <div className="flex gap-2">
             <button
               onClick={cargarReporte}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded"
             >
               Consultar
             </button>
             <button
               onClick={exportarPDF}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded"
             >
               PDF
             </button>
@@ -579,14 +581,14 @@ export default function InformeEventos() {
       </div>
 
       {/* TABS */}
-      <div className="mb-4 border-b border-gray-200">
-        <ul className="flex flex-wrap -mb-px text-sm font-medium text-center">
+      <div className="mb-4 border-b border-gray-200 dark:border-slate-700">
+        <ul className="flex flex-wrap -mb-px text-sm font-bold text-center">
           <li className="mr-2">
             <button
               className={`inline-block p-4 rounded-t-lg ${
                 activeTab === "general"
-                  ? "text-blue-600 border-b-2 border-blue-600 active"
-                  : "hover:text-gray-600 hover:border-gray-300"
+                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 active"
+                  : "text-gray-700 dark:text-gray-300 hover:text-gray-600 dark:hover:text-white hover:border-gray-300"
               }`}
               onClick={() => setActiveTab("general")}
             >
@@ -597,8 +599,8 @@ export default function InformeEventos() {
             <button
               className={`inline-block p-4 rounded-t-lg ${
                 activeTab === "audit"
-                  ? "text-blue-600 border-b-2 border-blue-600 active"
-                  : "hover:text-gray-600 hover:border-gray-300"
+                  ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 active"
+                  : "text-gray-700 dark:text-gray-300 hover:text-gray-600 dark:hover:text-white hover:border-gray-300"
               }`}
               onClick={() => setActiveTab("audit")}
             >
@@ -612,8 +614,8 @@ export default function InformeEventos() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Top Funcionarios: Solo mostrar si no hay funcionario seleccionado */}
           {!filtros.id_empleado && (
-            <div className="bg-white p-4 rounded shadow">
-              <h3 className="text-lg font-bold mb-4">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded shadow">
+              <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
                 Top Funcionarios (Eventos)
               </h3>
               <div className="h-[300px]">
@@ -629,7 +631,7 @@ export default function InformeEventos() {
                       dataKey="name"
                       type="category"
                       width={150}
-                      tick={{ fontSize: 12 }}
+                      tick={{ fontSize: 12, fill: isDark ? "#cbd5e1" : "#000" }}
                     />
                     <Tooltip />
                     <Bar dataKey="value" fill="#8884d8" name="Eventos" />
@@ -643,8 +645,8 @@ export default function InformeEventos() {
           {filtros.id_empleado && (
             <>
               {/* Actividad Diaria */}
-              <div className="bg-white p-4 rounded shadow">
-                <h3 className="text-lg font-bold mb-4">
+              <div className="bg-white dark:bg-slate-800 p-4 rounded shadow">
+                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
                   Evolución Diaria de Eventos
                 </h3>
                 {loadingStats ? (
@@ -685,8 +687,8 @@ export default function InformeEventos() {
               </div>
 
               {/* Distribución de Tiempo */}
-              <div className="bg-white p-4 rounded shadow">
-                <h3 className="text-lg font-bold mb-4">
+              <div className="bg-white dark:bg-slate-800 p-4 rounded shadow">
+                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
                   Uso del Tiempo Disponible (Horas)
                 </h3>
                 {loadingStats ? (
@@ -731,8 +733,8 @@ export default function InformeEventos() {
           )}
 
           {/* Distribución Categorías */}
-          <div className="bg-white p-4 rounded shadow">
-            <h3 className="text-lg font-bold mb-4">
+          <div className="bg-white dark:bg-slate-800 p-4 rounded shadow">
+            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
               {filtros.id_empleado
                 ? "Distribución de Eventos por Categoría"
                 : "Distribución Global por Categoría"}
@@ -767,29 +769,29 @@ export default function InformeEventos() {
           </div>
 
           {/* Tabla Detalle */}
-          <div className="bg-white p-4 rounded shadow md:col-span-2">
-            <h3 className="text-lg font-bold mb-4">
+          <div className="bg-white dark:bg-slate-800 p-4 rounded shadow md:col-span-2">
+            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
               Detalle por Funcionario y Categoría
             </h3>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm border">
+              <table className="w-full text-sm border border-gray-300 dark:border-slate-600">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="p-2 border text-left">Funcionario</th>
-                    <th className="p-2 border text-left">Categoría</th>
-                    <th className="p-2 border text-right">Eventos</th>
-                    <th className="p-2 border text-right">Horas</th>
+                  <tr className="bg-gray-100 dark:bg-slate-700">
+                    <th className="p-2 border text-left font-bold text-gray-900 dark:text-white">Funcionario</th>
+                    <th className="p-2 border text-left font-bold text-gray-900 dark:text-white">Categoría</th>
+                    <th className="p-2 border text-right font-bold text-gray-900 dark:text-white">Eventos</th>
+                    <th className="p-2 border text-right font-bold text-gray-900 dark:text-white">Horas</th>
                   </tr>
                 </thead>
                 <tbody>
                   {reporte.map((r, i) => (
                     <tr key={i} className="hover:bg-gray-50">
-                      <td className="p-2 border">{r.funcionario}</td>
-                      <td className="p-2 border">{r.categoria}</td>
-                      <td className="p-2 border text-right">
+                      <td className="p-2 border font-bold text-gray-900 dark:text-white">{r.funcionario}</td>
+                      <td className="p-2 border font-bold text-gray-900 dark:text-white">{r.categoria}</td>
+                      <td className="p-2 border text-right font-bold text-gray-900 dark:text-white">
                         {r.total_eventos}
                       </td>
-                      <td className="p-2 border text-right">{r.horas_total}</td>
+                      <td className="p-2 border text-right font-bold text-gray-900 dark:text-white">{r.horas_total}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -800,9 +802,9 @@ export default function InformeEventos() {
       )}
 
       {activeTab === "audit" && (
-        <div className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-bold mb-4">Auditoría de Agendamiento</h3>
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded shadow">
+          <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Auditoría de Agendamiento</h3>
+          <p className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-4">
             Analiza el cumplimiento del horario laboral:
             <br />
             L-V: 8:30am - 12:30pm | 2:00pm - 6:00pm
@@ -811,19 +813,19 @@ export default function InformeEventos() {
           </p>
 
           {loadingAudit ? (
-            <div className="text-center py-10">Cargando auditoría...</div>
+            <div className="text-center py-10 font-bold text-gray-700 dark:text-gray-300">Cargando auditoría...</div>
           ) : auditData.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm border">
+              <table className="w-full text-sm border border-gray-300 dark:border-slate-600">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="p-2 border">Fecha</th>
-                    <th className="p-2 border">Día</th>
-                    <th className="p-2 border text-center">Eventos</th>
-                    <th className="p-2 border text-center">Tiempo Agendado</th>
-                    <th className="p-2 border text-center">Tiempo Laboral</th>
-                    <th className="p-2 border text-center">% Ocupación</th>
-                    <th className="p-2 border text-center">Estado</th>
+                  <tr className="bg-gray-100 dark:bg-slate-700">
+                    <th className="p-2 border font-bold text-gray-900 dark:text-white">Fecha</th>
+                    <th className="p-2 border font-bold text-gray-900 dark:text-white">Día</th>
+                    <th className="p-2 border text-center font-bold text-gray-900 dark:text-white">Eventos</th>
+                    <th className="p-2 border text-center font-bold text-gray-900 dark:text-white">Tiempo Agendado</th>
+                    <th className="p-2 border text-center font-bold text-gray-900 dark:text-white">Tiempo Laboral</th>
+                    <th className="p-2 border text-center font-bold text-gray-900 dark:text-white">% Ocupación</th>
+                    <th className="p-2 border text-center font-bold text-gray-900 dark:text-white">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -831,16 +833,18 @@ export default function InformeEventos() {
                     <tr
                       key={i}
                       className={
-                        d.utilization < 50 ? "bg-red-50" : "hover:bg-gray-50"
+                        d.utilization < 50
+                          ? "bg-red-50 dark:bg-red-900/30"
+                          : "hover:bg-gray-50 dark:hover:bg-slate-700"
                       }
                     >
-                      <td className="p-2 border">{d.date}</td>
-                      <td className="p-2 border capitalize">{d.dayName}</td>
-                      <td className="p-2 border text-center">{d.eventCount}</td>
-                      <td className="p-2 border text-center">
+                      <td className="p-2 border font-bold text-gray-900 dark:text-white">{d.date}</td>
+                      <td className="p-2 border capitalize font-bold text-gray-900 dark:text-white">{d.dayName}</td>
+                      <td className="p-2 border text-center font-bold text-gray-900 dark:text-white">{d.eventCount}</td>
+                      <td className="p-2 border text-center font-bold text-gray-900 dark:text-white">
                         {d.occupiedMinutes} min
                       </td>
-                      <td className="p-2 border text-center">
+                      <td className="p-2 border text-center font-bold text-gray-900 dark:text-white">
                         {d.totalWorkMinutes} min
                       </td>
                       <td className="p-2 border text-center font-bold">
@@ -854,7 +858,7 @@ export default function InformeEventos() {
                           {d.utilization}%
                         </span>
                       </td>
-                      <td className="p-2 border text-center">
+                      <td className="p-2 border text-center font-bold text-gray-900 dark:text-white">
                         {d.utilization < 50 ? "Baja Productividad" : "OK"}
                       </td>
                     </tr>
@@ -863,7 +867,7 @@ export default function InformeEventos() {
               </table>
             </div>
           ) : (
-            <div className="text-center py-10 text-gray-500">
+            <div className="text-center py-10 text-gray-500 dark:text-gray-300 font-bold">
               No hay datos para mostrar. Seleccione un funcionario y rango de
               fechas.
             </div>
@@ -872,24 +876,24 @@ export default function InformeEventos() {
       )}
 
       {activeTab === "audit" && individualCompliance.length > 0 && (
-        <div className="bg-white p-4 rounded shadow mt-6">
-          <h3 className="text-lg font-bold mb-4">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded shadow mt-6">
+          <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">
             Cumplimiento por Funcionario (
             {tipoFuncionario === "todos" ? "Global" : tipoFuncionario})
           </h3>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm font-bold text-gray-600 dark:text-gray-300 mb-4">
             Ranking de utilización del tiempo laboral disponible en el periodo
             seleccionado.
           </p>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse border border-gray-300 dark:border-slate-600">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-2 border">Funcionario</th>
-                  <th className="p-2 border">Total Eventos</th>
-                  <th className="p-2 border">Horas Agendadas</th>
-                  <th className="p-2 border">Cumplimiento (%)</th>
-                  <th className="p-2 border">Estado</th>
+                <tr className="bg-gray-100 dark:bg-slate-700">
+                  <th className="p-2 border font-bold text-gray-900 dark:text-white">Funcionario</th>
+                  <th className="p-2 border font-bold text-gray-900 dark:text-white">Total Eventos</th>
+                  <th className="p-2 border font-bold text-gray-900 dark:text-white">Horas Agendadas</th>
+                  <th className="p-2 border font-bold text-gray-900 dark:text-white">Cumplimiento (%)</th>
+                  <th className="p-2 border font-bold text-gray-900 dark:text-white">Estado</th>
                 </tr>
               </thead>
               <tbody>
@@ -906,11 +910,11 @@ export default function InformeEventos() {
                   }
 
                   return (
-                    <tr key={idx} className="border-b hover:bg-gray-50">
-                      <td className="p-2 border font-medium">{item.nombre}</td>
-                      <td className="p-2 border">{item.eventos}</td>
-                      <td className="p-2 border">{item.horas} h</td>
-                      <td className="p-2 border font-bold">
+                    <tr key={idx} className="border-b border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700">
+                      <td className="p-2 border font-bold text-gray-900 dark:text-white">{item.nombre}</td>
+                      <td className="p-2 border font-bold text-gray-900 dark:text-white">{item.eventos}</td>
+                      <td className="p-2 border font-bold text-gray-900 dark:text-white">{item.horas} h</td>
+                      <td className="p-2 border font-bold text-gray-900 dark:text-white">
                         {item.utilization}%
                       </td>
                       <td className={`p-2 border font-bold ${statusColor}`}>

@@ -7,6 +7,7 @@ import {
 } from "../services/eventService";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { useDarkMode } from "../hooks/useDarkMode";
 
 export default function ConsolidadoSeguimientos() {
   const [data, setData] = useState([]);
@@ -14,6 +15,7 @@ export default function ConsolidadoSeguimientos() {
   const [filterText, setFilterText] = useState("");
   const [funcionarios, setFuncionarios] = useState([]);
   const [selectedFuncionario, setSelectedFuncionario] = useState("");
+  const isDark = useDarkMode();
 
   const columns = [
     {
@@ -32,8 +34,8 @@ export default function ConsolidadoSeguimientos() {
         <span
           className={`px-2 py-1 rounded text-xs font-bold ${
             row.tipo === "global"
-              ? "bg-indigo-100 text-indigo-700"
-              : "bg-blue-100 text-blue-700"
+              ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200"
+              : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-200"
           }`}
         >
           {row.tipo ? row.tipo.toUpperCase() : "EVENTO"}
@@ -125,9 +127,9 @@ export default function ConsolidadoSeguimientos() {
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">
+        <h1 className="page-title text-lg sm:text-3xl md:text-5xl font-bold text-center leading-tight">
           Consolidado de Seguimientos Globales
         </h1>
         <button
@@ -138,23 +140,25 @@ export default function ConsolidadoSeguimientos() {
         </button>
       </div>
 
-      <div className="bg-white p-4 rounded shadow mb-4 flex flex-wrap gap-4 items-end">
+      <div className="bg-white dark:bg-slate-800 p-4 rounded shadow mb-4 flex flex-wrap gap-4 items-end">
         <div className="w-full sm:w-1/3">
-          <label className="block text-sm font-bold mb-1">Buscar:</label>
+          <label className="block text-sm font-bold mb-1 text-gray-900 dark:text-white">
+            Buscar:
+          </label>
           <input
             type="text"
-            className="w-full border p-2 rounded"
+            className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded"
             placeholder="Buscar por detalle, usuario, evento..."
             value={filterText}
             onChange={(e) => setFilterText(e.target.value)}
           />
         </div>
         <div className="w-full sm:w-1/3">
-          <label className="block text-sm font-bold mb-1">
+          <label className="block text-sm font-bold mb-1 text-gray-900 dark:text-white">
             Filtrar por Funcionario Objetivo:
           </label>
           <select
-            className="w-full border p-2 rounded"
+            className="w-full border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white p-2 rounded"
             value={selectedFuncionario}
             onChange={(e) => setSelectedFuncionario(e.target.value)}
           >
@@ -176,7 +180,7 @@ export default function ConsolidadoSeguimientos() {
         </div>
       </div>
 
-      <div className="bg-white rounded shadow p-4">
+      <div className="bg-white dark:bg-slate-800 rounded shadow p-4">
         <DataTable
           columns={columns}
           data={filteredData}
@@ -184,6 +188,7 @@ export default function ConsolidadoSeguimientos() {
           progressPending={loading}
           highlightOnHover
           responsive
+          theme={isDark ? "dark" : "default"}
           noDataComponent="No se encontraron seguimientos."
           paginationComponentOptions={{
             rowsPerPageText: "Filas por página:",

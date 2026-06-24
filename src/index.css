@@ -4,13 +4,29 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: rgba(0, 0, 0, 0.87);
+  background-color: #f8fafc;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark {
+  color: rgba(255, 255, 255, 0.92);
+  background-color: #0f172a;
+  color-scheme: dark;
+}
+
+/* Título principal de las vistas: negro en light, blanco en dark.
+   Se usa !important para ganarle a MUI Typography. */
+.page-title {
+  color: #000000 !important;
+}
+html.dark .page-title {
+  color: #ffffff !important;
 }
 
 a {
@@ -24,15 +40,379 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
+  min-height: 100vh;
+  background-color: inherit;
+  color: inherit;
+}
+
+#root {
   min-height: 100vh;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.rs__event__item,
+.rs__multi_day,
+.rs__cell,
+.rs__popper_actions {
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* react-scheduler: cabeceras de días y celdas en dark mode */
+html.dark .rs__cell.rs__header {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+  font-weight: 700;
+}
+
+html.dark .rs__cell.rs__header__center {
+  color: #f1f5f9 !important;
+  font-weight: 700;
+}
+
+html.dark .rs__cell {
+  border-color: #334155 !important;
+}
+
+html.dark .rs__cell.rs__time {
+  color: #cbd5e1 !important;
+  font-weight: 600;
+  background-color: #0f172a !important;
+}
+
+html.dark .rs__view_navigator button {
+  color: #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+html.dark .rs__view_navigator button[color="primary"],
+html.dark .rs__view_navigator .MuiButton-colorPrimary {
+  color: #facc15 !important;
+}
+
+/* MUI Dialog (modal Crear evento) en dark mode */
+html.dark .MuiDialog-paper {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .MuiDialogTitle-root {
+  color: #f1f5f9 !important;
+  font-weight: 700 !important;
+}
+
+html.dark .MuiInputLabel-root {
+  color: #f1f5f9 !important;
+  font-weight: 700 !important;
+}
+
+html.dark .MuiInputLabel-root.Mui-focused {
+  color: #90caf9 !important;
+}
+
+html.dark .MuiOutlinedInput-root {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: #475569 !important;
+}
+
+html.dark .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #90caf9 !important;
+  border-width: 2px !important;
+}
+
+html.dark .MuiFormControlLabel-label,
+html.dark .MuiTypography-root {
+  color: #f1f5f9 !important;
+}
+
+html.dark .MuiTab-root {
+  color: #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+html.dark .MuiTab-root.Mui-selected {
+  color: #facc15 !important;
+}
+
+html.dark .MuiButton-root {
+  font-weight: 700 !important;
+}
+
+/* react-scheduler: eventos del calendario
+   - Forzar texto BLANCO y BOLD siempre, con text-shadow para garantizar
+     contraste sobre cualquier color de fondo (claro u oscuro). */
+.rs__event__item,
+.rs__event__item *,
+.rs__multi_day,
+.rs__multi_day * {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85) !important;
+}
+
+.rs__event__item .MuiTypography-root,
+.rs__event__item .MuiTypography-subtitle2,
+.rs__event__item .MuiTypography-body2,
+.rs__multi_day .MuiTypography-root {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+/* Tarjeta emergente del evento (popper/viewer) */
+.rs__popper_actions .MuiTypography-root,
+.rs__popper_actions * {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+/* Modal: campos de formulario en MUI Dialog (Crear evento) */
+html.dark .MuiDialog-paper .MuiInputLabel-root {
+  color: #f1f5f9 !important;
+  font-weight: 700 !important;
+}
+
+html.dark .MuiDialog-paper {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .MuiDialog-paper .MuiOutlinedInput-root {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark .MuiDialog-paper .MuiOutlinedInput-root .MuiOutlinedInput-input {
+  color: #f1f5f9 !important;
+}
+
+html.dark .MuiDialog-paper .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border-color: #475569 !important;
+}
+
+html.dark .MuiDialog-paper .MuiFormControlLabel-label {
+  color: #f1f5f9 !important;
+  font-weight: 600 !important;
+}
+
+html.dark .MuiDialog-paper .MuiTypography-root {
+  color: #f1f5f9 !important;
+}
+
+html.dark .MuiDialog-paper .MuiDialogActions-root .MuiButton-text {
+  color: #f1f5f9 !important;
+}
+
+/* ============================================================
+   Inputs / selects / textareas nativos de los FILTROS.
+   Aplica a TODOS los form controls de la app (no solo los que
+   tengan dark: en su className). Garantiza contraste claro/oscuro.
+   ============================================================ */
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
+select,
+textarea {
+  background-color: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+    background-color 0.15s ease, color 0.15s ease;
+}
+
+input[type="text"]:focus,
+input[type="search"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="datetime-local"]:focus,
+input[type="month"]:focus,
+input[type="week"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+/* Dark mode: fondo oscuro, texto blanco, borde slate */
+html.dark input[type="text"],
+html.dark input[type="search"],
+html.dark input[type="email"],
+html.dark input[type="tel"],
+html.dark input[type="url"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark input[type="date"],
+html.dark input[type="time"],
+html.dark input[type="datetime-local"],
+html.dark input[type="month"],
+html.dark input[type="week"],
+html.dark select,
+html.dark textarea {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+html.dark input[type="text"]:focus,
+html.dark input[type="search"]:focus,
+html.dark input[type="email"]:focus,
+html.dark input[type="tel"]:focus,
+html.dark input[type="url"]:focus,
+html.dark input[type="password"]:focus,
+html.dark input[type="number"]:focus,
+html.dark input[type="date"]:focus,
+html.dark input[type="time"]:focus,
+html.dark input[type="datetime-local"]:focus,
+html.dark input[type="month"]:focus,
+html.dark input[type="week"]:focus,
+html.dark select:focus,
+html.dark textarea:focus {
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Los nativos <select> en Chrome/Edge/Firefox no heredan color en
+   las opciones desplegadas; forzamos el esquema oscuro. */
+html.dark select option {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+/* Icono del calendario (date picker nativo): blanco en dark */
+html.dark input[type="date"]::-webkit-calendar-picker-indicator,
+html.dark input[type="time"]::-webkit-calendar-picker-indicator,
+html.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+html.dark input[type="week"]::-webkit-calendar-picker-indicator,
+html.dark input[type="month"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.4);
+  cursor: pointer;
+}
+
+/* Asegurar que el color-scheme del navegador cambie los controles nativos */
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+/* ============================================================
+   Utilidades para modales "Guía" (Guía de eventos recurrentes,
+   recordatorios, etc.). Garantizan contraste en light y dark.
+   ============================================================ */
+.guia-text {
+  color: #1f2937; /* gray-800 */
+}
+html.dark .guia-text {
+  color: #f1f5f9; /* slate-100 */
+}
+
+.guia-card {
+  background-color: transparent;
+  border-color: #e5e7eb; /* gray-200 */
+}
+.guia-card-soft {
+  background-color: #f9fafb; /* gray-50 */
+}
+html.dark .guia-card {
+  background-color: #0f172a; /* slate-900 */
+  border-color: #475569; /* slate-600 */
+}
+html.dark .guia-card-soft {
+  background-color: #0f172a;
+  border-color: #475569;
+}
+
+/* ============================================================
+   Vista móvil del calendario
+   ============================================================ */
+
+/* Wrapper del calendario: scroll horizontal con scrollbar visible */
+.calendar-wrapper {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+  border-radius: 0.5rem;
+}
+.calendar-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+.calendar-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+.calendar-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.5);
+  border-radius: 4px;
+}
+.calendar-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+html.dark .calendar-wrapper {
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+html.dark .calendar-wrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+html.dark .calendar-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+}
+
+/* Móvil: ajustes finos al react-scheduler */
+@media (max-width: 640px) {
+  .rs__cell.rs__time {
+    min-width: 32px !important;
+    max-width: 32px !important;
+    font-size: 9px !important;
+  }
+  .rs__cell.rs__header__center {
+    font-size: 10px !important;
+    padding: 4px 2px !important;
+  }
+  .rs__cell:not(.rs__time) {
+    min-width: 60px !important;
+  }
+  .rs__event__item,
+  .rs__multi_day {
+    font-size: 10px !important;
+    padding: 1px 2px !important;
+  }
+  /* Botones de navegación del scheduler: más grandes al tacto */
+  .rs__view_navigator button {
+    padding: 4px 6px !important;
+    min-height: 32px !important;
   }
 }

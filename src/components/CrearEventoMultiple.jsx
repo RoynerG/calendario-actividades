@@ -12,9 +12,9 @@ export default function CrearEventoMultiple() {
   } = useEventoForm("multiple");
 
   const styleLabel =
-    "block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white";
+    "block mb-2 mt-3 text-sm font-bold text-gray-900 dark:text-white";
   const styleInput =
-    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
+    "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-slate-900 dark:border-slate-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
 
   if (loading) {
     return (
@@ -104,7 +104,7 @@ export default function CrearEventoMultiple() {
           />
           <label
             htmlFor="recordatorio_activo_multiple"
-            className="text-sm text-gray-700"
+            className="text-sm font-bold text-gray-900 dark:text-white"
           >
             Enviar recordatorio
           </label>
@@ -214,7 +214,7 @@ export default function CrearEventoMultiple() {
 
         <button
           type="submit"
-          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
+          className="w-full bg-black dark:bg-blue-600 text-white font-bold py-2 rounded hover:bg-gray-800 dark:hover:bg-blue-700 transition"
         >
           Crear evento
         </button>

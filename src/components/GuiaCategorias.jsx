@@ -68,7 +68,7 @@ export default function GuiaCategorias({ buttonStyle }) {
         <DialogContent dividers>
           <Typography component="div" gutterBottom>
             {loading ? (
-              <div className="text-center p-4">Cargando categorías...</div>
+              <div className="text-center p-4 font-bold text-gray-900 dark:text-white">Cargando categorías...</div>
             ) : (
               <>
                 <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -93,13 +93,13 @@ export default function GuiaCategorias({ buttonStyle }) {
                                 backgroundColor: row.color,
                               }}
                             ></td>
-                            <td className="px-6 py-4">{row.categoria}</td>
-                            <td className="px-6 py-4">{row.descripcion}</td>
+                            <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{row.categoria}</td>
+                            <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{row.descripcion}</td>
                           </tr>
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="3" className="text-center p-4">
+                          <td colSpan="3" className="text-center p-4 font-bold text-gray-900 dark:text-white">
                             No hay categorías registradas.
                           </td>
                         </tr>
