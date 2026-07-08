@@ -14,6 +14,7 @@ import ConsolidadoFuncionario from "../views/ConsolidadoFuncionario";
 import InformeEventos from "../views/InformeEventos";
 import ConsolidadoSeguimientos from "../views/ConsolidadoSeguimientos";
 import GestionCategorias from "../views/GestionCategorias";
+import BotonAdminGlobal from "../components/BotonAdminGlobal";
 
 export default function AppRoutes() {
   return (
@@ -56,6 +57,7 @@ export default function AppRoutes() {
           element={<CrearEventoFuncionario />}
         />
       </Routes>
+      <BotonAdminGlobal />
     </BrowserRouter>
   );
 }

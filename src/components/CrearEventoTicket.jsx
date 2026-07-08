@@ -41,7 +41,7 @@ export default function CrearEventoTicket() {
   }
 
   return (
-    <div className="p-4 space-y-4 mx-auto max-w-2xl">
+    <div className="event-form-page p-4 space-y-4 mx-auto max-w-2xl">
       <div className="flex flex-col sm:flex-row justify-center gap-2">
         <GuiaCategorias buttonStyle={buttonStyle} />
         <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
