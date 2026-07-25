@@ -30,9 +30,12 @@ export async function listarFuncionarios() {
   return await res.json();
 }
 
-export async function listarFuncionariosAdmin() {
-  const res = await fetch(BASE_URL + "listar_funcionarios_admin");
-  return await res.json();
+export async function validarAccesoAdmin(usuario, password) {
+  const { data } = await axios.post(BASE_URL + "validar_admin", {
+    usuario,
+    password,
+  });
+  return data;
 }
 
 export async function listarTickets() {

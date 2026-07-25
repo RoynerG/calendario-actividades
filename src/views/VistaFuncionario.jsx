@@ -26,7 +26,10 @@ import {
   showCrearSeguimientoModal,
 } from "../helpers/seguimientoModals";
 
-import { checkAdminAndExecute } from "../helpers/auth";
+import {
+  checkAdminAndExecute,
+  isAdminSessionActive,
+} from "../helpers/auth";
 import { useResponsiveView } from "../hooks/useResponsiveView";
 import FiltrosCalendario from "../components/FiltrosCalendario";
 
@@ -69,14 +72,14 @@ export default function VistaFuncionario() {
   const [esCita, setEsCita] = useState(null);
   const [pendientesCount, setPendientesCount] = useState(0);
   const [isAdmin, setIsAdmin] = useState(
-    typeof window !== "undefined" && localStorage.getItem("modo_admin") === "true"
+    typeof window !== "undefined" && isAdminSessionActive()
   );
   const [view, setView] = useResponsiveView();
   const schedulerRef = useRef(null);
 
   useEffect(() => {
     const handleAdminChange = () => {
-      setIsAdmin(localStorage.getItem("modo_admin") === "true");
+      setIsAdmin(isAdminSessionActive());
     };
     window.addEventListener("adminModeChanged", handleAdminChange);
     window.addEventListener("storage", handleAdminChange);

@@ -3,14 +3,16 @@ import { FaUserSecret } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import { showVerSeguimientosModal } from "../helpers/seguimientoModals";
+import {
+  isAdminSessionActive,
+  solicitarAccesoAdmin,
+} from "../helpers/auth";
 import { swalBaseOptions } from "../helpers/swalUtils";
 import ThemeToggle from "./ThemeToggle";
 
 export default function BotonAdminGlobal() {
   const { pathname } = useLocation();
-  const [isAdmin, setIsAdmin] = useState(
-    localStorage.getItem("modo_admin") === "true"
-  );
+  const [isAdmin, setIsAdmin] = useState(isAdminSessionActive());
   const isEventFormRoute =
     pathname.startsWith("/crear-evento-ticket/") ||
     pathname === "/crear-evento-multiple" ||
@@ -18,7 +20,7 @@ export default function BotonAdminGlobal() {
 
   useEffect(() => {
     const handleAdminChange = () => {
-      setIsAdmin(localStorage.getItem("modo_admin") === "true");
+      setIsAdmin(isAdminSessionActive());
     };
 
     window.addEventListener("adminModeChanged", handleAdminChange);
@@ -35,6 +37,7 @@ export default function BotonAdminGlobal() {
   const toggleAdmin = async () => {
     if (isAdmin) {
       localStorage.removeItem("modo_admin");
+      localStorage.removeItem("admin_auth_version");
       localStorage.removeItem("admin_user");
       setIsAdmin(false);
       window.dispatchEvent(new Event("adminModeChanged"));
@@ -44,30 +47,9 @@ export default function BotonAdminGlobal() {
         ...swalBaseOptions,
       });
     } else {
-      const { value: password } = await Swal.fire({
-        title: "Ingrese clave de administrador",
-        input: "password",
-        inputPlaceholder: "Clave...",
-        showCancelButton: true,
-        ...swalBaseOptions,
-      });
-
-      if (password === "admin123" || password === "skcadmin2025*") {
-        // Clave sencilla por ahora
-        localStorage.setItem("modo_admin", "true");
+      const autorizado = await solicitarAccesoAdmin();
+      if (autorizado) {
         setIsAdmin(true);
-        window.dispatchEvent(new Event("adminModeChanged"));
-        Swal.fire({
-          title: "Modo Admin Activado",
-          icon: "success",
-          ...swalBaseOptions,
-        });
-      } else if (password) {
-        Swal.fire({
-          title: "Clave incorrecta",
-          icon: "error",
-          ...swalBaseOptions,
-        });
       }
     }
   };
