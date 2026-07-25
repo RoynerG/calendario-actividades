@@ -10,12 +10,11 @@ import {
   FaClipboardList,
   FaEye,
 } from "react-icons/fa6";
-import { FaCalendarAlt, FaHistory } from "react-icons/fa";
+import { FaCalendarAlt } from "react-icons/fa";
 import {
   showVerSeguimientosModal,
   showCrearSeguimientoModal,
 } from "../helpers/seguimientoModals";
-import { showHistorialModal } from "../helpers/eventModals";
 import { checkAdminAndExecute } from "../helpers/auth";
 import { swalBaseOptions } from "../helpers/swalUtils";
 
@@ -205,13 +204,6 @@ export default function VistaEvento() {
           >
             <FaEye className="mr-2" />
             Ver seguimiento
-          </button>
-          <button
-            onClick={() => showHistorialModal(evento.id)}
-            className="flex items-center justify-center w-full bg-gray-500 text-white font-bold px-4 py-2 rounded hover:bg-gray-600 transition-colors"
-          >
-            <FaHistory className="mr-2" />
-            Ver historial
           </button>
         </div>
       </div>

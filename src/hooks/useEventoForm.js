@@ -29,9 +29,6 @@ export function useEventoForm(mode = "simple", id) {
     inmueble: "",
     es_cita: "",
     empleados: [],
-    recordatorio_activo: false,
-    recordatorio_minutos: "",
-    recordatorio_canal: "whatsapp",
   };
 
   const [categorias, setCategorias] = useState([]);
@@ -208,15 +205,6 @@ export function useEventoForm(mode = "simple", id) {
       return Swal.fire({
         title: "Error",
         text: "La descripción es obligatoria si el evento no es una cita.",
-        icon: "warning",
-        ...swalBaseOptions,
-      });
-    }
-
-    if (formData.recordatorio_activo && !formData.recordatorio_minutos) {
-      return Swal.fire({
-        title: "Error",
-        text: "Selecciona la anticipación del recordatorio.",
         icon: "warning",
         ...swalBaseOptions,
       });

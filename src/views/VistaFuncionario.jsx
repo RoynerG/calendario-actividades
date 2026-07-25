@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Scheduler } from "@aldabil/react-scheduler";
 import Swal from "sweetalert2";
 import {
@@ -7,9 +7,6 @@ import {
   filtrarEventos,
   crearEvento,
   crearEventos,
-  crearRecordatorioLibre,
-  listarRecordatoriosLibres,
-  listarRecordatoriosEventos,
   obtenerTicketsFuncionario,
   verificarBloqueo,
   listarPendientesVencidos,
@@ -21,10 +18,9 @@ import { es } from "date-fns/locale";
 import Select from "react-select";
 import GuiaCategorias from "../components/GuiaCategorias";
 import GuiaEventosRecurrentes from "../components/GuiaEventosRecurrentes";
-import GuiaRecordatorios from "../components/GuiaRecordatorios";
 import EventoViewer from "../components/EventoViewer";
 import { showSwal, swalBaseOptions } from "../helpers/swalUtils";
-import { FaClipboardList, FaExclamationTriangle, FaTable, FaTags, FaPlus, FaCalendarPlus, FaBell, FaList, FaEye } from "react-icons/fa";
+import { FaClipboardList, FaExclamationTriangle, FaTable, FaTags, FaPlus, FaCalendarPlus, FaEye } from "react-icons/fa";
 import {
   showVerSeguimientosModal,
   showCrearSeguimientoModal,
@@ -65,23 +61,11 @@ export default function VistaFuncionario() {
     contrato: "",
     inmueble: "",
     es_cita: "",
-    recordatorio_activo: false,
-    recordatorio_minutos: "",
-    recordatorio_canal: "whatsapp",
   });
   const [relacionadoConTicket, setRelacionadoConTicket] = useState(null);
   const [ticketSelecionado, setTicketSelecionado] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [showRecordatorioLibreForm, setShowRecordatorioLibreForm] =
-    useState(false);
-  const [recordatorioLibreData, setRecordatorioLibreData] = useState({
-    titulo: "",
-    mensaje: "",
-    fecha: "",
-    hora: "",
-    canal: "whatsapp",
-  });
   const [esCita, setEsCita] = useState(null);
   const [pendientesCount, setPendientesCount] = useState(0);
   const [isAdmin, setIsAdmin] = useState(
@@ -117,43 +101,6 @@ export default function VistaFuncionario() {
 
   const labelStyle =
     "block mb-2 text-sm font-bold text-gray-900 dark:text-white";
-
-  const formatearFechaBogota = (fechaUtc) => {
-    if (!fechaUtc) return "";
-    const base = fechaUtc.includes("T") ? fechaUtc : fechaUtc.replace(" ", "T");
-    const date = new Date(`${base}Z`);
-    if (Number.isNaN(date.getTime())) return fechaUtc;
-    return date.toLocaleString("es-CO", { timeZone: "America/Bogota" });
-  };
-
-  const formatearFechaBogotaLocal = (fechaBogota) => {
-    if (!fechaBogota) return "";
-    const base = fechaBogota.includes("T")
-      ? fechaBogota
-      : fechaBogota.replace(" ", "T");
-    const date = new Date(`${base}-05:00`);
-    if (Number.isNaN(date.getTime())) return fechaBogota;
-    return date.toLocaleString("es-CO", { timeZone: "America/Bogota" });
-  };
-
-  const calcularProgramadoEvento = (fechaInicio, minutos) => {
-    const base = fechaInicio?.includes("T")
-      ? fechaInicio
-      : fechaInicio?.replace(" ", "T");
-    const date = base ? new Date(`${base}-05:00`) : null;
-    if (!date || Number.isNaN(date.getTime())) return "";
-    const programado = new Date(
-      date.getTime() - (Number(minutos) || 0) * 60 * 1000
-    );
-    return programado.toLocaleString("es-CO", { timeZone: "America/Bogota" });
-  };
-
-  const canalLabel = (canal) =>
-    canal === "ambos"
-      ? "WhatsApp y correo"
-      : canal === "email"
-      ? "Correo"
-      : "WhatsApp";
 
   // Función para mostrar modal de eventos pendientes
   const mostrarPendientes = async () => {
@@ -296,139 +243,6 @@ export default function VistaFuncionario() {
       Swal.fire({
         title: "Error",
         text: "Error de conexión",
-        icon: "error",
-        ...swalBaseOptions,
-      });
-    }
-  };
-
-  const mostrarRecordatoriosLibres = async () => {
-    Swal.fire({
-      title: "Cargando recordatorios...",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-      ...swalBaseOptions,
-    });
-
-    try {
-      const [resLibres, resEventos] = await Promise.all([
-        listarRecordatoriosLibres(id_funcionario),
-        listarRecordatoriosEventos(id_funcionario),
-      ]);
-      Swal.close();
-
-      if (resLibres.success && resEventos.success) {
-        const recordatoriosRaw = resLibres.data || [];
-        const recordatoriosEventosRaw = resEventos.data || [];
-
-        // Filtrar los pendientes: en "Mis recordatorios" sólo deben salir
-        // los que ya se procesaron (enviado, error, bloqueado).
-        const recordatoriosEventos = recordatoriosEventosRaw.filter(
-          (rec) => (rec.estado || "pendiente") !== "pendiente"
-        );
-        const recordatorios = recordatoriosRaw.filter(
-          (rec) => (rec.estado || "pendiente") !== "pendiente"
-        );
-
-        if (recordatorios.length === 0 && recordatoriosEventos.length === 0) {
-          Swal.fire({
-            title: "Sin recordatorios",
-            text: "No tienes recordatorios enviados todavía.",
-            icon: "info",
-            ...swalBaseOptions,
-          });
-          return;
-        }
-
-        let htmlList = `<div class="text-left max-h-[60vh] overflow-y-auto space-y-4 p-2">`;
-        htmlList += `<div class="text-sm font-bold text-gray-700">Recordatorios de eventos</div>`;
-        if (recordatoriosEventos.length === 0) {
-          htmlList += `<div class="text-xs text-gray-500">No hay recordatorios de eventos enviados.</div>`;
-        } else {
-          recordatoriosEventos.forEach((rec) => {
-            const fechaEvento = formatearFechaBogotaLocal(rec.fecha_inicio);
-            const fechaProgramada = calcularProgramadoEvento(
-              rec.fecha_inicio,
-              rec.recordatorio_minutos
-            );
-            htmlList += `
-              <div class="bg-white p-3 rounded border-l-4 border-blue-500 shadow-sm mb-2">
-                <div class="font-bold text-gray-800 text-sm">${rec.titulo}</div>
-                <div class="text-xs text-gray-500 mt-1">Evento: ${fechaEvento}</div>
-                <div class="text-xs text-gray-500 mt-1">Programado: ${fechaProgramada}</div>
-                <div class="text-xs text-gray-500 mt-1">Anticipación: ${
-                  rec.recordatorio_minutos
-                } minutos</div>
-                <div class="text-xs text-gray-500 mt-1">Canal: ${canalLabel(
-                  rec.recordatorio_canal
-                )}</div>
-                <div class="text-xs text-gray-500 mt-1">Estado evento: ${
-                  rec.estado
-                }</div>
-              </div>
-            `;
-          });
-        }
-
-        htmlList += `<div class="text-sm font-bold text-gray-700 mt-3">Recordatorios libres</div>`;
-        if (recordatorios.length === 0) {
-          htmlList += `<div class="text-xs text-gray-500">No hay recordatorios libres enviados.</div>`;
-        } else {
-          recordatorios.forEach((rec) => {
-            const estado = rec.estado || "pendiente";
-            const estadoColor =
-              estado === "enviado"
-                ? "border-green-500"
-                : estado === "error"
-                ? "border-red-500"
-                : estado === "bloqueado"
-                ? "border-yellow-500"
-                : "border-gray-300";
-            const fechaProgramada = formatearFechaBogota(rec.fecha_programada);
-            const fechaEnvio = rec.fecha_envio
-              ? formatearFechaBogota(rec.fecha_envio)
-              : "Pendiente";
-
-            htmlList += `
-              <div class="bg-white p-3 rounded border-l-4 ${estadoColor} shadow-sm mb-2">
-                <div class="font-bold text-gray-800 text-sm">${rec.titulo}</div>
-                <div class="text-xs text-gray-600 mt-1">${rec.mensaje}</div>
-                <div class="text-xs text-gray-500 mt-2">Programado: ${fechaProgramada}</div>
-                <div class="text-xs text-gray-500 mt-1">Enviado: ${fechaEnvio}</div>
-                <div class="text-xs text-gray-500 mt-1">Canal: ${canalLabel(
-                  rec.canal
-                )}</div>
-                <div class="text-xs text-gray-500 mt-1">Estado: ${estado}</div>
-              </div>
-            `;
-          });
-        }
-        htmlList += `</div>`;
-
-        await Swal.fire({
-          title: "Mis recordatorios",
-          html: htmlList,
-          width: "700px",
-          showCloseButton: true,
-          showConfirmButton: false,
-          ...swalBaseOptions,
-        });
-      } else {
-        await Swal.fire({
-          title: "Error",
-          text:
-            resLibres.message ||
-            resEventos.message ||
-            "No se pudo cargar la lista de recordatorios.",
-          icon: "error",
-          ...swalBaseOptions,
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      await Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error al cargar los recordatorios.",
         icon: "error",
         ...swalBaseOptions,
       });
@@ -634,9 +448,6 @@ export default function VistaFuncionario() {
       contrato: "",
       inmueble: "",
       es_cita: "",
-      recordatorio_activo: false,
-      recordatorio_minutos: "",
-      recordatorio_canal: "whatsapp",
     });
     setRelacionadoConTicket(null);
     setEsCita(null);
@@ -699,17 +510,6 @@ export default function VistaFuncionario() {
 
     // Combina fecha y horas a formato ISO local: "YYYY-MM-DDTHH:mm"
     const { fecha, hora_inicio, hora_fin } = formData;
-
-    if (formData.recordatorio_activo && !formData.recordatorio_minutos) {
-      setShowForm(false);
-      await showSwal({
-        title: "Error",
-        text: "Selecciona la anticipación del recordatorio.",
-        icon: "error",
-      });
-      setShowForm(true);
-      return;
-    }
 
     if (esRecurrente) {
       let eventosParaCrear = [];
@@ -924,95 +724,6 @@ export default function VistaFuncionario() {
     }
   };
 
-  const handleCrearRecordatorioLibre = async (e) => {
-    e.preventDefault();
-    document.activeElement?.blur();
-
-    const { titulo, mensaje, fecha, hora, canal } = recordatorioLibreData;
-
-    if (!titulo || !mensaje || !fecha || !hora) {
-      await showSwal({
-        title: "Error",
-        text: "Completa todos los campos del recordatorio.",
-        icon: "error",
-      });
-      return;
-    }
-
-    const fecha_programada = `${fecha}T${hora}`;
-    const fechaProgramadaDate = new Date(fecha_programada);
-    const ahora = new Date();
-
-    if (isNaN(fechaProgramadaDate.getTime())) {
-      await showSwal({
-        title: "Error",
-        text: "La fecha u hora no son válidas.",
-        icon: "error",
-      });
-      return;
-    }
-
-    if (fechaProgramadaDate < ahora) {
-      await showSwal({
-        title: "Error",
-        text: "La fecha programada no puede ser pasada.",
-        icon: "error",
-      });
-      return;
-    }
-
-    try {
-      setShowRecordatorioLibreForm(false);
-      Swal.fire({
-        title: "Guardando...",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-        ...swalBaseOptions,
-      });
-
-      const res = await crearRecordatorioLibre({
-        id_empleado: id_funcionario,
-        titulo,
-        mensaje,
-        canal,
-        fecha_programada,
-      });
-
-      if (res.success) {
-        await Swal.fire({
-          title: "¡Éxito!",
-          text: "El recordatorio fue creado correctamente",
-          icon: "success",
-          ...swalBaseOptions,
-        });
-        setRecordatorioLibreData({
-          titulo: "",
-          mensaje: "",
-          fecha: "",
-          hora: "",
-          canal: "whatsapp",
-        });
-      } else {
-        await Swal.fire({
-          title: "Error",
-          text: res.message || "No se pudo crear el recordatorio",
-          icon: "error",
-          ...swalBaseOptions,
-        });
-        setShowRecordatorioLibreForm(true);
-      }
-    } catch (error) {
-      console.error(error);
-      await Swal.fire({
-        title: "Error",
-        text: "Ocurrió un error al crear el recordatorio",
-        icon: "error",
-        ...swalBaseOptions,
-      });
-      setShowRecordatorioLibreForm(true);
-    }
-  };
-
   return (
     <div className="p-2 sm:p-4 space-y-4">
       <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-2 mb-3 sm:mb-6">
@@ -1025,7 +736,6 @@ export default function VistaFuncionario() {
         </a>
         <GuiaCategorias buttonStyle={buttonStyle} />
         <GuiaEventosRecurrentes buttonStyle={buttonStyle} />
-        <GuiaRecordatorios buttonStyle={buttonStyle} />
       </div>
       <h1 className="page-title text-lg sm:text-3xl md:text-5xl font-bold text-center leading-tight">
         Calendario de {funcionario.nombre || "Funcionario"}
@@ -1053,22 +763,6 @@ export default function VistaFuncionario() {
         >
           <FaCalendarPlus className="text-lg sm:text-base" />
           <span className="leading-tight text-center sm:text-left">Eventos Recurrentes</span>
-        </button>
-
-        <button
-          onClick={() => setShowRecordatorioLibreForm(true)}
-          className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
-        >
-          <FaBell className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Recordatorio Libre</span>
-        </button>
-
-        <button
-          onClick={mostrarRecordatoriosLibres}
-          className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
-        >
-          <FaList className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Mis Recordatorios</span>
         </button>
 
         {/* Botón de Pendientes */}
@@ -1343,79 +1037,6 @@ export default function VistaFuncionario() {
                   !(esRecurrente && tipoRecurrencia === "personalizado")
                 }
               />
-
-              <div className="flex items-center mb-4">
-                <input
-                  id="recordatorio_activo"
-                  type="checkbox"
-                  checked={formData.recordatorio_activo}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      recordatorio_activo: e.target.checked,
-                    })
-                  }
-                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                />
-                <label
-                  htmlFor="recordatorio_activo"
-                  className="ml-2 text-sm font-bold text-gray-900 dark:text-white"
-                >
-                  Enviar recordatorio
-                </label>
-              </div>
-
-              {formData.recordatorio_activo && (
-                <>
-                  <label
-                    htmlFor="recordatorio_minutos"
-                    className={labelStyle}
-                  >
-                    Anticipación del recordatorio
-                  </label>
-                  <select
-                    id="recordatorio_minutos"
-                    value={formData.recordatorio_minutos}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        recordatorio_minutos: e.target.value,
-                      })
-                    }
-                    className={inputStyle}
-                    required
-                  >
-                    <option value="">Selecciona</option>
-                    <option value="10">10 minutos antes</option>
-                    <option value="30">30 minutos antes</option>
-                    <option value="60">1 hora antes</option>
-                    <option value="120">2 horas antes</option>
-                    <option value="1440">1 día antes</option>
-                  </select>
-                  <label
-                    htmlFor="recordatorio_canal"
-                    className={labelStyle}
-                  >
-                    Canal del recordatorio
-                  </label>
-                  <select
-                    id="recordatorio_canal"
-                    value={formData.recordatorio_canal}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        recordatorio_canal: e.target.value,
-                      })
-                    }
-                    className={inputStyle}
-                    required
-                  >
-                    <option value="whatsapp">WhatsApp</option>
-                    <option value="email">Correo</option>
-                    <option value="ambos">WhatsApp y correo</option>
-                  </select>
-                </>
-              )}
 
               {esRecurrente && (
                 <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-700 dark:bg-emerald-900/30">
@@ -1875,155 +1496,6 @@ export default function VistaFuncionario() {
                 <button
                   type="submit"
                   className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                >
-                  Crear
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {showRecordatorioLibreForm && (
-        <div className="fixed inset-0 z-[120000] flex items-center justify-center p-2 sm:p-4">
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[120000]"
-            onClick={() => setShowRecordatorioLibreForm(false)}
-          />
-          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto z-[120001]">
-            <div className="px-6 py-5 text-white bg-gradient-to-r from-orange-600 to-amber-500">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    Crear recordatorio libre
-                  </h2>
-                  <p className="text-sm text-white/80">
-                    Programa un recordatorio sin evento asociado.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowRecordatorioLibreForm(false)}
-                  className="h-9 w-9 rounded-full bg-white/15 hover:bg-white/25 transition flex items-center justify-center text-white"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-            <form
-              onSubmit={handleCrearRecordatorioLibre}
-              className="space-y-4 p-6"
-            >
-              <label
-                htmlFor="recordatorio_libre_titulo"
-                className={labelStyle}
-              >
-                Título
-              </label>
-              <input
-                id="recordatorio_libre_titulo"
-                type="text"
-                placeholder="Escribe el título del recordatorio"
-                value={recordatorioLibreData.titulo}
-                onChange={(e) =>
-                  setRecordatorioLibreData({
-                    ...recordatorioLibreData,
-                    titulo: e.target.value,
-                  })
-                }
-                className={inputStyle}
-                required
-              />
-              <label
-                htmlFor="recordatorio_libre_mensaje"
-                className={labelStyle}
-              >
-                Mensaje
-              </label>
-              <textarea
-                id="recordatorio_libre_mensaje"
-                rows={5}
-                placeholder="Describe el recordatorio"
-                value={recordatorioLibreData.mensaje}
-                onChange={(e) =>
-                  setRecordatorioLibreData({
-                    ...recordatorioLibreData,
-                    mensaje: e.target.value,
-                  })
-                }
-                className={inputStyle}
-                required
-              />
-              <label
-                htmlFor="recordatorio_libre_fecha"
-                className={labelStyle}
-              >
-                Fecha programada
-              </label>
-              <input
-                id="recordatorio_libre_fecha"
-                type="date"
-                value={recordatorioLibreData.fecha}
-                onChange={(e) =>
-                  setRecordatorioLibreData({
-                    ...recordatorioLibreData,
-                    fecha: e.target.value,
-                  })
-                }
-                className={inputStyle}
-                required
-              />
-              <label
-                htmlFor="recordatorio_libre_hora"
-                className={labelStyle}
-              >
-                Hora programada
-              </label>
-              <input
-                id="recordatorio_libre_hora"
-                type="time"
-                value={recordatorioLibreData.hora}
-                onChange={(e) =>
-                  setRecordatorioLibreData({
-                    ...recordatorioLibreData,
-                    hora: e.target.value,
-                  })
-                }
-                className={inputStyle}
-                required
-              />
-              <label
-                htmlFor="recordatorio_libre_canal"
-                className={labelStyle}
-              >
-                Canal
-              </label>
-              <select
-                id="recordatorio_libre_canal"
-                value={recordatorioLibreData.canal}
-                onChange={(e) =>
-                  setRecordatorioLibreData({
-                    ...recordatorioLibreData,
-                    canal: e.target.value,
-                  })
-                }
-                className={inputStyle}
-                required
-              >
-                <option value="whatsapp">WhatsApp</option>
-                <option value="email">Correo</option>
-                <option value="ambos">WhatsApp y correo</option>
-              </select>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowRecordatorioLibreForm(false)}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold px-4 py-2 rounded dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-white"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 py-2 rounded"
                 >
                   Crear
                 </button>

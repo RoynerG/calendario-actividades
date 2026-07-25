@@ -415,8 +415,8 @@ html.dark {
 }
 
 /* ============================================================
-   Utilidades para modales "Guía" (Guía de eventos recurrentes,
-   recordatorios, etc.). Garantizan contraste en light y dark.
+   Utilidades para modales "Guía".
+   Garantizan contraste en light y dark.
    ============================================================ */
 .guia-text {
   color: #1f2937; /* gray-800 */

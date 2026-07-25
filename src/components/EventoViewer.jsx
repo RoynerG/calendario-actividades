@@ -9,7 +9,6 @@ import {
   showRealizadoModal,
   showEditarModal,
   showTrasladarModal,
-  showHistorialModal,
 } from "../helpers/eventModals";
 
 export default function EventoViewer({
@@ -125,12 +124,6 @@ export default function EventoViewer({
             Ver Seguimiento
           </button>
         )}
-        <button
-          className="px-2 py-1 bg-gray-500 text-white font-bold rounded"
-          onClick={() => showHistorialModal(event.event_id)}
-        >
-          Ver cambios
-        </button>
         {allowActions && event?.estado === "No" && (
           <>
             <button

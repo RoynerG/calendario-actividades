@@ -4,7 +4,6 @@ import {
   cambiarEstadoEvento,
   actualizarEvento,
   trasladarEvento,
-  obtenerHistorialEvento,
 } from "../services/eventService";
 import { swalBaseOptions } from "./swalUtils";
 const styleInput =
@@ -71,7 +70,6 @@ export async function showRealizadoModal(event, setFiltros) {
     });
   }
 }
-
 export async function showEditarModal(
   event,
   passedCategorias = [],
@@ -177,7 +175,6 @@ export async function showEditarModal(
     });
   }
 }
-
 export async function showTrasladarModal(event, setFiltros) {
   const mostrarCita = event.id_ticket > 0;
   const styleInput = "border p-2 rounded w-full mb-2";
@@ -342,82 +339,5 @@ export async function showTrasladarModal(event, setFiltros) {
       icon: "error",
       ...swalBaseOptions,
     });
-  }
-}
-
-export async function showHistorialModal(event_id, page = 1) {
-  const pageSize = 5;
-  const {
-    success,
-    data: historial,
-    message,
-  } = await obtenerHistorialEvento(event_id);
-  if (!success) {
-    return Swal.fire({
-      title: "Error",
-      text: message,
-      icon: "error",
-      ...swalBaseOptions,
-    });
-  }
-
-  if (!historial.length) {
-    return Swal.fire({
-      title: `Historial del evento #${event_id}`,
-      html: `<p>Aún no se han registrado cambios para este evento.</p>`,
-      icon: "info",
-      ...swalBaseOptions,
-    });
-  }
-  const totalPages = Math.ceil(historial.length / pageSize);
-  const start = (page - 1) * pageSize;
-  const slice = historial.slice(start, start + pageSize);
-  const rows = slice
-    .map((h) => {
-      const fecha = new Date(h.fecha).toLocaleString("es-CO", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      return `
-      <tr>
-        <td style="padding:.5rem;border:1px solid #ddd;">${fecha}</td>
-        <td style="padding:.5rem;border:1px solid #ddd;">${h.descripcion}</td>
-      </tr>
-    `;
-    })
-    .join("");
-  const result = await Swal.fire({
-    title: `Historial del evento #${event_id}`,
-    html: `
-      <table style="width:100%;border-collapse:collapse;margin-top:.5rem;">
-        <thead>
-          <tr>
-            <th style="padding:.5rem;border:1px solid #ddd;background:#f5f5f5;">Fecha</th>
-            <th style="padding:.5rem;border:1px solid #ddd;background:#f5f5f5;">Información</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
-    `,
-    width: 600,
-    showCancelButton: true,
-    cancelButtonText: "Cerrar",
-    showDenyButton: page > 1,
-    denyButtonText: "Anterior",
-    showConfirmButton: page < totalPages,
-    confirmButtonText: "Siguiente",
-    ...swalBaseOptions,
-  });
-
-  if (result.isDenied) {
-    return showHistorialModal(event_id, page - 1);
-  }
-  if (result.isConfirmed) {
-    return showHistorialModal(event_id, page + 1);
   }
 }
