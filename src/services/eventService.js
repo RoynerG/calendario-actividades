@@ -87,10 +87,30 @@ export async function obtenerTicket(id_ticket) {
   return res.data;
 }
 
-export async function cambiarEstadoEvento(id_evento, observacion) {
+export async function prepararReporteComercial(id_evento) {
+  const { data } = await axios.post(BASE_URL + "preparar_reporte_comercial", {
+    id_evento,
+  });
+  return data;
+}
+
+export async function buscarInmueblesReporte(id_evento, termino) {
+  const { data } = await axios.post(BASE_URL + "buscar_inmuebles_reporte", {
+    id_evento,
+    termino,
+  });
+  return data;
+}
+
+export async function cambiarEstadoEvento(
+  id_evento,
+  observacion,
+  reporte = null
+) {
   const { data } = await axios.post(BASE_URL + "cambiar_estado", {
     id_evento,
     observacion,
+    ...(reporte ? { reporte } : {}),
   });
   return data;
 }

@@ -10,7 +10,6 @@ import {
   obtenerTicketsFuncionario,
   verificarBloqueo,
   listarPendientesVencidos,
-  cambiarEstadoEvento,
 } from "../services/eventService";
 import { useParams, useNavigate } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
@@ -25,6 +24,7 @@ import {
   showVerSeguimientosModal,
   showCrearSeguimientoModal,
 } from "../helpers/seguimientoModals";
+import { showRealizadoModal } from "../helpers/eventModals";
 
 import {
   checkAdminAndExecute,
@@ -175,59 +175,22 @@ export default function VistaFuncionario() {
             buttons.forEach((btn) => {
               btn.addEventListener("click", async () => {
                 const idEvento = btn.getAttribute("data-id");
+                const pendiente = pendientes.find(
+                  (evento) => String(evento.id) === String(idEvento)
+                );
+                if (!pendiente) return;
 
-                // Pedir observación
-                const { value: observacion } = await Swal.fire({
-                  title: "Finalizar Evento",
-                  input: "textarea",
-                  inputLabel: "Observación / Motivo",
-                  inputPlaceholder: "Escribe una observación...",
-                  inputAttributes: {
-                    "aria-label": "Escribe una observación",
+                Swal.close();
+                const finalizado = await showRealizadoModal(
+                  {
+                    ...pendiente,
+                    event_id: pendiente.id,
+                    title: pendiente.titulo,
                   },
-                  showCancelButton: true,
-                  ...swalBaseOptions,
-                });
-
-                if (observacion) {
-                  try {
-                    // Mostrar loading pequeño
-                    Swal.showLoading();
-                    const resp = await cambiarEstadoEvento(
-                      idEvento,
-                      observacion
-                    );
-                    if (resp.success) {
-                      await Swal.fire({
-                        title: "¡Evento finalizado!",
-                        icon: "success",
-                        timer: 1500,
-                        showConfirmButton: false,
-                        ...swalBaseOptions,
-                      });
-                      // Recargar la lista de pendientes (llamada recursiva a mostrarPendientes)
-                      mostrarPendientes();
-                      // Recargar eventos del calendario
-                      // No podemos llamar fetchEventos directamente porque está en useEffect, pero podemos forzar reload o actualizar estado si lo sacamos.
-                      // Por simplicidad, recargaremos la página al cerrar todo, o confiamos en que el usuario refresque.
-                      // O mejor: window.location.reload() si queremos ser drásticos, o dejamos así.
-                    } else {
-                      Swal.fire({
-                        title: "Error",
-                        text: resp.message || "Error al finalizar",
-                        icon: "error",
-                        ...swalBaseOptions,
-                      });
-                    }
-                  } catch (e) {
-                    console.error(e);
-                    Swal.fire({
-                      title: "Error",
-                      text: "Ocurrió un error al finalizar el evento",
-                      icon: "error",
-                      ...swalBaseOptions,
-                    });
-                  }
+                  setFiltros
+                );
+                if (finalizado) {
+                  await mostrarPendientes();
                 }
               });
             });

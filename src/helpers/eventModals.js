@@ -2,12 +2,33 @@ import Swal from "sweetalert2";
 import {
   listarCategorias,
   cambiarEstadoEvento,
+  prepararReporteComercial,
+  buscarInmueblesReporte,
   actualizarEvento,
   trasladarEvento,
 } from "../services/eventService";
 import { swalBaseOptions } from "./swalUtils";
 const styleInput =
   "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500";
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function propertyLabel(property) {
+  return [
+    property.codigo ? `#${property.codigo}` : "",
+    property.titulo,
+    property.direccion,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
 
 export async function showRealizadoModal(event, setFiltros) {
   // Intentar cerrar el visor del scheduler antes de abrir el modal
@@ -22,53 +43,284 @@ export async function showRealizadoModal(event, setFiltros) {
     console.error("No se pudo cerrar el visor del evento", e);
   }
 
-  const { value: obs } = await Swal.fire({
-    ...swalBaseOptions,
-    title: `Resultado del evento #${event.event_id}`,
-    html: `
-      <label for="obs" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">
-        Escribe en este campo el resultado de la actividad
-      </label>
-      <textarea id="obs" 
-        class="${styleInput}"
-      >Realizado</textarea>
-    `,
-    focusConfirm: false,
-    preConfirm: () => {
-      const value = document.getElementById("obs").value;
-      if (!value) {
-        Swal.showValidationMessage("La observación es requerida");
-        return false;
-      }
-      return value;
-    },
-    showCancelButton: true,
-  });
-  if (!obs) return;
+  const eventId = event.event_id ?? event.id;
+  let preparacion;
+  try {
+    const respuesta = await prepararReporteComercial(eventId);
+    if (!respuesta.success) {
+      throw new Error(respuesta.message || "No fue posible preparar el reporte");
+    }
+    preparacion = respuesta.data;
+  } catch (error) {
+    await Swal.fire({
+      title: "Error",
+      text:
+        error.response?.data?.message ||
+        error.message ||
+        "No fue posible consultar el evento.",
+      icon: "error",
+      ...swalBaseOptions,
+    });
+    return false;
+  }
+
+  let resultado;
+  if (!preparacion.habilitado) {
+    const { value: observacion } = await Swal.fire({
+      ...swalBaseOptions,
+      title: `Resultado del evento #${eventId}`,
+      html: `
+        <label for="obs" class="block mb-3 mt-3 text-sm font-medium text-gray-900 dark:text-white">
+          Escribe en este campo el resultado de la actividad
+        </label>
+        <textarea id="obs" class="${styleInput}">Realizado</textarea>
+      `,
+      focusConfirm: false,
+      preConfirm: () => {
+        const value = document.getElementById("obs").value.trim();
+        if (!value) {
+          Swal.showValidationMessage("La observación es requerida");
+          return false;
+        }
+        return value;
+      },
+      showCancelButton: true,
+    });
+    if (!observacion) return false;
+    resultado = { observacion, reporte: null };
+  } else {
+    const propiedades = new Map(
+      (preparacion.inmuebles || []).map((property) => [
+        String(property.id),
+        property,
+      ])
+    );
+
+    const renderOptions = (selected = "") =>
+      [
+        `<option value="">Seleccione un inmueble</option>`,
+        ...Array.from(propiedades.values()).map(
+          (property) =>
+            `<option value="${escapeHtml(property.id)}" ${
+              String(property.id) === String(selected) ? "selected" : ""
+            }>${escapeHtml(propertyLabel(property))}</option>`
+        ),
+      ].join("");
+
+    const { value: formulario } = await Swal.fire({
+      ...swalBaseOptions,
+      width: "720px",
+      title: `Finalizar evento #${eventId}`,
+      html: `
+        <div class="text-left">
+          <p class="mb-4 text-sm text-gray-600 dark:text-gray-300">
+            Este evento requiere un reporte comercial. Si cancelas, permanecerá pendiente.
+          </p>
+          ${
+            preparacion.ticket
+              ? `<div class="mb-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+                  <b>Ticket #${escapeHtml(preparacion.ticket.id)}</b>
+                  ${preparacion.ticket.indicativo ? ` · ${escapeHtml(preparacion.ticket.indicativo)}` : ""}
+                  ${preparacion.ticket.solicitante ? `<br>${escapeHtml(preparacion.ticket.solicitante)}` : ""}
+                </div>`
+              : ""
+          }
+
+          <label for="tipo-reporte" class="block mb-1 text-sm font-medium">Tipo de reporte</label>
+          <select id="tipo-reporte" class="${styleInput}">
+            ${preparacion.tipos_permitidos
+              .map(
+                (tipo) =>
+                  `<option value="${escapeHtml(tipo)}" ${
+                    tipo === preparacion.tipo_predeterminado ? "selected" : ""
+                  }>${escapeHtml(tipo)}</option>`
+              )
+              .join("")}
+          </select>
+
+          <div id="grupo-inmueble" class="mt-3">
+            <label for="buscar-inmueble" class="block mb-1 text-sm font-medium">
+              Inmueble
+            </label>
+            <input id="buscar-inmueble" class="${styleInput}"
+              placeholder="Buscar por código, título o dirección">
+            <p id="estado-busqueda" class="mt-1 mb-2 text-xs text-gray-500">
+              Se muestran primero los inmuebles relacionados con la cotización.
+            </p>
+            <select id="inmueble-reporte" class="${styleInput}">
+              ${renderOptions()}
+            </select>
+          </div>
+
+          <label for="valor-reporte" class="block mt-3 mb-1 text-sm font-medium">
+            Valor (máximo $${Number(preparacion.valor_maximo).toLocaleString(
+              "es-CO"
+            )})
+          </label>
+          <input id="valor-reporte" type="number" min="0"
+            max="${Number(preparacion.valor_maximo)}" step="1" value="0"
+            class="${styleInput}">
+          <p class="mt-1 text-xs text-gray-500">
+            Calculado con valor_transporte: $${Number(
+              preparacion.valor_transporte
+            ).toLocaleString("es-CO")}.
+          </p>
+
+          <label for="obs" class="block mt-3 mb-1 text-sm font-medium">
+            Resultado de la actividad
+          </label>
+          <textarea id="obs" class="${styleInput}">Realizado</textarea>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Guardar reporte y finalizar",
+      cancelButtonText: "Cancelar",
+      focusConfirm: false,
+      didOpen: () => {
+        const typeSelect = document.getElementById("tipo-reporte");
+        const propertyGroup = document.getElementById("grupo-inmueble");
+        const searchInput = document.getElementById("buscar-inmueble");
+        const propertySelect = document.getElementById("inmueble-reporte");
+        const searchStatus = document.getElementById("estado-busqueda");
+        let timer;
+        let searchSequence = 0;
+
+        const updatePropertyVisibility = () => {
+          const required =
+            preparacion.inmueble_obligatorio ||
+            typeSelect.value === "Visita";
+          propertyGroup.style.display = required ? "block" : "none";
+        };
+        typeSelect.addEventListener("change", updatePropertyVisibility);
+        updatePropertyVisibility();
+
+        searchInput.addEventListener("input", () => {
+          window.clearTimeout(timer);
+          const term = searchInput.value.trim();
+          if (term.length < 2) {
+            searchStatus.textContent =
+              "Escribe al menos 2 caracteres para buscar.";
+            return;
+          }
+
+          const currentSequence = ++searchSequence;
+          searchStatus.textContent = "Buscando inmuebles...";
+          timer = window.setTimeout(async () => {
+            try {
+              const response = await buscarInmueblesReporte(eventId, term);
+              if (currentSequence !== searchSequence) return;
+              if (!response.success) {
+                throw new Error(response.message);
+              }
+              (response.data || []).forEach((property) => {
+                propiedades.set(String(property.id), property);
+              });
+              const selected = propertySelect.value;
+              propertySelect.innerHTML = renderOptions(selected);
+              searchStatus.textContent = `${response.data.length} resultado(s) encontrados.`;
+            } catch (error) {
+              if (currentSequence !== searchSequence) return;
+              searchStatus.textContent =
+                error.response?.data?.message ||
+                error.message ||
+                "No fue posible buscar inmuebles.";
+            }
+          }, 350);
+        });
+      },
+      preConfirm: () => {
+        const tipo = document.getElementById("tipo-reporte").value;
+        const observacion = document.getElementById("obs").value.trim();
+        const valorRaw = document.getElementById("valor-reporte").value;
+        const valor = Number(valorRaw);
+        const idInmueble =
+          document.getElementById("inmueble-reporte").value;
+        const inmueble = propiedades.get(String(idInmueble));
+        const requiresProperty =
+          preparacion.inmueble_obligatorio || tipo === "Visita";
+
+        if (!observacion) {
+          Swal.showValidationMessage("La observación es requerida.");
+          return false;
+        }
+        if (!preparacion.tipos_permitidos.includes(tipo)) {
+          Swal.showValidationMessage("El tipo de reporte no es válido.");
+          return false;
+        }
+        if (
+          valorRaw === "" ||
+          !Number.isInteger(valor) ||
+          valor < 0 ||
+          valor > Number(preparacion.valor_maximo)
+        ) {
+          Swal.showValidationMessage(
+            `El valor debe estar entre 0 y ${preparacion.valor_maximo}.`
+          );
+          return false;
+        }
+        if (requiresProperty && !inmueble) {
+          Swal.showValidationMessage("Debes seleccionar un inmueble.");
+          return false;
+        }
+
+        return {
+          observacion,
+          reporte: {
+            tipo_reporte: tipo,
+            valor,
+            id_inmueble: inmueble?.id || "",
+            id_cotizacion: inmueble?.id_cotizacion || "",
+          },
+        };
+      },
+    });
+    if (!formulario) return false;
+    resultado = formulario;
+  }
+
   Swal.fire({
     title: "Actualizando estado...",
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading(),
     ...swalBaseOptions,
   });
-  const resp = await cambiarEstadoEvento(event.event_id, obs);
-  Swal.close();
-  if (resp.success) {
+  try {
+    const resp = await cambiarEstadoEvento(
+      eventId,
+      resultado.observacion,
+      resultado.reporte
+    );
+    Swal.close();
+    if (resp.success) {
+      await Swal.fire({
+        title: "¡Hecho!",
+        text: resp.message,
+        icon: "success",
+        ...swalBaseOptions,
+      });
+      if (typeof setFiltros === "function") {
+        setFiltros((prev) => ({ ...prev }));
+      }
+      return true;
+    }
     await Swal.fire({
-      title: "¡Hecho!",
-      text: resp.message,
-      icon: "success",
-      ...swalBaseOptions,
-    });
-    setFiltros((prev) => ({ ...prev }));
-  } else {
-    Swal.fire({
       title: "Error",
       text: resp.message,
       icon: "error",
       ...swalBaseOptions,
     });
+  } catch (error) {
+    Swal.close();
+    await Swal.fire({
+      title: "Error",
+      text:
+        error.response?.data?.message ||
+        "No fue posible finalizar el evento.",
+      icon: "error",
+      ...swalBaseOptions,
+    });
   }
+  return false;
 }
 export async function showEditarModal(
   event,
