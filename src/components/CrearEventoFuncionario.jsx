@@ -108,11 +108,11 @@ export default function CrearEventoFuncionario() {
       formData.hora_fin
     ) {
       const categoriaSeleccionada = categorias.find(
-        (cat) => cat.id === formData.id_categoria
+        (cat) => cat.id === formData.id_categoria,
       );
       if (categoriaSeleccionada) {
         const fechaInicio = new Date(
-          `${formData.fecha}T${formData.hora_inicio}`
+          `${formData.fecha}T${formData.hora_inicio}`,
         );
         const fechaFin = new Date(`${formData.fecha}T${formData.hora_fin}`);
         const opcionesFecha = {
@@ -124,7 +124,7 @@ export default function CrearEventoFuncionario() {
         const fechaStr = fechaInicio.toLocaleDateString("es-CO", opcionesFecha);
         const horaInicioStr = fechaInicio.toLocaleTimeString(
           "es-CO",
-          opcionesHora
+          opcionesHora,
         );
         const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
 
@@ -187,12 +187,12 @@ export default function CrearEventoFuncionario() {
     const inicioSinHoras = new Date(
       fechaInicio.getFullYear(),
       fechaInicio.getMonth(),
-      fechaInicio.getDate()
+      fechaInicio.getDate(),
     );
     const hoySinHoras = new Date(
       ahora.getFullYear(),
       ahora.getMonth(),
-      ahora.getDate()
+      ahora.getDate(),
     );
 
     if (inicioSinHoras < hoySinHoras) {
@@ -439,10 +439,7 @@ export default function CrearEventoFuncionario() {
     <div className="event-form-page p-4 space-y-4 mx-auto max-w-lg">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Título */}
-        <label
-          htmlFor="titulo"
-          className={labelStyle}
-        >
+        <label htmlFor="titulo" className={labelStyle}>
           Título
         </label>
         <input
@@ -455,10 +452,7 @@ export default function CrearEventoFuncionario() {
           required
         />
         {/* Ubicación */}
-        <label
-          htmlFor="ubicacion"
-          className={labelStyle}
-        >
+        <label htmlFor="ubicacion" className={labelStyle}>
           Ubicación / dirección del evento
         </label>
         <input
@@ -473,10 +467,7 @@ export default function CrearEventoFuncionario() {
           required
         />
         {/* Fecha */}
-        <label
-          htmlFor="fecha"
-          className={labelStyle}
-        >
+        <label htmlFor="fecha" className={labelStyle}>
           Fecha
         </label>
         <input
@@ -488,10 +479,7 @@ export default function CrearEventoFuncionario() {
           required={!(esRecurrente && tipoRecurrencia === "personalizado")}
         />
         {/* Hora de inicio */}
-        <label
-          htmlFor="hora_inicio"
-          className={labelStyle}
-        >
+        <label htmlFor="hora_inicio" className={labelStyle}>
           Hora de inicio
         </label>
         <input
@@ -505,10 +493,7 @@ export default function CrearEventoFuncionario() {
           required={!(esRecurrente && tipoRecurrencia === "personalizado")}
         />
         {/* Hora de fin */}
-        <label
-          htmlFor="hora_fin"
-          className={labelStyle}
-        >
+        <label htmlFor="hora_fin" className={labelStyle}>
           Hora de finalización
         </label>
         <input
@@ -592,9 +577,7 @@ export default function CrearEventoFuncionario() {
             {(tipoRecurrencia === "diario" ||
               tipoRecurrencia === "semanal") && (
               <div className="mb-4">
-                <label className={labelStyle}>
-                  Repetir hasta
-                </label>
+                <label className={labelStyle}>Repetir hasta</label>
                 <input
                   type="date"
                   value={fechaFinRecurrencia}
@@ -608,9 +591,7 @@ export default function CrearEventoFuncionario() {
             {/* Opciones para Semanal (Días de la semana) */}
             {tipoRecurrencia === "semanal" && (
               <div className="mb-4">
-                <label className={labelStyle}>
-                  Selecciona los días
-                </label>
+                <label className={labelStyle}>Selecciona los días</label>
                 <div className="flex flex-wrap gap-2">
                   {["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"].map(
                     (dia, index) => (
@@ -626,7 +607,7 @@ export default function CrearEventoFuncionario() {
                               setDiasSemana([...diasSemana, index]);
                             } else {
                               setDiasSemana(
-                                diasSemana.filter((d) => d !== index)
+                                diasSemana.filter((d) => d !== index),
                               );
                             }
                           }}
@@ -636,7 +617,7 @@ export default function CrearEventoFuncionario() {
                           {dia}
                         </span>
                       </label>
-                    )
+                    ),
                   )}
                 </div>
               </div>
@@ -679,7 +660,7 @@ export default function CrearEventoFuncionario() {
                       const error = validarEventoIndividual(
                         fechaPersonalizada,
                         horaInicioPersonalizada,
-                        horaFinPersonalizada
+                        horaFinPersonalizada,
                       );
                       if (error) {
                         await showSwal({
@@ -726,7 +707,7 @@ export default function CrearEventoFuncionario() {
                         type="button"
                         onClick={() => {
                           setFechasPersonalizadas(
-                            fechasPersonalizadas.filter((_, i) => i !== index)
+                            fechasPersonalizadas.filter((_, i) => i !== index),
                           );
                         }}
                         className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
@@ -752,7 +733,7 @@ export default function CrearEventoFuncionario() {
               ? {
                   value: formData.id_categoria,
                   label: categorias.find(
-                    (cat) => cat.id === formData.id_categoria
+                    (cat) => cat.id === formData.id_categoria,
                   )?.nombre,
                 }
               : null
@@ -785,14 +766,14 @@ export default function CrearEventoFuncionario() {
               relacionadoConTicket === null
                 ? null
                 : relacionadoConTicket
-                ? {
-                    value: "si",
-                    label: "Sí, está relacionado con un ticket",
-                  }
-                : {
-                    value: "no",
-                    label: "No, no está relacionado con un ticket",
-                  }
+                  ? {
+                      value: "si",
+                      label: "Sí, está relacionado con un ticket",
+                    }
+                  : {
+                      value: "no",
+                      label: "No, no está relacionado con un ticket",
+                    }
             }
             onChange={(opt) => setRelacionadoConTicket(opt?.value === "si")}
             className="w-full"
@@ -861,8 +842,8 @@ export default function CrearEventoFuncionario() {
               esCita === null
                 ? null
                 : esCita
-                ? { value: "si", label: "Sí, es una cita" }
-                : { value: "no", label: "No, no es una cita" }
+                  ? { value: "si", label: "Sí, es una cita" }
+                  : { value: "no", label: "No, no es una cita" }
             }
             onChange={(opt) => {
               const valor = opt?.value ?? "";
@@ -936,8 +917,8 @@ export default function CrearEventoFuncionario() {
             <Select
               options={[
                 {
-                  value: "Por inspecccionar",
-                  label: "Por inspecccionar",
+                  value: "Por inspeccionar",
+                  label: "Por inspeccionar",
                 },
                 { value: "Inspeccionado", label: "Inspeccionado" },
                 { value: "Cotizado", label: "Cotizado" },
@@ -969,10 +950,7 @@ export default function CrearEventoFuncionario() {
             />
           )}
         {/* Descripción */}
-        <label
-          htmlFor="descripcion"
-          className={labelStyle}
-        >
+        <label htmlFor="descripcion" className={labelStyle}>
           Descripción
         </label>
         <textarea

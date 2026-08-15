@@ -264,14 +264,14 @@ export default function CrearEventoTicket() {
             ticketData.departamento !== "Servicio al cliente" && (
               <Select
                 options={[
-                  { value: "Por inspecccionar", label: "Por inspecccionar" },
+                  { value: "Por inspeccionar", label: "Por inspeccionar" },
                   { value: "Inspeccionado", label: "Inspeccionado" },
                   { value: "Cotizado", label: "Cotizado" },
                   { value: "En ejecucion", label: "En ejecucion" },
                 ]}
                 value={
                   [
-                    { value: "Por inspecccionar", label: "Por inspecccionar" },
+                    { value: "Por inspeccionar", label: "Por inspeccionar" },
                     { value: "Inspeccionado", label: "Inspeccionado" },
                     { value: "Cotizado", label: "Cotizado" },
                     { value: "En ejecucion", label: "En ejecucion" },

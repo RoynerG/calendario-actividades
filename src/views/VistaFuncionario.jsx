@@ -19,17 +19,22 @@ import GuiaCategorias from "../components/GuiaCategorias";
 import GuiaEventosRecurrentes from "../components/GuiaEventosRecurrentes";
 import EventoViewer from "../components/EventoViewer";
 import { showSwal, swalBaseOptions } from "../helpers/swalUtils";
-import { FaClipboardList, FaExclamationTriangle, FaTable, FaTags, FaPlus, FaCalendarPlus, FaEye } from "react-icons/fa";
+import {
+  FaClipboardList,
+  FaExclamationTriangle,
+  FaTable,
+  FaTags,
+  FaPlus,
+  FaCalendarPlus,
+  FaEye,
+} from "react-icons/fa";
 import {
   showVerSeguimientosModal,
   showCrearSeguimientoModal,
 } from "../helpers/seguimientoModals";
 import { showRealizadoModal } from "../helpers/eventModals";
 
-import {
-  checkAdminAndExecute,
-  isAdminSessionActive,
-} from "../helpers/auth";
+import { checkAdminAndExecute, isAdminSessionActive } from "../helpers/auth";
 import { useResponsiveView } from "../hooks/useResponsiveView";
 import FiltrosCalendario from "../components/FiltrosCalendario";
 
@@ -72,7 +77,7 @@ export default function VistaFuncionario() {
   const [esCita, setEsCita] = useState(null);
   const [pendientesCount, setPendientesCount] = useState(0);
   const [isAdmin, setIsAdmin] = useState(
-    typeof window !== "undefined" && isAdminSessionActive()
+    typeof window !== "undefined" && isAdminSessionActive(),
   );
   const [view, setView] = useResponsiveView();
   const schedulerRef = useRef(null);
@@ -170,13 +175,13 @@ export default function VistaFuncionario() {
           didOpen: (modalElement) => {
             // Agregar listeners a los botones
             const buttons = modalElement.querySelectorAll(
-              ".btn-marcar-realizado"
+              ".btn-marcar-realizado",
             );
             buttons.forEach((btn) => {
               btn.addEventListener("click", async () => {
                 const idEvento = btn.getAttribute("data-id");
                 const pendiente = pendientes.find(
-                  (evento) => String(evento.id) === String(idEvento)
+                  (evento) => String(evento.id) === String(idEvento),
                 );
                 if (!pendiente) return;
 
@@ -187,7 +192,7 @@ export default function VistaFuncionario() {
                     event_id: pendiente.id,
                     title: pendiente.titulo,
                   },
-                  setFiltros
+                  setFiltros,
                 );
                 if (finalizado) {
                   await mostrarPendientes();
@@ -333,7 +338,7 @@ export default function VistaFuncionario() {
               ...swalBaseOptions,
               didOpen: (modalElement) => {
                 const btn = modalElement.querySelector(
-                  "#btn-ver-pendientes-alert"
+                  "#btn-ver-pendientes-alert",
                 );
                 if (btn) {
                   btn.addEventListener("click", () => {
@@ -362,11 +367,11 @@ export default function VistaFuncionario() {
       formData.hora_fin
     ) {
       const categoriaSeleccionada = categorias.find(
-        (cat) => cat.id === formData.id_categoria
+        (cat) => cat.id === formData.id_categoria,
       );
       if (categoriaSeleccionada) {
         const fechaInicio = new Date(
-          `${formData.fecha}T${formData.hora_inicio}`
+          `${formData.fecha}T${formData.hora_inicio}`,
         );
         const fechaFin = new Date(`${formData.fecha}T${formData.hora_fin}`);
         const opcionesFecha = {
@@ -378,7 +383,7 @@ export default function VistaFuncionario() {
         const fechaStr = fechaInicio.toLocaleDateString("es-CO", opcionesFecha);
         const horaInicioStr = fechaInicio.toLocaleTimeString(
           "es-CO",
-          opcionesHora
+          opcionesHora,
         );
         const horaFinStr = fechaFin.toLocaleTimeString("es-CO", opcionesHora);
 
@@ -440,12 +445,12 @@ export default function VistaFuncionario() {
     const inicioSinHoras = new Date(
       fechaInicio.getFullYear(),
       fechaInicio.getMonth(),
-      fechaInicio.getDate()
+      fechaInicio.getDate(),
     );
     const hoySinHoras = new Date(
       ahora.getFullYear(),
       ahora.getMonth(),
-      ahora.getDate()
+      ahora.getDate(),
     );
 
     if (inicioSinHoras < hoySinHoras) {
@@ -716,7 +721,9 @@ export default function VistaFuncionario() {
           className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
           <FaPlus className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Crear Evento</span>
+          <span className="leading-tight text-center sm:text-left">
+            Crear Evento
+          </span>
         </button>
 
         <button
@@ -728,7 +735,9 @@ export default function VistaFuncionario() {
           className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
           <FaCalendarPlus className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Eventos Recurrentes</span>
+          <span className="leading-tight text-center sm:text-left">
+            Eventos Recurrentes
+          </span>
         </button>
 
         {/* Botón de Pendientes */}
@@ -737,7 +746,9 @@ export default function VistaFuncionario() {
           className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0 relative"
         >
           <FaExclamationTriangle className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Eventos Pendientes</span>
+          <span className="leading-tight text-center sm:text-left">
+            Eventos Pendientes
+          </span>
           {pendientesCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-yellow-400 text-red-800 text-xs font-bold px-2 py-1 rounded-full shadow-sm border border-white">
               {pendientesCount}
@@ -750,21 +761,27 @@ export default function VistaFuncionario() {
           className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
           <FaClipboardList className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Hacer Seguimiento Global</span>
+          <span className="leading-tight text-center sm:text-left">
+            Hacer Seguimiento Global
+          </span>
         </button>
         <button
           onClick={() => handleVerSeguimiento(null)}
           className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
           <FaEye className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Ver Mi Seguimiento</span>
+          <span className="leading-tight text-center sm:text-left">
+            Ver Mi Seguimiento
+          </span>
         </button>
         <button
           onClick={handleVerSeguimientoGlobal}
           className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
           <FaClipboardList className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Ver Seguimiento Global</span>
+          <span className="leading-tight text-center sm:text-left">
+            Ver Seguimiento Global
+          </span>
         </button>
 
         <button
@@ -772,7 +789,9 @@ export default function VistaFuncionario() {
           className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
         >
           <FaTable className="text-lg sm:text-base" />
-          <span className="leading-tight text-center sm:text-left">Consolidado de Eventos</span>
+          <span className="leading-tight text-center sm:text-left">
+            Consolidado de Eventos
+          </span>
         </button>
 
         {isAdmin && (
@@ -783,7 +802,9 @@ export default function VistaFuncionario() {
               className="hover:bg-slate-800 font-bold py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
             >
               <FaTable className="text-lg sm:text-base" />
-              <span className="leading-tight text-center sm:text-left">Consolidado Global</span>
+              <span className="leading-tight text-center sm:text-left">
+                Consolidado Global
+              </span>
             </button>
             <a
               href="/gestion-categorias"
@@ -797,7 +818,9 @@ export default function VistaFuncionario() {
               className="hover:bg-amber-900 py-2 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm md:text-base rounded shadow-md transition active:scale-95 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 min-h-[64px] sm:min-h-0"
             >
               <FaTags className="text-lg sm:text-base" />
-              <span className="leading-tight text-center sm:text-left">Gestor Categorías</span>
+              <span className="leading-tight text-center sm:text-left">
+                Gestor Categorías
+              </span>
             </a>
           </>
         )}
@@ -823,38 +846,38 @@ export default function VistaFuncionario() {
             </div>
           )}
           <div className="min-w-[640px]">
-          <Scheduler
-            ref={schedulerRef}
-            view={view}
-            onViewChange={setView}
-            agenda={false}
-            events={eventos}
-            week={schedulerConfig.week}
-            day={schedulerConfig.day}
-            translations={{
-              navigation: schedulerConfig.navigation,
-              event: schedulerConfig.event,
-              moreEvents: schedulerConfig.moreEvents,
-              noDataToDisplay: schedulerConfig.noDataToDisplay,
-              loading: schedulerConfig.loading,
-            }}
-            locale={es}
-            viewerExtraComponent={(fields, event) => (
-              <EventoViewer
-                event={event}
-                categorias={categorias}
-                setFiltros={setFiltros}
-                onVerSeguimiento={() => handleVerSeguimiento(event.event_id)}
-                onHacerSeguimiento={() =>
-                  handleHacerSeguimiento(event.event_id)
-                }
-                allowActions={true}
-              />
-            )}
-            editable={false}
-            deletable={false}
-            draggable={false}
-          />
+            <Scheduler
+              ref={schedulerRef}
+              view={view}
+              onViewChange={setView}
+              agenda={false}
+              events={eventos}
+              week={schedulerConfig.week}
+              day={schedulerConfig.day}
+              translations={{
+                navigation: schedulerConfig.navigation,
+                event: schedulerConfig.event,
+                moreEvents: schedulerConfig.moreEvents,
+                noDataToDisplay: schedulerConfig.noDataToDisplay,
+                loading: schedulerConfig.loading,
+              }}
+              locale={es}
+              viewerExtraComponent={(fields, event) => (
+                <EventoViewer
+                  event={event}
+                  categorias={categorias}
+                  setFiltros={setFiltros}
+                  onVerSeguimiento={() => handleVerSeguimiento(event.event_id)}
+                  onHacerSeguimiento={() =>
+                    handleHacerSeguimiento(event.event_id)
+                  }
+                  allowActions={true}
+                />
+              )}
+              editable={false}
+              deletable={false}
+              draggable={false}
+            />
           </div>
         </div>
       )}
@@ -909,12 +932,12 @@ export default function VistaFuncionario() {
                 </span>
               </div>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4 p-6 dark:text-white">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 p-6 dark:text-white"
+            >
               {/* Título */}
-              <label
-                htmlFor="titulo"
-                className={labelStyle}
-              >
+              <label htmlFor="titulo" className={labelStyle}>
                 Título
               </label>
               <input
@@ -929,10 +952,7 @@ export default function VistaFuncionario() {
                 required
               />
               {/* Ubicación */}
-              <label
-                htmlFor="ubicacion"
-                className={labelStyle}
-              >
+              <label htmlFor="ubicacion" className={labelStyle}>
                 Ubicación / dirección del evento
               </label>
               <input
@@ -947,10 +967,7 @@ export default function VistaFuncionario() {
                 required
               />
               {/* Fecha */}
-              <label
-                htmlFor="fecha"
-                className={labelStyle}
-              >
+              <label htmlFor="fecha" className={labelStyle}>
                 Fecha
               </label>
               <input
@@ -966,10 +983,7 @@ export default function VistaFuncionario() {
                 }
               />
               {/* Hora de inicio */}
-              <label
-                htmlFor="hora_inicio"
-                className={labelStyle}
-              >
+              <label htmlFor="hora_inicio" className={labelStyle}>
                 Hora de inicio
               </label>
               <input
@@ -985,10 +999,7 @@ export default function VistaFuncionario() {
                 }
               />
               {/* Hora de fin */}
-              <label
-                htmlFor="hora_fin"
-                className={labelStyle}
-              >
+              <label htmlFor="hora_fin" className={labelStyle}>
                 Hora de finalización
               </label>
               <input
@@ -1091,7 +1102,7 @@ export default function VistaFuncionario() {
                                     setDiasSemana([...diasSemana, index]);
                                   } else {
                                     setDiasSemana(
-                                      diasSemana.filter((d) => d !== index)
+                                      diasSemana.filter((d) => d !== index),
                                     );
                                   }
                                 }}
@@ -1163,7 +1174,7 @@ export default function VistaFuncionario() {
                             const error = validarEventoIndividual(
                               fechaPersonalizada,
                               horaInicioPersonalizada,
-                              horaFinPersonalizada
+                              horaFinPersonalizada,
                             );
                             if (error) {
                               await showSwal({
@@ -1210,8 +1221,8 @@ export default function VistaFuncionario() {
                                     onClick={() => {
                                       setFechasPersonalizadas(
                                         fechasPersonalizadas.filter(
-                                          (_, i) => i !== idx
-                                        )
+                                          (_, i) => i !== idx,
+                                        ),
                                       );
                                     }}
                                     className="text-red-600 hover:text-red-800 ml-2 text-xs font-semibold px-2 py-1 rounded-full hover:bg-red-50"
@@ -1239,7 +1250,7 @@ export default function VistaFuncionario() {
                     ? {
                         value: formData.id_categoria,
                         label: categorias.find(
-                          (cat) => cat.id === formData.id_categoria
+                          (cat) => cat.id === formData.id_categoria,
                         )?.nombre,
                       }
                     : null
@@ -1272,14 +1283,14 @@ export default function VistaFuncionario() {
                     relacionadoConTicket === null
                       ? null
                       : relacionadoConTicket
-                      ? {
-                          value: "si",
-                          label: "Sí, está relacionado con un ticket",
-                        }
-                      : {
-                          value: "no",
-                          label: "No, no está relacionado con un ticket",
-                        }
+                        ? {
+                            value: "si",
+                            label: "Sí, está relacionado con un ticket",
+                          }
+                        : {
+                            value: "no",
+                            label: "No, no está relacionado con un ticket",
+                          }
                   }
                   onChange={(opt) =>
                     setRelacionadoConTicket(opt?.value === "si")
@@ -1324,8 +1335,8 @@ export default function VistaFuncionario() {
                     esCita === null
                       ? null
                       : esCita
-                      ? { value: "si", label: "Sí, es una cita" }
-                      : { value: "no", label: "No, no es una cita" }
+                        ? { value: "si", label: "Sí, es una cita" }
+                        : { value: "no", label: "No, no es una cita" }
                   }
                   onChange={(opt) => {
                     const valor = opt?.value ?? "";
@@ -1399,8 +1410,8 @@ export default function VistaFuncionario() {
                   <Select
                     options={[
                       {
-                        value: "Por inspecccionar",
-                        label: "Por inspecccionar",
+                        value: "Por inspeccionar",
+                        label: "Por inspeccionar",
                       },
                       { value: "Inspeccionado", label: "Inspeccionado" },
                       { value: "Cotizado", label: "Cotizado" },
@@ -1433,10 +1444,7 @@ export default function VistaFuncionario() {
                   />
                 )}
               {/* Descripción */}
-              <label
-                htmlFor="descripcion"
-                className={labelStyle}
-              >
+              <label htmlFor="descripcion" className={labelStyle}>
                 Descripción
               </label>
               <textarea
