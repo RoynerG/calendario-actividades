@@ -2,16 +2,25 @@ import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import {
   listarCategorias,
+  listarFuncionarios,
   crearCategoria,
   actualizarCategoria,
   eliminarCategoria,
   actualizarEsquemaCategorias,
 } from "../services/eventService";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import Select from "react-select";
 import { swalBaseOptions } from "../helpers/swalUtils";
+
+const parseFuncionarioIds = (value = "") =>
+  String(value)
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
 
 export default function GestionCategorias() {
   const [categorias, setCategorias] = useState([]);
+  const [funcionarios, setFuncionarios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCat, setEditingCat] = useState(null);
@@ -30,11 +39,13 @@ export default function GestionCategorias() {
       .then((res) => {
         console.log("Schema update:", res);
         loadCategorias();
+        loadFuncionarios();
       })
       .catch((err) => {
         console.error("Schema update error:", err);
         // Intentar cargar de todos modos
         loadCategorias();
+        loadFuncionarios();
       });
   }, []);
 
@@ -63,6 +74,36 @@ export default function GestionCategorias() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadFuncionarios = async () => {
+    try {
+      const res = await listarFuncionarios();
+      if (res.success) {
+        setFuncionarios(res.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const funcionarioOptions = funcionarios.map((funcionario) => ({
+    value: String(funcionario.id_empleado),
+    label: funcionario.nombre,
+  }));
+
+  const getFuncionariosNotificados = (value) => {
+    const ids = parseFuncionarioIds(value);
+    const nombres = ids
+      .map((id) => {
+        const funcionario = funcionarios.find(
+          (item) => String(item.id_empleado) === String(id)
+        );
+        return funcionario?.nombre || null;
+      })
+      .filter(Boolean);
+
+    return nombres.length > 0 ? nombres : ids;
   };
 
   const handleOpenModal = (cat = null) => {
@@ -205,6 +246,7 @@ export default function GestionCategorias() {
                   <th className="p-3 border-b">ID</th>
                   <th className="p-3 border-b">Color</th>
                   <th className="p-3 border-b">Nombre</th>
+                  <th className="p-3 border-b">Funcionarios notificados</th>
                   <th className="p-3 border-b">Descripción</th>
                   <th className="p-3 border-b text-center">Acciones</th>
                 </tr>
@@ -221,6 +263,25 @@ export default function GestionCategorias() {
                       ></div>
                     </td>
                     <td className="p-3 font-bold text-gray-900 dark:text-white">{cat.nombre}</td>
+                    <td className="p-3 text-sm text-gray-600 dark:text-gray-300 font-bold">
+                      {getFuncionariosNotificados(cat.roles_notificar).length >
+                      0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {getFuncionariosNotificados(cat.roles_notificar).map(
+                            (nombre) => (
+                              <span
+                                key={nombre}
+                                className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-900/40 dark:text-blue-200"
+                              >
+                                {nombre}
+                              </span>
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 italic">Ninguno</span>
+                      )}
+                    </td>
                     <td className="p-3 text-gray-600 dark:text-gray-300 text-sm font-bold">
                       {cat.descripcion || "Sin descripción"}
                     </td>
@@ -260,7 +321,7 @@ export default function GestionCategorias() {
       {/* Modal Crear/Editar */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-lg p-6">
             <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
               {editingCat ? "Editar Categoría" : "Nueva Categoría"}
             </h2>
@@ -313,6 +374,39 @@ export default function GestionCategorias() {
                   }
                   placeholder="Explica cuándo se debe usar esta categoría..."
                 ></textarea>
+              </div>
+
+              <div className="mb-6">
+                <label
+                  htmlFor="roles_notificar"
+                  className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2"
+                >
+                  Funcionarios a notificar
+                </label>
+                <Select
+                  inputId="roles_notificar"
+                  isMulti
+                  options={funcionarioOptions}
+                  value={funcionarioOptions.filter((option) =>
+                    parseFuncionarioIds(formData.roles_notificar).includes(
+                      String(option.value)
+                    )
+                  )}
+                  onChange={(opts) =>
+                    setFormData({
+                      ...formData,
+                      roles_notificar: opts.map((opt) => opt.value).join(","),
+                    })
+                  }
+                  placeholder="Selecciona funcionarios"
+                  isClearable
+                  className="w-full"
+                  classNamePrefix="react-select"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-bold">
+                  Estos funcionarios recibirán copia automática cuando se cree
+                  un evento de esta categoría.
+                </p>
               </div>
 
               <div className="flex justify-end gap-2">

@@ -8,7 +8,6 @@ export default function CrearEventoTicket() {
   const { id_ticket } = useParams();
   const {
     categorias,
-    funcionarios,
     ticketData,
     formData,
     setFormData,
@@ -149,38 +148,6 @@ export default function CrearEventoTicket() {
               setFormData({ ...formData, id_categoria: opt?.value || "" })
             }
             placeholder="Selecciona categoría"
-            isClearable
-            className="w-full"
-            classNamePrefix="react-select"
-          />
-
-          <label htmlFor="notificar_funcionarios" className={styleLabel}>
-            Funcionarios adicionales a notificar
-          </label>
-          <Select
-            inputId="notificar_funcionarios"
-            isMulti
-            options={funcionarios.map((f) => ({
-              value: f.id_empleado,
-              label: f.nombre,
-            }))}
-            value={(formData.notificar_funcionarios || [])
-              .map((id) => {
-                const funcionario = funcionarios.find(
-                  (f) => f.id_empleado === id
-                );
-                return funcionario
-                  ? { value: id, label: funcionario.nombre }
-                  : null;
-              })
-              .filter(Boolean)}
-            onChange={(opts) =>
-              setFormData({
-                ...formData,
-                notificar_funcionarios: opts.map((o) => o.value),
-              })
-            }
-            placeholder="Selecciona funcionarios"
             isClearable
             className="w-full"
             classNamePrefix="react-select"

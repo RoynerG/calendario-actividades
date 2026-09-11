@@ -39,7 +39,6 @@ export function useEventoForm(mode = "simple", id) {
     es_cita: "",
     empleados: [],
     creado_por: obtenerCreadorActual(""),
-    notificar_funcionarios: [],
   };
 
   const [categorias, setCategorias] = useState([]);
@@ -62,11 +61,6 @@ export function useEventoForm(mode = "simple", id) {
       listarCategorias().then((res) => res.success && setCategorias(res.data)),
     ];
     if (mode === "ticket") {
-      tasks.push(
-        listarFuncionarios().then(
-          (res) => res.success && setFuncionarios(res.data)
-        )
-      );
       tasks.push(
         obtenerTicket(id).then((res) => {
           if (res.success) {

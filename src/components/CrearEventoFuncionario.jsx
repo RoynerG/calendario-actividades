@@ -7,7 +7,6 @@ import {
   obtenerTicketsFuncionario,
   verificarBloqueo,
   obtenerFuncionario,
-  listarFuncionarios,
 } from "../services/eventService";
 import Select from "react-select";
 import { useParams } from "react-router-dom";
@@ -26,7 +25,6 @@ export default function CrearEventoFuncionario() {
   const { id_funcionario } = useParams();
   const [categorias, setCategorias] = useState([]);
   const [funcionario, setFuncionario] = useState({});
-  const [funcionarios, setFuncionarios] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [filtros, setFiltros] = useState({
     id_categoria: "",
@@ -53,7 +51,6 @@ export default function CrearEventoFuncionario() {
     inmueble: "",
     es_cita: "",
     creado_por: obtenerCreadorActual(id_funcionario),
-    notificar_funcionarios: [],
   });
   const [relacionadoConTicket, setRelacionadoConTicket] = useState(null);
   const [ticketSelecionado, setTicketSelecionado] = useState(null);
@@ -82,9 +79,6 @@ export default function CrearEventoFuncionario() {
     obtenerTicketsFuncionario(id_funcionario).then((res) => {
       if (res.success) setTickets(res.data);
     });
-    listarFuncionarios().then((res) => {
-      if (res.success) setFuncionarios(res.data);
-    });
   }, [id_funcionario]);
 
   useEffect(() => {
@@ -110,9 +104,6 @@ export default function CrearEventoFuncionario() {
 
       const resTickets = await obtenerTicketsFuncionario(id_funcionario);
       if (resTickets.success) setTickets(resTickets.data);
-
-      const resFuncionarios = await listarFuncionarios();
-      if (resFuncionarios.success) setFuncionarios(resFuncionarios.data);
     };
 
     cargarDatos();
@@ -180,7 +171,6 @@ export default function CrearEventoFuncionario() {
       inmueble: "",
       es_cita: "",
       creado_por: obtenerCreadorActual(id_funcionario),
-      notificar_funcionarios: [],
     });
     setRelacionadoConTicket(null);
     setEsCita(null);
@@ -769,33 +759,6 @@ export default function CrearEventoFuncionario() {
           className="w-full"
           classNamePrefix="react-select"
           placeholder="Selecciona una categoría"
-          isClearable
-        />
-        <label htmlFor="notificar_funcionarios" className={labelStyle}>
-          Funcionarios adicionales a notificar
-        </label>
-        <Select
-          inputId="notificar_funcionarios"
-          isMulti
-          options={funcionarios.map((f) => ({
-            value: f.id_empleado,
-            label: f.nombre,
-          }))}
-          value={(formData.notificar_funcionarios || [])
-            .map((id) => {
-              const fn = funcionarios.find((f) => f.id_empleado === id);
-              return fn ? { value: id, label: fn.nombre } : null;
-            })
-            .filter(Boolean)}
-          onChange={(opts) =>
-            setFormData({
-              ...formData,
-              notificar_funcionarios: opts.map((o) => o.value),
-            })
-          }
-          className="w-full"
-          classNamePrefix="react-select"
-          placeholder="Selecciona funcionarios"
           isClearable
         />
         {/* ¿Relacionado con ticket? */}
