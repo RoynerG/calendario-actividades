@@ -94,7 +94,7 @@ export default function GestionCategorias() {
 
   const getFuncionariosNotificados = (value) => {
     const ids = parseFuncionarioIds(value);
-    const nombres = ids
+    return ids
       .map((id) => {
         const funcionario = funcionarios.find(
           (item) => String(item.id_empleado) === String(id)
@@ -102,8 +102,6 @@ export default function GestionCategorias() {
         return funcionario?.nombre || null;
       })
       .filter(Boolean);
-
-    return nombres.length > 0 ? nombres : ids;
   };
 
   const handleOpenModal = (cat = null) => {
@@ -264,8 +262,7 @@ export default function GestionCategorias() {
                     </td>
                     <td className="p-3 font-bold text-gray-900 dark:text-white">{cat.nombre}</td>
                     <td className="p-3 text-sm text-gray-600 dark:text-gray-300 font-bold">
-                      {getFuncionariosNotificados(cat.roles_notificar).length >
-                      0 ? (
+                      {getFuncionariosNotificados(cat.roles_notificar).length > 0 ? (
                         <div className="flex flex-wrap gap-1">
                           {getFuncionariosNotificados(cat.roles_notificar).map(
                             (nombre) => (
@@ -279,7 +276,9 @@ export default function GestionCategorias() {
                           )}
                         </div>
                       ) : (
-                        <span className="text-gray-400 italic">Ninguno</span>
+                        <span className="text-gray-400 italic">
+                          Sin configurar
+                        </span>
                       )}
                     </td>
                     <td className="p-3 text-gray-600 dark:text-gray-300 text-sm font-bold">
