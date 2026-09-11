@@ -38,6 +38,15 @@ import { checkAdminAndExecute, isAdminSessionActive } from "../helpers/auth";
 import { useResponsiveView } from "../hooks/useResponsiveView";
 import FiltrosCalendario from "../components/FiltrosCalendario";
 
+const obtenerCreadorActual = (fallback = "") => {
+  try {
+    const adminUser = JSON.parse(localStorage.getItem("admin_user") || "null");
+    return adminUser?.id_empleado || fallback || "";
+  } catch {
+    return fallback || "";
+  }
+};
+
 export default function VistaFuncionario() {
   const { id_funcionario } = useParams();
   const navigate = useNavigate();
@@ -69,6 +78,7 @@ export default function VistaFuncionario() {
     contrato: "",
     inmueble: "",
     es_cita: "",
+    creado_por: obtenerCreadorActual(id_funcionario),
   });
   const [relacionadoConTicket, setRelacionadoConTicket] = useState(null);
   const [ticketSelecionado, setTicketSelecionado] = useState(null);
@@ -419,6 +429,7 @@ export default function VistaFuncionario() {
       contrato: "",
       inmueble: "",
       es_cita: "",
+      creado_por: obtenerCreadorActual(id_funcionario),
     });
     setRelacionadoConTicket(null);
     setEsCita(null);
@@ -497,6 +508,7 @@ export default function VistaFuncionario() {
         fechasPersonalizadas.forEach((item) => {
           eventosParaCrear.push({
             ...formData,
+            creado_por: obtenerCreadorActual(id_funcionario),
             fecha_inicio: `${item.fecha}T${item.hora_inicio}`,
             fecha_fin: `${item.fecha}T${item.hora_fin}`,
           });
@@ -559,6 +571,7 @@ export default function VistaFuncionario() {
 
             eventosParaCrear.push({
               ...formData,
+              creado_por: obtenerCreadorActual(id_funcionario),
               fecha_inicio: `${fechaStr}T${hora_inicio}`,
               fecha_fin: `${fechaStr}T${hora_fin}`,
             });
@@ -649,6 +662,7 @@ export default function VistaFuncionario() {
       ...formData,
       fecha_inicio,
       fecha_fin,
+      creado_por: obtenerCreadorActual(id_funcionario),
     };
 
     delete eventoData.fecha;

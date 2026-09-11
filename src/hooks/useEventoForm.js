@@ -121,6 +121,16 @@ export function useEventoForm(mode = "simple", id) {
   // Submit con validación y armado de payload para API
   const handleSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault();
+    const creadorActual = obtenerCreadorActual("");
+
+    if (mode === "multiple" && !creadorActual) {
+      return Swal.fire({
+        title: "Activa modo admin",
+        text: "Para crear eventos múltiples se debe identificar quién los crea y poder notificarle.",
+        icon: "warning",
+        ...swalBaseOptions,
+      });
+    }
 
     // Unir fecha y horas para enviar a la API
     const { fecha, hora_inicio, hora_fin } = formData;
@@ -248,7 +258,7 @@ export function useEventoForm(mode = "simple", id) {
         ...formData,
         fecha_inicio,
         fecha_fin,
-        creado_por: obtenerCreadorActual(
+        creado_por: creadorActual || obtenerCreadorActual(
           formData.id_empleado || ticketData?.id_empleado || ""
         ),
       };
