@@ -146,6 +146,33 @@ export default function CrearEventoMultiple() {
           className="w-full"
         />
 
+        <label htmlFor="notificar_funcionarios" className={styleLabel}>
+          Funcionarios adicionales a notificar
+        </label>
+        <Select
+          inputId="notificar_funcionarios"
+          isMulti
+          options={funcionarios.map((f) => ({
+            value: f.id_empleado,
+            label: f.nombre,
+          }))}
+          value={(formData.notificar_funcionarios || [])
+            .map((id) => {
+              const fn = funcionarios.find((f) => f.id_empleado === id);
+              return fn ? { value: id, label: fn.nombre } : null;
+            })
+            .filter(Boolean)}
+          onChange={(opts) =>
+            setFormData({
+              ...formData,
+              notificar_funcionarios: opts.map((o) => o.value),
+            })
+          }
+          placeholder="Selecciona funcionarios"
+          isClearable
+          className="w-full"
+        />
+
         <button
           type="submit"
           className="w-full bg-black dark:bg-blue-600 text-white font-bold py-2 rounded hover:bg-gray-800 dark:hover:bg-blue-700 transition"

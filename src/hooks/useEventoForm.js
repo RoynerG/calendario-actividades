@@ -9,6 +9,15 @@ import {
 } from "../services/eventService";
 import { swalBaseOptions } from "../helpers/swalUtils";
 
+const obtenerCreadorActual = (fallback = "") => {
+  try {
+    const adminUser = JSON.parse(localStorage.getItem("admin_user") || "null");
+    return adminUser?.id_empleado || fallback || "";
+  } catch {
+    return fallback || "";
+  }
+};
+
 export function useEventoForm(mode = "simple", id) {
   // Campos de formulario, ahora con fecha y horas separadas
   const initialData = {
@@ -29,6 +38,8 @@ export function useEventoForm(mode = "simple", id) {
     inmueble: "",
     es_cita: "",
     empleados: [],
+    creado_por: obtenerCreadorActual(""),
+    notificar_funcionarios: [],
   };
 
   const [categorias, setCategorias] = useState([]);
@@ -36,6 +47,13 @@ export function useEventoForm(mode = "simple", id) {
   const [ticketData, setTicketData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState(initialData);
+  const {
+    id_categoria: formIdCategoria,
+    fecha: formFecha,
+    hora_inicio: formHoraInicio,
+    hora_fin: formHoraFin,
+    es_cita: formEsCita,
+  } = formData;
 
   // Cargar categorías y, si aplica, datos del ticket o funcionarios
   useEffect(() => {
@@ -45,9 +63,18 @@ export function useEventoForm(mode = "simple", id) {
     ];
     if (mode === "ticket") {
       tasks.push(
+        listarFuncionarios().then(
+          (res) => res.success && setFuncionarios(res.data)
+        )
+      );
+      tasks.push(
         obtenerTicket(id).then((res) => {
           if (res.success) {
-            setFormData((f) => ({ ...f, id_empleado: res.data.id_empleado }));
+            setFormData((f) => ({
+              ...f,
+              id_empleado: res.data.id_empleado,
+              creado_por: obtenerCreadorActual(res.data.id_empleado),
+            }));
             setTicketData(res.data);
           }
         })
@@ -65,11 +92,16 @@ export function useEventoForm(mode = "simple", id) {
   // Generar automáticamente la descripción para citas
   useEffect(() => {
     if (mode !== "ticket") return;
-    const { id_categoria, fecha, hora_inicio, hora_fin, es_cita } = formData;
-    const cat = categorias.find((c) => c.id === id_categoria);
-    if (es_cita === "si" && cat && fecha && hora_inicio && hora_fin) {
-      const f1 = new Date(`${fecha}T${hora_inicio}`);
-      const f2 = new Date(`${fecha}T${hora_fin}`);
+    const cat = categorias.find((c) => c.id === formIdCategoria);
+    if (
+      formEsCita === "si" &&
+      cat &&
+      formFecha &&
+      formHoraInicio &&
+      formHoraFin
+    ) {
+      const f1 = new Date(`${formFecha}T${formHoraInicio}`);
+      const f2 = new Date(`${formFecha}T${formHoraFin}`);
       const optsDate = { day: "2-digit", month: "2-digit", year: "numeric" };
       const optsTime = { hour: "2-digit", minute: "2-digit" };
       const fechaStr = f1.toLocaleDateString("es-CO", optsDate);
@@ -79,15 +111,15 @@ export function useEventoForm(mode = "simple", id) {
         ...f,
         descripcion: `Por medio de la presente, le confirmo que he dispuesto de un espacio con el propósito de reunirnos, ya sea de forma presencial o por medios virtuales, a fin de atender cualquier inquietud o asunto pendiente.</br></br>En cumplimiento de <b>${cat.nombre}</b>, la cita ha quedado agendada para el día <b>${fechaStr}</b>, de <b>${hora1}</b> a <b>${hora2}</b>. En caso de no ser posible contar con su atención en la fecha indicada, le agradecemos nos lo comunique por este mismo medio con al menos 3 horas de antelación.`,
       }));
-    } else if (mode === "ticket" && formData.es_cita === "no") {
+    } else if (mode === "ticket" && formEsCita === "no") {
       setFormData((f) => ({ ...f, descripcion: "" }));
     }
   }, [
-    formData.id_categoria,
-    formData.fecha,
-    formData.hora_inicio,
-    formData.hora_fin,
-    formData.es_cita,
+    formIdCategoria,
+    formFecha,
+    formHoraInicio,
+    formHoraFin,
+    formEsCita,
     categorias,
     mode,
   ]);
@@ -222,6 +254,9 @@ export function useEventoForm(mode = "simple", id) {
         ...formData,
         fecha_inicio,
         fecha_fin,
+        creado_por: obtenerCreadorActual(
+          formData.id_empleado || ticketData?.id_empleado || ""
+        ),
       };
       delete payload.fecha;
       delete payload.hora_inicio;
@@ -246,6 +281,7 @@ export function useEventoForm(mode = "simple", id) {
           ...initialData,
           id_ticket: mode === "ticket" ? id : "",
           id_empleado: ticketData?.id_empleado || "",
+          creado_por: obtenerCreadorActual(ticketData?.id_empleado || ""),
         });
       } else {
         const mensaje = resp.message || "No se pudo crear el evento.";

@@ -7,7 +7,7 @@ import {
   eliminarCategoria,
   actualizarEsquemaCategorias,
 } from "../services/eventService";
-import { FaPlus, FaEdit, FaTrash, FaDatabase } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { swalBaseOptions } from "../helpers/swalUtils";
 
 export default function GestionCategorias() {
@@ -205,7 +205,6 @@ export default function GestionCategorias() {
                   <th className="p-3 border-b">ID</th>
                   <th className="p-3 border-b">Color</th>
                   <th className="p-3 border-b">Nombre</th>
-                  <th className="p-3 border-b">Roles a Notificar</th>
                   <th className="p-3 border-b">Descripción</th>
                   <th className="p-3 border-b text-center">Acciones</th>
                 </tr>
@@ -222,15 +221,6 @@ export default function GestionCategorias() {
                       ></div>
                     </td>
                     <td className="p-3 font-bold text-gray-900 dark:text-white">{cat.nombre}</td>
-                    <td className="p-3 text-sm text-gray-600 dark:text-gray-300 font-bold">
-                      {cat.roles_notificar ? (
-                        <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-900/40 dark:text-blue-200">
-                          {cat.roles_notificar}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 italic">Ninguno</span>
-                      )}
-                    </td>
                     <td className="p-3 text-gray-600 dark:text-gray-300 text-sm font-bold">
                       {cat.descripcion || "Sin descripción"}
                     </td>
@@ -308,27 +298,6 @@ export default function GestionCategorias() {
                     {formData.color}
                   </span>
                 </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">
-                  Roles a notificar
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded focus:outline-none focus:border-blue-500"
-                  value={formData.roles_notificar}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      roles_notificar: e.target.value,
-                    })
-                  }
-                  placeholder="Ej: Gerencia, Comercial, Soporte"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-bold">
-                  Separa los roles por comas. (Roles disponibles en el sistema)
-                </p>
               </div>
 
               <div className="mb-6">
