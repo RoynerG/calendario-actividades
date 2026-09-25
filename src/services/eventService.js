@@ -11,6 +11,22 @@ export const obtenerReporteEventos = (filtros) =>
   axios.post(BASE_URL + "reporte_eventos", filtros);
 export const crearEvento = (evento) =>
   axios.post(BASE_URL + "crear_evento", evento);
+export const crearItemCalendario = (item, apiKey = "") =>
+  axios.post(BASE_URL + "crear_item_calendario", item, {
+    headers: apiKey ? { "X-SKC-Calendar-Key": apiKey } : {},
+  });
+export const crearTareaCalendario = (tarea, apiKey = "") =>
+  axios.post(BASE_URL + "crear_tarea", tarea, {
+    headers: apiKey ? { "X-SKC-Calendar-Key": apiKey } : {},
+  });
+export const crearRecordatorioCalendario = (recordatorio, apiKey = "") =>
+  axios.post(BASE_URL + "crear_recordatorio", recordatorio, {
+    headers: apiKey ? { "X-SKC-Calendar-Key": apiKey } : {},
+  });
+export const listarItemsCalendario = (filtros = {}, apiKey = "") =>
+  axios.post(BASE_URL + "listar_items_calendario", filtros, {
+    headers: apiKey ? { "X-SKC-Calendar-Key": apiKey } : {},
+  });
 export const crearEventos = (payload) =>
   axios.post(BASE_URL + "crear_eventos", payload).then((res) => res.data);
 export async function obtenerEvento(id) {
