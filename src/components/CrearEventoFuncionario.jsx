@@ -11,13 +11,15 @@ import {
 import Select from "react-select";
 import { useParams } from "react-router-dom";
 import { showSwal, swalBaseOptions } from "../helpers/swalUtils";
+import { isAdminSessionActive } from "../helpers/auth";
 
-const obtenerCreadorActual = (fallback = "") => {
+const obtenerCreadorActual = () => {
+  if (!isAdminSessionActive()) return "";
   try {
     const adminUser = JSON.parse(localStorage.getItem("admin_user") || "null");
-    return adminUser?.id_empleado || fallback || "";
+    return adminUser?.id_empleado || "";
   } catch {
-    return fallback || "";
+    return "";
   }
 };
 
@@ -271,10 +273,11 @@ export default function CrearEventoFuncionario() {
         });
         const res = await crearEvento(eventoData);
         if (res.data.success) {
+          const googlePendiente = Boolean(res.data.data?.google_pendiente);
           await Swal.fire({
-            title: "¡Éxito!",
-            text: "El evento fue agregado correctamente",
-            icon: "success",
+            title: googlePendiente ? "Creado en el panel" : "¡Éxito!",
+            text: googlePendiente ? "El evento quedó pendiente en Google Calendar. El funcionario debe conectar o revisar su cuenta." : "El evento fue agregado correctamente",
+            icon: googlePendiente ? "warning" : "success",
             ...swalBaseOptions,
           });
           resetForm();
@@ -420,10 +423,11 @@ export default function CrearEventoFuncionario() {
           // Si el backend devuelve success=true
           // res.data suele tener { count: X, ids: [...] } o similar
           const count = res.data?.count || eventosParaCrear.length;
+          const googlePendientes = res.data?.google_pendientes || 0;
           await Swal.fire({
-            title: "¡Éxito!",
-            text: `Se crearon ${count} eventos correctamente.`,
-            icon: "success",
+            title: googlePendientes ? "Creados en el panel" : "¡Éxito!",
+            text: googlePendientes ? `Se crearon ${count} eventos; ${googlePendientes} quedaron pendientes en Google Calendar.` : `Se crearon ${count} eventos correctamente.`,
+            icon: googlePendientes ? "warning" : "success",
             ...swalBaseOptions,
           });
           resetForm();

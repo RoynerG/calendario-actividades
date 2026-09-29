@@ -8,13 +8,15 @@ import {
   crearEventos,
 } from "../services/eventService";
 import { swalBaseOptions } from "../helpers/swalUtils";
+import { isAdminSessionActive } from "../helpers/auth";
 
-const obtenerCreadorActual = (fallback = "") => {
+const obtenerCreadorActual = () => {
+  if (!isAdminSessionActive()) return "";
   try {
     const adminUser = JSON.parse(localStorage.getItem("admin_user") || "null");
-    return adminUser?.id_empleado || fallback || "";
+    return adminUser?.id_empleado || "";
   } catch {
-    return fallback || "";
+    return "";
   }
 };
 
@@ -275,10 +277,11 @@ export function useEventoForm(mode = "simple", id) {
       else resp = (await crearEvento(payload)).data;
       Swal.close();
       if (resp.success) {
+        const googlePendientes = resp.data?.google_pendientes || (resp.data?.google_pendiente ? 1 : 0);
         Swal.fire({
-          title: "¡Éxito!",
-          text: resp.message || "Evento creado.",
-          icon: "success",
+          title: googlePendientes ? "Creado en el panel" : "¡Éxito!",
+          text: googlePendientes ? "El evento quedó pendiente en Google Calendar. El funcionario debe conectar o revisar su cuenta." : (resp.message || "Evento creado."),
+          icon: googlePendientes ? "warning" : "success",
           ...swalBaseOptions,
         });
         setFormData({

@@ -10,6 +10,8 @@ import {
   obtenerTicketsFuncionario,
   verificarBloqueo,
   listarPendientesVencidos,
+  estadoGoogleCalendar,
+  iniciarGoogleCalendar,
 } from "../services/eventService";
 import { useParams, useNavigate } from "react-router-dom";
 import schedulerConfig from "../services/schedulerConfig";
@@ -38,12 +40,13 @@ import { checkAdminAndExecute, isAdminSessionActive } from "../helpers/auth";
 import { useResponsiveView } from "../hooks/useResponsiveView";
 import FiltrosCalendario from "../components/FiltrosCalendario";
 
-const obtenerCreadorActual = (fallback = "") => {
+const obtenerCreadorActual = () => {
+  if (!isAdminSessionActive()) return "";
   try {
     const adminUser = JSON.parse(localStorage.getItem("admin_user") || "null");
-    return adminUser?.id_empleado || fallback || "";
+    return adminUser?.id_empleado || "";
   } catch {
-    return fallback || "";
+    return "";
   }
 };
 
@@ -54,6 +57,7 @@ export default function VistaFuncionario() {
   const [categorias, setCategorias] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [funcionario, setFuncionario] = useState({});
+  const [googleConnection, setGoogleConnection] = useState(null);
   const [filtros, setFiltros] = useState({
     id_categoria: "",
     fecha_inicio: "",
@@ -285,6 +289,23 @@ export default function VistaFuncionario() {
       if (res.success) setTickets(res.data);
     });
   }, [id_funcionario]);
+
+  useEffect(() => {
+    if (!id_funcionario) return;
+    estadoGoogleCalendar(id_funcionario).then((data) => {
+      setGoogleConnection(data.success ? data.data : null);
+    }).catch(() => setGoogleConnection(null));
+  }, [id_funcionario]);
+
+  const conectarGoogle = async () => {
+    try {
+      const data = await iniciarGoogleCalendar(id_funcionario, window.location.href);
+      if (!data.success || !data.data?.auth_url) throw new Error(data.message || "No se pudo iniciar Google Calendar.");
+      window.location.assign(data.data.auth_url);
+    } catch (error) {
+      showSwal({ title: "Google Calendar", text: error.message || "No se pudo conectar Google Calendar.", icon: "error" });
+    }
+  };
 
   useEffect(() => {
     if (!id_funcionario) return;
@@ -615,10 +636,11 @@ export default function VistaFuncionario() {
 
         if (res.success) {
           const count = res.data?.count || eventosParaCrear.length;
+          const googlePendientes = res.data?.google_pendientes || 0;
           await Swal.fire({
-            title: "¡Éxito!",
-            text: `Se crearon ${count} eventos correctamente.`,
-            icon: "success",
+            title: googlePendientes ? "Creados en el panel" : "¡Éxito!",
+            text: googlePendientes ? `Se crearon ${count} eventos; ${googlePendientes} quedaron pendientes en Google Calendar.` : `Se crearon ${count} eventos correctamente.`,
+            icon: googlePendientes ? "warning" : "success",
             ...swalBaseOptions,
           });
           resetFormState();
@@ -679,10 +701,11 @@ export default function VistaFuncionario() {
       });
       const res = await crearEvento(eventoData);
       if (res.data.success) {
+        const googlePendiente = Boolean(res.data.data?.google_pendiente);
         await Swal.fire({
-          title: "¡Éxito!",
-          text: "El evento fue agregado correctamente",
-          icon: "success",
+          title: googlePendiente ? "Creado en el panel" : "¡Éxito!",
+          text: googlePendiente ? "El evento quedó pendiente en Google Calendar. El funcionario debe conectar o revisar su cuenta." : "El evento fue agregado correctamente",
+          icon: googlePendiente ? "warning" : "success",
           ...swalBaseOptions,
         });
         resetFormState();
@@ -725,6 +748,16 @@ export default function VistaFuncionario() {
       <h1 className="page-title text-lg sm:text-3xl md:text-5xl font-bold text-center leading-tight">
         Calendario de {funcionario.nombre || "Funcionario"}
       </h1>
+      {googleConnection && (
+        <div className="text-center text-sm">
+          <span>{googleConnection.connected && googleConnection.sync_enabled ? `Google Calendar conectado (${googleConnection.google_email})` : "Google Calendar sin conectar: los eventos se guardan en el panel."}</span>
+          {isAdmin && String(obtenerCreadorActual("")) === String(id_funcionario) && !googleConnection.connected && (
+            <button type="button" onClick={conectarGoogle} className="ml-2 rounded bg-blue-700 px-3 py-1 text-white">
+              {googleConnection.reconnect_required ? "Volver a conectar mi Google" : "Conectar mi Google"}
+            </button>
+          )}
+        </div>
+      )}
       <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-2 sm:gap-3 mb-4">
         <button
           onClick={() => {

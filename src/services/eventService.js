@@ -13,6 +13,10 @@ export const crearEvento = (evento) =>
   axios.post(BASE_URL + "crear_evento", evento);
 export const crearEventos = (payload) =>
   axios.post(BASE_URL + "crear_eventos", payload).then((res) => res.data);
+export const estadoGoogleCalendar = (id_empleado) =>
+  axios.post(BASE_URL + "estado_google_oauth", { id_empleado }).then((res) => res.data);
+export const iniciarGoogleCalendar = (id_empleado, redirect_after) =>
+  axios.post(BASE_URL + "iniciar_google_oauth", { id_empleado, redirect_after }).then((res) => res.data);
 export async function obtenerEvento(id) {
   const res = await axios.post(BASE_URL + "obtener_evento", { id });
   return res.data.data;
